@@ -452,7 +452,7 @@ function Update-AddressBookEntry {
 }
 
 function Add-AddressBookEntry {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param(
         [uri]
         [Parameter(Mandatory)]
@@ -515,7 +515,15 @@ function Add-AddressBookEntry {
     }
 
     end {
-        Invoke-WebRequest @add > $null
+        $names = Select-Xml -Xml $add.Body -Namespace $namespaces -XPath '/s:Envelope/s:Body/u:putObjects/propListList/item/item[propName/text()="name"]/propVal'
+
+        $allNames = $names -join ', '
+        if ($PSCmdlet.ShouldProcess(
+                "Adding address book entries for $allNames",
+                "Add address book entry for ${allNames}?",
+                'Confirm address book addition.')) {
+            Invoke-WebRequest @add > $null
+        }
         Disconnect-Session $Hostname $session
     }
 }
