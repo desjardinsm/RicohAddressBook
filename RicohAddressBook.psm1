@@ -441,7 +441,7 @@ function Get-AddressBookEntry {
 .Parameter ScanAccount
     The account to use to save the scanned files to a network location.
 
-.Parameters Path
+.Parameters FolderPath
     The network path used to save scanned files.
 
 .Example
@@ -494,7 +494,7 @@ function Update-AddressBookEntry {
 
         [string]
         [Parameter(ValueFromPipelineByPropertyName)]
-        $Path
+        $FolderPath
     )
 
     begin {
@@ -519,8 +519,8 @@ function Update-AddressBookEntry {
             $properties['remoteFolder:accountName'] = $ScanAccount.UserName
             $properties['remoteFolder:password'] = ConvertTo-Base64 $ScanAccount.GetNetworkCredential().Password
         }
-        if ($PSBoundParameters.ContainsKey('Path')) {
-            $properties['remoteFolder:path'] = $Path
+        if ($PSBoundParameters.ContainsKey('FolderPath')) {
+            $properties['remoteFolder:path'] = $FolderPath
         }
         if ($PSBoundParameters.ContainsKey('Name')) {
             $properties['name'] = $Name
@@ -571,7 +571,7 @@ function Update-AddressBookEntry {
 .Parameter ScanAccount
     The account to use to save the scanned files to a network location.
 
-.Parameters Path
+.Parameters FolderPath
     The network path used to save scanned files.
 
 .Example
