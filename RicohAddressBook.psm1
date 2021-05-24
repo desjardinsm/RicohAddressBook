@@ -470,13 +470,13 @@ function Add-AddressBookEntry {
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         $LongName,
 
-        [string]
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
-        $FolderPath,
-
         [pscredential]
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
-        $ScanAccount
+        $ScanAccount,
+
+        [string]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        $FolderPath
     )
 
     begin {
