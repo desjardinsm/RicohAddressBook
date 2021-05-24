@@ -540,37 +540,51 @@ function Remove-AddressBookEntry {
         $Credential,
 
         [int[]]
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
         $Id
     )
 
-    try {
-        $session = Connect-Session -Hostname $Hostname -Credential $Credential
-    } catch {
-        $PSCmdlet.ThrowTerminatingError($_)
-    }
+    begin {
+        try {
+            $session = Connect-Session -Hostname $Hostname -Credential $Credential
+        } catch {
+            $PSCmdlet.ThrowTerminatingError($_)
+        }
 
-    $remove = Get-Request -Hostname $Hostname -Action deleteObjects -Message @"
-        <sessionId>$session</sessionId>
-        <objectIdList xsi:type="soap-enc:Array"
-                      soap-enc:arrayType="xs:string[]" />
+        $remove = Get-Request -Hostname $Hostname -Action deleteObjects -Message @"
+            <sessionId>$session</sessionId>
+            <objectIdList xsi:type="soap-enc:Array"
+                        soap-enc:arrayType="xs:string[]" />
 "@
-
-    $objectIdList = $remove.Body.Envelope.Body.deleteObjects.objectIdList
-    foreach ($item in $Id) {
-        $element = $remove.Body.CreateElement('item')
-        $element.InnerText = "entry:$item"
-        $objectIdList.AppendChild($element) > $null
+        $objectIdList = $remove.Body.Envelope.Body.deleteObjects.objectIdList
     }
 
-    if ($PSCmdlet.ShouldProcess(
-            "Removing IDs $($Id -join ', ').",
-            "Remove IDs $($Id -join ', ')?",
-            'Confirm removing entries')) {
-        Invoke-WebRequest @remove > $null
+    process {
+        foreach ($item in $Id) {
+            $element = $remove.Body.CreateElement('item')
+            $element.InnerText = "entry:$item"
+            $objectIdList.AppendChild($element) > $null
+        }
     }
 
-    Disconnect-Session $Hostname $session
+    end {
+        $entries =
+            Select-Xml -Xml $remove.Body -Namespace $namespaces -XPath '/s:Envelope/s:Body/u:deleteObjects/objectIdList/item' |
+            ForEach-Object {
+                if ($_.Node.InnerText -match '^entry:(\d+)$') {
+                    $Matches[1]
+                }
+            }
+        $allID = $entries -join ', '
+        if ($PSCmdlet.ShouldProcess(
+                "Removing IDs $allID.",
+                "Remove IDs ${allID}?",
+                'Confirm removing entries')) {
+            Invoke-WebRequest @remove > $null
+        }
+
+        Disconnect-Session $Hostname $session
+    }
 }
 
 function Disconnect-Session {
