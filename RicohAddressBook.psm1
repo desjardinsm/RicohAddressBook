@@ -72,7 +72,7 @@ function Get-Request {
     }
 }
 
-function Connect-RicohSession {
+function Connect-Session {
     [CmdletBinding()]
     param(
         [uri]
@@ -256,7 +256,7 @@ function Get-AddressBookEntry {
     )
 
     try {
-        $session = Connect-RicohSession -Hostname $Hostname -Credential $Credential -ReadOnly
+        $session = Connect-Session -Hostname $Hostname -Credential $Credential -ReadOnly
     } catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
@@ -369,7 +369,7 @@ function Get-AddressBookEntry {
             [PSCustomObject]$output
         }
 
-    Disconnect-RicohSession $Hostname $session
+    Disconnect-Session $Hostname $session
 }
 
 function Update-AddressBookEntry {
@@ -406,7 +406,7 @@ function Update-AddressBookEntry {
 
     begin {
         try {
-            $session = Connect-RicohSession -Hostname $Hostname -Credential $Credential
+            $session = Connect-Session -Hostname $Hostname -Credential $Credential
         } catch {
             $PSCmdlet.ThrowTerminatingError($_)
         }
@@ -447,7 +447,7 @@ function Update-AddressBookEntry {
     }
 
     end {
-        Disconnect-RicohSession $Hostname $session
+        Disconnect-Session $Hostname $session
     }
 }
 
@@ -481,7 +481,7 @@ function Add-AddressBookEntry {
 
     begin {
         try {
-            $session = Connect-RicohSession -Hostname $Hostname -Credential $Credential
+            $session = Connect-Session -Hostname $Hostname -Credential $Credential
         } catch {
             $PSCmdlet.ThrowTerminatingError($_)
         }
@@ -516,7 +516,7 @@ function Add-AddressBookEntry {
 
     end {
         Invoke-WebRequest @add > $null
-        Disconnect-RicohSession $Hostname $session
+        Disconnect-Session $Hostname $session
     }
 }
 
@@ -537,7 +537,7 @@ function Remove-AddressBookEntry {
     )
 
     try {
-        $session = Connect-RicohSession -Hostname $Hostname -Credential $Credential
+        $session = Connect-Session -Hostname $Hostname -Credential $Credential
     } catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
@@ -562,10 +562,10 @@ function Remove-AddressBookEntry {
         Invoke-WebRequest @remove > $null
     }
 
-    Disconnect-RicohSession $Hostname $session
+    Disconnect-Session $Hostname $session
 }
 
-function Disconnect-RicohSession {
+function Disconnect-Session {
     param(
         [uri]
         [Parameter(Mandatory)]
