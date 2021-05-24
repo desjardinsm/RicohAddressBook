@@ -89,7 +89,7 @@ function Connect-Session {
 
     $encodedUsername = ConvertTo-Base64 $Credential.UserName
     $encodedPassword = ConvertTo-Base64 $Credential.GetNetworkCredential().Password
-    $stringIn = @("SCHEME=QkFTSUM=",               # $Authentication = ConvertTo-Base64 'BASIC'
+    $stringIn = @("SCHEME=QkFTSUM=",               # ConvertTo-Base64 'BASIC'
                   "UID:UserName=$encodedUsername",
                   "PWD:Password=$encodedPassword",
                   "PES:Encoding=") -join ';'
