@@ -237,6 +237,44 @@ function Test-Property {
     $Properties.ContainsKey($Name) -and $Properties[$Name] -eq 'true'
 }
 
+<#
+.Synopsis
+    Retrieves address book entries from a Ricoh multi-function printer
+
+.Description
+    Get-AddressBookEntry retrieves address book entries from Ricoh
+    multi-function printers.
+
+.Parameter Hostname
+    The hostname of the printer from which address book entries are to be
+    retrieved.
+
+    By default, it will use HTTP; if HTTPS is required, specify that in the URI,
+    like "-Hostname https://printername"
+
+.Parameter Credential
+    The username and password to use to connect to the Ricoh printer.
+
+.Parameter Id
+    Only retrieve address book entries matching this ID.
+
+.Parameter Name
+    Only retrieve address book entries matching this name. Wildcards are
+    permitted.
+
+.Inputs
+    None. You cannot pipe objects to Get-AddressBookEntry.
+
+.Outputs
+    A Ricoh.AddressBook.Entry object containing properties describing an address
+    book entry.
+
+.Example
+    PS> Get-AddressBookEntry -Hostname https://10.10.10.10 -Credential admin
+
+    Retrieves a list of address book entries on the printer at IP address
+    10.10.10.10 using HTTPS. It will prompt for a password.
+#>
 function Get-AddressBookEntry {
     [CmdletBinding(PositionalBinding = $false)]
     param(
@@ -372,6 +410,61 @@ function Get-AddressBookEntry {
     Disconnect-Session $Hostname $session
 }
 
+<#
+.Synopsis
+    Modifies address book entries on a Ricoh multi-function printer
+
+.Description
+    Update-AddressBookEntry modifies address book entries on Ricoh
+    multi-function printers.
+
+.Parameter Hostname
+    The hostname of the printer from which address book entries are to be
+    modified.
+
+    By default, it will use HTTP; if HTTPS is required, specify that in the URI,
+    like "-Hostname https://printername"
+
+.Parameter Credential
+    The username and password to use to connect to the Ricoh printer.
+
+.Parameter Id
+    The ID of the address book entry to modify. Find the ID from
+    Get-AddressBookEntry.
+
+.Parameter Name
+    The new name for the address book entry.
+
+.Parameter LongName
+    The new "long name" for the address book entry.
+
+.Parameter ScanAccount
+    The account to use to save the scanned files to a network location.
+
+.Parameters Path
+    The network path used to save scanned files.
+
+.Example
+    PS> Update-AddressBookEntry -Hostname https://10.10.10.10 -Credential admin -Id 1 -Name 'Matthew D'
+
+    Sets the name of the address book entry with ID of 1 to "Matthew D".
+
+.Example
+    PS> $entries = @(
+        [PSCustomObject]@{
+            Id = 1
+            Name = 'Matthew D'
+        }
+        [PSCustomObject]@{
+            Id = 2
+            Name = 'John D'
+        }
+    )
+
+    PS> $entries | Update-AddressBookEntry -Hostname https://10.10.10.10 -Credential admin
+
+    Updates multiple entries based on objects received in the pipeline.
+#>
 function Update-AddressBookEntry {
     [CmdletBinding(SupportsShouldProcess)]
     param(
@@ -451,6 +544,67 @@ function Update-AddressBookEntry {
     }
 }
 
+<#
+.Synopsis
+    Adds address book entries to a Ricoh multi-function printer
+
+.Description
+    Add-AddressBookEntry adds address book entries to Ricoh
+    multi-function printers.
+
+.Parameter Hostname
+    The hostname of the printer from which address book entries are to be
+    added.
+
+    By default, it will use HTTP; if HTTPS is required, specify that in the URI,
+    like "-Hostname https://printername"
+
+.Parameter Credential
+    The username and password to use to connect to the Ricoh printer.
+
+.Parameter Name
+    The name for the address book entry.
+
+.Parameter LongName
+    The "long name" for the address book entry.
+
+.Parameter ScanAccount
+    The account to use to save the scanned files to a network location.
+
+.Parameters Path
+    The network path used to save scanned files.
+
+.Example
+    PS> $entry = @{
+        Hostname = 'https://10.10.10.10'
+        Credential = Get-Credential admin
+        Name = 'Matthew D'
+        LongName = 'Matthew Desjardins'
+        ScanAccount = Get-Credential ScanAccount
+        FolderPath = '\\my\path\here'
+    }
+    PS> Add-AddressBookEntry @entry
+
+.Example
+    PS> $scanAccount = Get-Credential ScanAccount
+    PS> $entries = @(
+        [PSCustomObject]@{
+            Name = 'Matthew D'
+            LongName = 'Matthew Desjardins'
+            ScanAccount = $scanAccount
+            FolderPath = '\\my\path\here'
+        }
+        [PSCustomObject]@{
+            Name = 'John D'
+            LongName = 'John Doe'
+            ScanAccount = $scanAccount
+            FolderPath = '\\my\path\here'
+        }
+    )
+    PS> $entries | Add-AddressBookEntry -Hostname https://10.10.10.10 -Credential admin
+
+    Adds multiple entries based on objects received in the pipeline.
+#>
 function Add-AddressBookEntry {
     [CmdletBinding(SupportsShouldProcess)]
     param(
@@ -528,6 +682,41 @@ function Add-AddressBookEntry {
     }
 }
 
+<#
+.Synopsis
+    Removes address book entries from a Ricoh multi-function printer
+
+.Description
+    Remove-AddressBookEntry removes address book entries from Ricoh
+    multi-function printers.
+
+.Parameter Hostname
+    The hostname of the printer from which address book entries are to be
+    removed.
+
+    By default, it will use HTTP; if HTTPS is required, specify that in the URI,
+    like "-Hostname https://printername"
+
+.Parameter Credential
+    The username and password to use to connect to the Ricoh printer.
+
+.Parameter Id
+    The IDs to be removed. Find the IDs from Get-AddressBookEntry.
+
+.Example
+    PS> Remove-AddressBookEntry -Hostname https://10.10.10.10 -Credential admin -Id 1, 2
+
+.Example
+    PS> 1, 2 | Remove-AddressBookEntry -Hostname https://10.10.10.10 -Credential admin
+
+.Example
+    PS> $users = Get-AddressBookEntry -Hostname https://10.10.10.10 -Credential admin |
+                 Where-Object {[string]::IsNullOrEmpty($_.LongName)}
+    PS> $users | Remove-AddressBookEntry -Hostname https://10.10.10.10 -Credential admin
+
+    These need to be run as separate commands, as the second command cannot run
+    while the first command has the Ricoh address book open.
+#>
 function Remove-AddressBookEntry {
     [CmdletBinding(SupportsShouldProcess)]
     param(
