@@ -344,16 +344,19 @@ function Get-AddressBookEntry {
             LongName = $properties['longName']
         }
 
-        $tags = $properties['tagId'] -split ','
-        $output.Frequent = $tags -contains '1'
-        foreach ($tag in $tags) {
-            $tag = [int]$tag
-            if ($tag -gt 1 -and $tag -le 11) {
-                $output.Title1 = [TagId]$tag
-            } elseif ($tag -gt 11 -and $tag -le 21) {
-                $output.Title2 = $tag - 11
-            } elseif ($tag -gt 21) {
-                $output.Title3 = $tag - 21
+        $output.Frequent = $false
+        switch ($properties['tagId'] -split ',') {
+            1 {
+                $output.Frequent = $true
+            }
+            {2..11 -contains $_} {
+                $output.Title1 = [TagId]$_
+            }
+            {12..21 -contains $_} {
+                $output.Title2 = $_ - 11
+            }
+            default {
+                $output.Title3 = $_ - 21
             }
         }
 
