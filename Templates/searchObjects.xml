@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Envelope
+      xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"
+      s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+  <s:Body>
+    <u:searchObjects
+          xmlns:xs="http://www.w3.org/2001/XMLSchema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:soap-enc="http://schemas.xmlsoap.org/soap/encoding/"
+          xmlns:ricoh="http://www.ricoh.co.jp/xmlns/schema/rdh/commontypes"
+          xmlns:u="http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory">
+      <sessionId />
+      <selectProps xsi:type="soap-enc:Array" soap-enc:arrayType="xs:string[]">
+        <item>id</item>
+      </selectProps>
+      <fromClass>entry</fromClass>
+      <orderBy xsi:type="soap-enc:Array" soap-enc:arrayType="ricoh:queryOrderBy[]">
+        <item>
+          <propName>index</propName>
+          <isDescending>false</isDescending>
+        </item>
+      </orderBy>
+      <rowOffset />
+      <rowCount>50</rowCount>
+    </u:searchObjects>
+  </s:Body>
+</s:Envelope>

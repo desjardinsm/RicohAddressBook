@@ -8,6 +8,16 @@
 #                                                                     #
 #=====================================================================#
 
+enum RicohMethodType {
+    startSession
+    terminateSession
+    searchObjects
+    getObjectsProps
+    putObjectProps
+    putObjects
+    deleteObjects
+}
+
 function ConvertTo-Base64 {
     param(
         [string]
@@ -25,51 +35,53 @@ $namespaces = @{
     u = 'http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory'
 }
 
-function Get-Request {
+function Invoke-SOAPRequest {
     param(
         [uri]
         [Parameter(Mandatory)]
         $Hostname,
 
-        [string]
+        [xml]
         [Parameter(Mandatory)]
-        $Action,
+        $Body,
 
-        [string]
+        [RicohMethodType]
         [Parameter(Mandatory)]
-        $Message
+        $Method
     )
 
     if (-not $Hostname.IsAbsoluteUri) {
         $Hostname = 'http://' + $Hostname.OriginalString
     }
 
-    $body = [xml]@"
-<?xml version="1.0" encoding="utf-8"?>
-<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"
-            s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
-    <s:Body>
-        <u:$Action xmlns:xs="http://www.w3.org/2001/XMLSchema"
-                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                   xmlns:soap-enc="http://schemas.xmlsoap.org/soap/encoding/"
-                   xmlns:ricoh="http://www.ricoh.co.jp/xmlns/schema/rdh/commontypes"
-                   xmlns:u="http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory">
-            $Message
-        </u:$Action>
-    </s:Body>
-</s:Envelope>
-"@
-
-    @{
+    $webRequest = @{
         Uri         = [uri]::new($Hostname, 'DH/udirectory')
-        Method      = 'Post'
+        Method      = [Microsoft.PowerShell.Commands.WebRequestMethod]::Post
         ContentType = 'text/xml'
-        Body        = $body
+        Body        = $Body
         Headers     = @{
             SOAPAction =
-                "http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#$Action"
+                "http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#$Method"
         }
     }
+
+    try {
+        $response = Invoke-WebRequest @webRequest
+        [xml]$response
+    } catch {
+        $PSCmdlet.ThrowTerminatingError($_)
+    }
+}
+
+function Get-Template {
+    param(
+        [RicohMethodType]
+        [Parameter(Mandatory)]
+        $Method
+    )
+
+    $content = Get-Content -Path "$PSScriptRoot\Templates\$Method.xml"
+    [xml]$content
 }
 
 function Connect-Session {
@@ -87,28 +99,27 @@ function Connect-Session {
         $ReadOnly
     )
 
+    $method = [RicohMethodType]::startSession
+    $template = Get-Template $method
+
     $encodedUsername = ConvertTo-Base64 $Credential.UserName
     $encodedPassword = ConvertTo-Base64 $Credential.GetNetworkCredential().Password
-    $stringIn = @("SCHEME=QkFTSUM=",               # ConvertTo-Base64 'BASIC'
+    $template.Envelope.Body.$method.stringIn =
+                # SCHEME = ConvertTo-Base64 'BASIC'
+                @("SCHEME=QkFTSUM=",
                   "UID:UserName=$encodedUsername",
                   "PWD:Password=$encodedPassword",
                   "PES:Encoding=") -join ';'
-    $lockMode = if ($ReadOnly) {
-        'S'
-    } else {
-        'X'
-    }
-
-    $login = Get-Request -Hostname $Hostname -Action startSession -Message @"
-        <stringIn>$stringIn</stringIn>
-        <timeLimit>30</timeLimit>
-        <lockMode>$lockMode</lockMode>
-"@
+    $template.Envelope.Body.$method.lockMode =
+        if ($ReadOnly) {
+            'S'
+        } else {
+            'X'
+        }
 
     try {
-        Invoke-WebRequest @login |
-        Select-Xml -Namespace $namespaces -XPath '/s:Envelope/s:Body/u:startSessionResponse/stringOut/text()' |
-        ForEach-Object {$_.Node.Value}
+        $response = Invoke-SOAPRequest -Hostname $Hostname -Body $template -Method $method
+        $response.Envelope.Body.startSessionResponse.stringOut
     } catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
@@ -125,27 +136,15 @@ function Search-AddressBookEntry {
         $Session
     )
 
+    $method = [RicohMethodType]::searchObjects
+    $template = Get-Template $method
+    $template.Envelope.Body.$method.sessionId = $Session
+
     $offset = 0
     do {
-        $search = Get-Request -Hostname $Hostname -Action searchObjects -Message @"
-            <sessionId>$Session</sessionId>
-            <selectProps xsi:type="soap-enc:Array"
-                         soap-enc:arrayType="xs:string[]">
-                <item>id</item>
-            </selectProps>
-            <fromClass>entry</fromClass>
-            <orderBy xsi:type="soap-enc:Array"
-                     soap-enc:arrayType="ricoh:queryOrderBy[]">
-                <item>
-                    <propName>index</propName>
-                    <isDescending>false</isDescending>
-                </item>
-            </orderBy>
-            <rowOffset>$offset</rowOffset>
-            <rowCount>50</rowCount>
-"@
+        $template.Envelope.Body.$method.rowOffset = [string]$offset
 
-        [xml]$response = Invoke-WebRequest @search
+        $response = Invoke-SOAPRequest -Hostname $Hostname -Body $template -Method $method
         $numberOfResults = $response.Envelope.Body.searchObjectsResponse.numOfResults - 10
 
         $response |
@@ -299,36 +298,11 @@ function Get-AddressBookEntry {
         $PSCmdlet.ThrowTerminatingError($_)
     }
 
-    $get = Get-Request -Hostname $Hostname -Action getObjectsProps -Message @"
-        <sessionId>$session</sessionId>
-        <objectIdList xsi:type="soap-enc:Array"
-                      soap-enc:arrayType="xs:string[]" />
-        <selectProps xsi:type="soap-enc:Array"
-                     soap-enc:arrayType="xs:string[]">
-            <item>id</item>
-            <item>index</item>
-            <item>displayedOrder</item>
-            <item>name</item>
-            <item>longName</item>
-            <item>tagId</item>
-            <item>lastAccessDateTime</item>
-            <item>isDestination</item>
-            <item>isSender</item>
-            <item>auth:</item>
-            <item>auth:name</item>
-            <item>mail:</item>
-            <item>mail:address</item>
-            <item>mail:parameter</item>
-            <item>mail:isDirectSMTP</item>
-            <item>remoteFolder:</item>
-            <item>remoteFolder:type</item>
-            <item>remoteFolder:path</item>
-            <item>remoteFolder:port</item>
-            <item>remoteFolder:accountName</item>
-        </selectProps>
-"@
+    $method = [RicohMethodType]::getObjectsProps
+    $template = Get-Template $method
+    $template.Envelope.Body.$method.sessionId = $session
 
-        $objectIdList = $get.Body.Envelope.Body.getObjectsProps.objectIdList
+        $objectIdList = $template.Envelope.Body.getObjectsProps.objectIdList
         if ($null -eq $Id) {
             $Id = Search-AddressBookEntry $Hostname $session
         }
@@ -337,12 +311,12 @@ function Get-AddressBookEntry {
             $Id |
             Select-Object -First 50 |
             ForEach-Object {
-                $item = $get.Body.CreateElement('item')
+                $item = $template.CreateElement('item')
                 $item.InnerText = "entry:$_"
                 $objectIdList.AppendChild($item) > $null
             }
 
-            Invoke-WebRequest @get |
+            Invoke-SOAPRequest -Hostname $Hostname -Body $template -Method $method |
             Select-Xml -Namespace $namespaces -XPath '/s:Envelope/s:Body/u:getObjectsPropsResponse/returnValue/item'
 
             $Id = $Id | Select-Object -Skip 50
@@ -503,15 +477,14 @@ function Update-AddressBookEntry {
         } catch {
             $PSCmdlet.ThrowTerminatingError($_)
         }
+
+        $method = [RicohMethodType]::putObjectProps
+        $template = Get-Template $method
+        $template.Envelope.Body.$method.sessionId = $session
     }
 
     process {
-        $set = Get-Request -Hostname $Hostname -Action putObjectProps -Message @"
-            <sessionId>$session</sessionId>
-            <objectId>entry:$Id</objectId>
-            <propList xsi:type="soap-enc:Array"
-                      soap-enc:arrayType="ricoh:property[]" />
-"@
+        $template.Envelope.Body.$method.objectId = "entry:$Id"
 
         $properties = @{}
 
@@ -529,13 +502,13 @@ function Update-AddressBookEntry {
             $properties['longName'] = $LongName
         }
 
-        Add-PropertyList $set.Body.Envelope.Body.putObjectProps.propList $properties
+        Add-PropertyList $template.Envelope.Body.putObjectProps.propList $properties
 
         if ($PSCmdlet.ShouldProcess(
                 "Updating address book entry with ID of $Id.",
                 "Update address book entry with ID of ${Id}?",
                 "Confirm address book update.")) {
-            Invoke-WebRequest @set > $null
+            Invoke-SOAPRequest -Hostname $Hostname -Body $template -Method $method > $null
         }
     }
 
@@ -639,20 +612,16 @@ function Add-AddressBookEntry {
         } catch {
             $PSCmdlet.ThrowTerminatingError($_)
         }
-
-        $add = Get-Request -Hostname $Hostname -Action putObjects -Message @"
-            <sessionId>$session</sessionId>
-            <objectClass>entry</objectClass>
-            <propListList xsi:type="soap-enc:Array"
-                          soap-enc:arrayType="ricoh:propertyList[]" />
-"@
+        $method = [RicohMethodType]::putObjects
+        $template = Get-Template $method
+        $template.Envelope.Body.$method.sessionId = $session
     }
 
     process {
         $tagId = $letters[($Name[0].ToString())]
 
-        $entry = $add.Body.CreateElement('item')
-        $add.Body.Envelope.Body.putObjects.propListList.AppendChild($entry) > $null
+        $entry = $template.CreateElement('item')
+        $template.Envelope.Body.$method.propListList.AppendChild($entry) > $null
 
         Add-PropertyList $entry @{
             'entryType'                = 'user'
@@ -669,14 +638,14 @@ function Add-AddressBookEntry {
     }
 
     end {
-        $names = Select-Xml -Xml $add.Body -Namespace $namespaces -XPath '/s:Envelope/s:Body/u:putObjects/propListList/item/item[propName/text()="name"]/propVal'
+        $names = Select-Xml -Xml $template -Namespace $namespaces -XPath '/s:Envelope/s:Body/u:putObjects/propListList/item/item[propName/text()="name"]/propVal'
 
         $allNames = $names -join ', '
         if ($PSCmdlet.ShouldProcess(
                 "Adding address book entries for $allNames",
                 "Add address book entry for ${allNames}?",
                 'Confirm address book addition.')) {
-            Invoke-WebRequest @add > $null
+            Invoke-SOAPRequest -Hostname $Hostname -Body $template -Method $method > $null
         }
         Disconnect-Session $Hostname $session
     }
@@ -740,17 +709,16 @@ function Remove-AddressBookEntry {
             $PSCmdlet.ThrowTerminatingError($_)
         }
 
-        $remove = Get-Request -Hostname $Hostname -Action deleteObjects -Message @"
-            <sessionId>$session</sessionId>
-            <objectIdList xsi:type="soap-enc:Array"
-                        soap-enc:arrayType="xs:string[]" />
-"@
-        $objectIdList = $remove.Body.Envelope.Body.deleteObjects.objectIdList
+        $method = [RicohMethodType]::deleteObjects
+        $template = Get-Template $method
+        $template.Envelope.Body.$method.sessionId = $session
+
+        $objectIdList = $template.Envelope.Body.deleteObjects.objectIdList
     }
 
     process {
         foreach ($item in $Id) {
-            $element = $remove.Body.CreateElement('item')
+            $element = $template.CreateElement('item')
             $element.InnerText = "entry:$item"
             $objectIdList.AppendChild($element) > $null
         }
@@ -758,7 +726,7 @@ function Remove-AddressBookEntry {
 
     end {
         $entries =
-            Select-Xml -Xml $remove.Body -Namespace $namespaces -XPath '/s:Envelope/s:Body/u:deleteObjects/objectIdList/item' |
+            Select-Xml -Xml $template -Namespace $namespaces -XPath '/s:Envelope/s:Body/u:deleteObjects/objectIdList/item' |
             ForEach-Object {
                 if ($_.Node.InnerText -match '^entry:(\d+)$') {
                     $Matches[1]
@@ -769,7 +737,7 @@ function Remove-AddressBookEntry {
                 "Removing IDs $allID.",
                 "Remove IDs ${allID}?",
                 'Confirm removing entries')) {
-            Invoke-WebRequest @remove > $null
+            Invoke-SOAPRequest -Hostname $Hostname -Body $template -Method $method > $null
         }
 
         Disconnect-Session $Hostname $session
@@ -787,10 +755,12 @@ function Disconnect-Session {
         $Session
     )
 
-    $logout = Get-Request -Hostname $Hostname -Action terminateSession -Message "<sessionId>$Session</sessionId>"
+    $method = [RicohMethodType]::terminateSession
+    $template = Get-Template $method
+    $template.Envelope.Body.$method.sessionId = $session
 
     try {
-        Invoke-WebRequest @logout > $null
+        Invoke-SOAPRequest -Hostname $Hostname -Body $template -Method $method > $null
     } catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }

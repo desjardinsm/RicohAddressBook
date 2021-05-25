@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Envelope
+      xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"
+      s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+  <s:Body>
+    <u:putObjectProps
+          xmlns:xs="http://www.w3.org/2001/XMLSchema"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:soap-enc="http://schemas.xmlsoap.org/soap/encoding/"
+          xmlns:ricoh="http://www.ricoh.co.jp/xmlns/schema/rdh/commontypes"
+          xmlns:u="http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory">
+      <sessionId />
+      <objectId />
+      <propList xsi:type="soap-enc:Array" soap-enc:arrayType="ricoh:property[]" />
+    </u:putObjectProps>
+  </s:Body>
+</s:Envelope>
