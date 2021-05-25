@@ -302,84 +302,84 @@ function Get-AddressBookEntry {
     $template = Get-Template $method
     $template.Envelope.Body.$method.sessionId = $session
 
-        $objectIdList = $template.Envelope.Body.getObjectsProps.objectIdList
-        if ($null -eq $Id) {
-            $Id = Search-AddressBookEntry $Hostname $session
+    $objectIdList = $template.Envelope.Body.getObjectsProps.objectIdList
+    if ($null -eq $Id) {
+        $Id = Search-AddressBookEntry $Hostname $session
+    }
+    $entries = do {
+        $objectIdList.IsEmpty = $true # Empties the node
+        $Id |
+        Select-Object -First 50 |
+        ForEach-Object {
+            $item = $template.CreateElement('item')
+            $item.InnerText = "entry:$_"
+            $objectIdList.AppendChild($item) > $null
         }
-        $entries = do {
-            $objectIdList.IsEmpty = $true # Empties the node
-            $Id |
-            Select-Object -First 50 |
-            ForEach-Object {
-                $item = $template.CreateElement('item')
-                $item.InnerText = "entry:$_"
-                $objectIdList.AppendChild($item) > $null
+
+        Invoke-SOAPRequest -Hostname $Hostname -Body $template -Method $method |
+        Select-Xml -Namespace $namespaces -XPath '/s:Envelope/s:Body/u:getObjectsPropsResponse/returnValue/item'
+
+        $Id = $Id | Select-Object -Skip 50
+    } while ($Id.Count -gt 0)
+
+    foreach ($entry in $entries) {
+        $properties = @{}
+        foreach ($property in $entry.Node.ChildNodes) {
+            if (-not [string]::IsNullOrEmpty($property.propVal)) {
+                $properties[$property.propName] = $property.propVal
             }
-
-            Invoke-SOAPRequest -Hostname $Hostname -Body $template -Method $method |
-            Select-Xml -Namespace $namespaces -XPath '/s:Envelope/s:Body/u:getObjectsPropsResponse/returnValue/item'
-
-            $Id = $Id | Select-Object -Skip 50
-        } while ($Id.Count -gt 0)
-
-        foreach ($entry in $entries) {
-            $properties = @{}
-            foreach ($property in $entry.Node.ChildNodes) {
-                if (-not [string]::IsNullOrEmpty($property.propVal)) {
-                    $properties[$property.propName] = $property.propVal
-                }
-            }
-
-            if (-not [string]::IsNullOrEmpty($Name) -and $properties['name'] -notlike $Name) {
-                continue
-            }
-
-            $output = [ordered]@{
-                PSTypeName = 'Ricoh.AddressBook.Entry'
-
-                ID       = [uint32]$properties['id']
-                Index    = [uint32]$properties['index']
-                Priority = [uint32]$properties['displayedOrder']
-                Name     = $properties['name']
-                LongName = $properties['longName']
-            }
-
-            $tags = $properties['tagId'] -split ','
-            $output.Frequent = $tags -contains '1'
-            foreach ($tag in $tags) {
-                $tag = [int]$tag
-                if ($tag -gt 1 -and $tag -le 11) {
-                    $output.Title1 = [TagId]$tag
-                } elseif ($tag -gt 11 -and $tag -le 21) {
-                    $output.Title2 = $tag - 11
-                } elseif ($tag -gt 21) {
-                    $output.Title3 = $tag - 21
-                }
-            }
-
-            if ($properties['lastAccessDateTime'] -ne '1970-01-01T00:00:00Z') {
-                $output.LastUsed = [datetime]$properties['lastAccessDateTime']
-            }
-
-            if (Test-Property $properties 'auth:') {
-                $output.UserCode = $properties['auth:name']
-            }
-
-            if (Test-Property $properties 'remoteFolder:') {
-                $output.RemoteFolderType = $properties['remoteFolder:type']
-                $output.RemoteFolderPath = $properties['remoteFolder:path']
-                $output.RemoteFolderPort = [uint32]$properties['remoteFolder:port']
-                $output.RemoteFolderAccount = $properties['remoteFolder:accountName']
-            }
-
-            if (Test-Property $properties 'mail:') {
-                $output.EmailAddress  = $properties['mail:address']
-                $output.IsSender      = [bool]$properties['isSender']
-                $output.IsDestination = [bool]$properties['isDestination']
-            }
-
-            [PSCustomObject]$output
         }
+
+        if (-not [string]::IsNullOrEmpty($Name) -and $properties['name'] -notlike $Name) {
+            continue
+        }
+
+        $output = [ordered]@{
+            PSTypeName = 'Ricoh.AddressBook.Entry'
+
+            ID       = [uint32]$properties['id']
+            Index    = [uint32]$properties['index']
+            Priority = [uint32]$properties['displayedOrder']
+            Name     = $properties['name']
+            LongName = $properties['longName']
+        }
+
+        $tags = $properties['tagId'] -split ','
+        $output.Frequent = $tags -contains '1'
+        foreach ($tag in $tags) {
+            $tag = [int]$tag
+            if ($tag -gt 1 -and $tag -le 11) {
+                $output.Title1 = [TagId]$tag
+            } elseif ($tag -gt 11 -and $tag -le 21) {
+                $output.Title2 = $tag - 11
+            } elseif ($tag -gt 21) {
+                $output.Title3 = $tag - 21
+            }
+        }
+
+        if ($properties['lastAccessDateTime'] -ne '1970-01-01T00:00:00Z') {
+            $output.LastUsed = [datetime]$properties['lastAccessDateTime']
+        }
+
+        if (Test-Property $properties 'auth:') {
+            $output.UserCode = $properties['auth:name']
+        }
+
+        if (Test-Property $properties 'remoteFolder:') {
+            $output.RemoteFolderType = $properties['remoteFolder:type']
+            $output.RemoteFolderPath = $properties['remoteFolder:path']
+            $output.RemoteFolderPort = [uint32]$properties['remoteFolder:port']
+            $output.RemoteFolderAccount = $properties['remoteFolder:accountName']
+        }
+
+        if (Test-Property $properties 'mail:') {
+            $output.EmailAddress  = $properties['mail:address']
+            $output.IsSender      = [bool]$properties['isSender']
+            $output.IsDestination = [bool]$properties['isDestination']
+        }
+
+        [PSCustomObject]$output
+    }
 
     Disconnect-Session $Hostname $session
 }
