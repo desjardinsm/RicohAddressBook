@@ -157,34 +157,6 @@ function Search-AddressBookEntry {
     } while ($numberRemaining -gt 0)
 }
 
-$letters = @{
-    A = 2
-    B = 2
-    C = 3
-    D = 3
-    E = 4
-    F = 4
-    G = 5
-    H = 5
-    I = 6
-    J = 6
-    K = 6
-    L = 7
-    M = 7
-    N = 7
-    O = 8
-    P = 8
-    Q = 8
-    R = 9
-    S = 9
-    T = 9
-    U = 10
-    V = 10
-    W = 10
-    X = 11
-    Y = 11
-    Z = 11
-}
 enum TagId {
     AB = 2
     CD = 3
@@ -196,6 +168,43 @@ enum TagId {
     RST = 9
     UVW = 10
     XYZ = 11
+}
+
+function Get-Title1Tag {
+    param(
+        [char]
+        [ValidatePattern('^[A-Za-z]$')]
+        $Letter
+    )
+
+    switch ([char]::ToUpper($Letter)) {
+        A { [TagId]::AB }
+        B { [TagId]::AB }
+        C { [TagId]::CD }
+        D { [TagId]::CD }
+        E { [TagId]::EF }
+        F { [TagId]::EF }
+        G { [TagId]::GH }
+        H { [TagId]::GH }
+        I { [TagId]::IJK }
+        J { [TagId]::IJK }
+        K { [TagId]::IJK }
+        L { [TagId]::LMN }
+        M { [TagId]::LMN }
+        N { [TagId]::LMN }
+        O { [TagId]::OPQ }
+        P { [TagId]::OPQ }
+        Q { [TagId]::OPQ }
+        R { [TagId]::RST }
+        S { [TagId]::RST }
+        T { [TagId]::RST }
+        U { [TagId]::UVW }
+        V { [TagId]::UVW }
+        W { [TagId]::UVW }
+        X { [TagId]::XYZ }
+        Y { [TagId]::XYZ }
+        Z { [TagId]::XYZ }
+    }
 }
 
 function Add-PropertyList {
@@ -387,6 +396,28 @@ function Get-AddressBookEntry {
     Disconnect-Session $Hostname $session
 }
 
+function Get-TagIdValue {
+    param(
+        [hashtable]
+        $Parameters
+    )
+
+    $tags = [System.Collections.Generic.List[byte]]::new(4)
+    if ($Parameters.ContainsKey('Frequent')) {
+        $tags.Add([byte]$Parameters.Frequent.IsPresent)
+    }
+    if ($Parameters.ContainsKey('Title1')) {
+        $tags.Add([byte]$Title1)
+    }
+    if ($Parameters.ContainsKey('Title2')) {
+        $tags.Add($Title2 + 11)
+    }
+    if ($Parameters.ContainsKey('Title3')) {
+        $tags.Add($Title3 + 21)
+    }
+    $tags -join ','
+}
+
 <#
 .Synopsis
     Modifies address book entries on a Ricoh multi-function printer
@@ -420,6 +451,27 @@ function Get-AddressBookEntry {
 
 .Parameters FolderPath
     The network path used to save scanned files.
+
+.Parameters Frequent
+    Whether the user is to be added to the frequently used list.
+
+.Parameters Title1
+    The heading to list this user under for Title1.
+
+    Title1 is usually the default grouping, and is the one that lists users by
+    letters (AB, CD, etc.) on the scanner.
+
+.Parameters Title2
+    The heading to list this user under for Title2.
+
+    Title2 is a range from 1 to 10, and is another option for grouping users on
+    the scanner.
+
+.Parameters Title3
+    The heading to list this user under for Title3.
+
+    Title3 is a range from 1 to 5, and is another option for grouping users on
+    the scanner.
 
 .Example
     PS> Update-AddressBookEntry -Hostname https://10.10.10.10 -Credential admin -Id 1 -Name 'Matthew D'
@@ -471,7 +523,25 @@ function Update-AddressBookEntry {
 
         [string]
         [Parameter(ValueFromPipelineByPropertyName)]
-        $FolderPath
+        $FolderPath,
+
+        [switch]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        $Frequent,
+
+        [TagId]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        $Title1,
+
+        [byte]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(1, 10)]
+        $Title2,
+
+        [byte]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(1, 5)]
+        $Title3
     )
 
     begin {
@@ -503,6 +573,12 @@ function Update-AddressBookEntry {
         }
         if ($PSBoundParameters.ContainsKey('LongName')) {
             $properties['longName'] = $LongName
+        }
+
+        # Tags (Frequent, Title1, Title2, Title3)
+        $tags = Get-TagIdValue $PSBoundParameters
+        if (-not [string]::IsNullOrEmpty($tags)) {
+            $properties['tagId'] = $tags
         }
 
         Add-PropertyList $template.Envelope.Body.putObjectProps.propList $properties
@@ -549,6 +625,27 @@ function Update-AddressBookEntry {
 
 .Parameters FolderPath
     The network path used to save scanned files.
+
+.Parameters Frequent
+    Whether the user is to be added to the frequently used list.
+
+.Parameters Title1
+    The heading to list this user under for Title1.
+
+    Title1 is usually the default grouping, and is the one that lists users by
+    letters (AB, CD, etc.) on the scanner.
+
+.Parameters Title2
+    The heading to list this user under for Title2.
+
+    Title2 is a range from 1 to 10, and is another option for grouping users on
+    the scanner.
+
+.Parameters Title3
+    The heading to list this user under for Title3.
+
+    Title3 is a range from 1 to 5, and is another option for grouping users on
+    the scanner.
 
 .Example
     PS> $entry = @{
@@ -606,7 +703,25 @@ function Add-AddressBookEntry {
 
         [string]
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
-        $FolderPath
+        $FolderPath,
+
+        [switch]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        $Frequent,
+
+        [TagId]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        $Title1,
+
+        [byte]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(1, 10)]
+        $Title2,
+
+        [byte]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(1, 5)]
+        $Title3
     )
 
     begin {
@@ -621,7 +736,8 @@ function Add-AddressBookEntry {
     }
 
     process {
-        $tagId = $letters[($Name[0].ToString())]
+        # Tags (Frequent, Title1, Title2, Title3)
+        $tagId = Get-TagIdValue $PSBoundParameters
 
         $entry = $template.CreateElement('item')
         $template.Envelope.Body.$method.propListList.AppendChild($entry) > $null
@@ -635,7 +751,7 @@ function Add-AddressBookEntry {
             'remoteFolder:password'    = ConvertTo-Base64 $ScanAccount.GetNetworkCredential().Password
             'remoteFolder:port'        = 21
             'remoteFolder:select'      = 'private'
-            'tagId'                    = "1,$tagId"
+            'tagId'                    = $tagId
             'isDestination'            = 'true'
         }
     }
