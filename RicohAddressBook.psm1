@@ -520,6 +520,10 @@ function Get-TagIdValue {
 .Parameters FolderPath
     The network path used to save scanned files.
 
+.Parameters DisplayPriority
+    The display order of the user in address book list. Sorting is done first by
+    DisplayPriority, then by ID.
+
 .Parameters Frequent
     Whether the user is to be added to the frequently used list.
 
@@ -600,6 +604,11 @@ function Update-AddressBookEntry {
         [Parameter(ValueFromPipelineByPropertyName)]
         $FolderPath,
 
+        [byte]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(1, 10)]
+        $DisplayPriority,
+
         [switch]
         [Parameter(ValueFromPipelineByPropertyName)]
         $Frequent,
@@ -657,6 +666,9 @@ function Update-AddressBookEntry {
         }
         if ($PSBoundParameters.ContainsKey('LongName')) {
             $properties['longName'] = $LongName
+        }
+        if ($PSBoundParameters.ContainsKey('DisplayPriority')) {
+            $properties['displayedOrder'] = $DisplayPriority
         }
 
         # Tags (Frequent, Title1, Title2, Title3)
