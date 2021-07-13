@@ -345,6 +345,7 @@ function Get-AddressBookEntry {
         $Id,
 
         [string]
+        [SupportsWildcards()]
         $Name,
 
         [switch]
