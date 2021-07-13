@@ -47,7 +47,10 @@ function Invoke-SOAPRequest {
 
         [RicohMethodType]
         [Parameter(Mandatory)]
-        $Method
+        $Method,
+
+        [switch]
+        $SkipCertificateCheck
     )
 
     if (-not $Hostname.IsAbsoluteUri) {
@@ -66,7 +69,19 @@ function Invoke-SOAPRequest {
     }
 
     try {
-        $response = Invoke-WebRequest @webRequest
+        $response =
+            if (-not $SkipCertificateCheck) {
+                Invoke-WebRequest @webRequest
+            } elseif ((Get-Command Invoke-WebRequest).Parameters.ContainsKey('SkipCertificateCheck')) {
+                Invoke-WebRequest -SkipCertificateCheck @webRequest
+            } else {
+                $originalCallback = [System.Net.ServicePointManager]::ServerCertificateValidationCallback
+                [System.Net.ServicePointManager]::ServerCertificateValidationCallback = {
+                    $true
+                }
+                Invoke-WebRequest @webRequest
+                [System.Net.ServicePointManager]::ServerCertificateValidationCallback = $originalCallback
+            }
         [xml]$response
     } catch {
         $PSCmdlet.ThrowTerminatingError($_)
@@ -96,7 +111,10 @@ function Connect-Session {
         $Credential,
 
         [switch]
-        $ReadOnly
+        $ReadOnly,
+
+        [switch]
+        $SkipCertificateCheck
     )
 
     $method = [RicohMethodType]::startSession
@@ -117,8 +135,15 @@ function Connect-Session {
             'X'
         }
 
+    $request = @{
+        Hostname = $Hostname
+        Body     = $template
+        Method   = $method
+        SkipCertificateCheck = $SkipCertificateCheck
+    }
+
     try {
-        $response = Invoke-SOAPRequest -Hostname $Hostname -Body $template -Method $method
+        $response = Invoke-SOAPRequest @request
         $response.Envelope.Body.startSessionResponse.stringOut
     } catch {
         $PSCmdlet.ThrowTerminatingError($_)
@@ -133,7 +158,10 @@ function Search-AddressBookEntry {
 
         [string]
         [Parameter(Mandatory)]
-        $Session
+        $Session,
+
+        [switch]
+        $SkipCertificateCheck
     )
 
     $method = [RicohMethodType]::searchObjects
@@ -144,7 +172,14 @@ function Search-AddressBookEntry {
     do {
         $template.Envelope.Body.$method.rowOffset = [string]$offset
 
-        $response = Invoke-SOAPRequest -Hostname $Hostname -Body $template -Method $method
+        $request = @{
+            Hostname = $Hostname
+            Body     = $template
+            Method   = $method
+            SkipCertificateCheck = $SkipCertificateCheck
+        }
+
+        $response = Invoke-SOAPRequest @request
         $numberOfResults = $response.Envelope.Body.searchObjectsResponse.numOfResults - 10
 
         $response |
@@ -270,6 +305,13 @@ function Test-Property {
     Only retrieve address book entries matching this name. Wildcards are
     permitted.
 
+.Parameter SkipCertificateCheck
+    Skips certificate validation checks. This includes all validation such as expiration,
+    revocation, trusted root authority, etc.
+
+    > [!WARNING] Using this parameter is not secure and is not recommended. This switch is only intended to be
+    used against known hosts using a self-signed certificate for testing purposes. Use at your own risk.
+
 .Inputs
     None. You cannot pipe objects to Get-AddressBookEntry.
 
@@ -298,11 +340,20 @@ function Get-AddressBookEntry {
         $Id,
 
         [string]
-        $Name
+        $Name,
+
+        [switch]
+        $SkipCertificateCheck
     )
 
     try {
-        $session = Connect-Session -Hostname $Hostname -Credential $Credential -ReadOnly
+        $connection = @{
+            Hostname   = $Hostname
+            Credential = $Credential
+            SkipCertificateCheck = $SkipCertificateCheck
+        }
+
+        $session = Connect-Session @connection -ReadOnly
     } catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
@@ -313,7 +364,12 @@ function Get-AddressBookEntry {
 
     $objectIdList = $template.Envelope.Body.getObjectsProps.objectIdList
     if ($null -eq $Id) {
-        $Id = Search-AddressBookEntry $Hostname $session
+        $selection = @{
+            Hostname = $Hostname
+            Session  = $session
+            SkipCertificateCheck = $SkipCertificateCheck
+        }
+        $Id = Search-AddressBookEntry @selection
     }
     $entries = do {
         $objectIdList.IsEmpty = $true # Empties the node
@@ -325,7 +381,14 @@ function Get-AddressBookEntry {
             $objectIdList.AppendChild($item) > $null
         }
 
-        Invoke-SOAPRequest -Hostname $Hostname -Body $template -Method $method |
+        $request = @{
+            Hostname = $Hostname
+            Body     = $template
+            Method   = $method
+            SkipCertificateCheck = $SkipCertificateCheck
+        }
+
+        Invoke-SOAPRequest @request |
         Select-Xml -Namespace $namespaces -XPath '/s:Envelope/s:Body/u:getObjectsPropsResponse/returnValue/item'
 
         $Id = $Id | Select-Object -Skip 50
@@ -393,7 +456,7 @@ function Get-AddressBookEntry {
         [PSCustomObject]$output
     }
 
-    Disconnect-Session $Hostname $session
+    Disconnect-Session -Hostname $Hostname -Session $session -SkipCertificateCheck:$SkipCertificateCheck
 }
 
 function Get-TagIdValue {
@@ -473,6 +536,13 @@ function Get-TagIdValue {
     Title3 is a range from 1 to 5, and is another option for grouping users on
     the scanner.
 
+.Parameter SkipCertificateCheck
+    Skips certificate validation checks. This includes all validation such as expiration,
+    revocation, trusted root authority, etc.
+
+    > [!WARNING] Using this parameter is not secure and is not recommended. This switch is only intended to be
+    used against known hosts using a self-signed certificate for testing purposes. Use at your own risk.
+
 .Example
     PS> Update-AddressBookEntry -Hostname https://10.10.10.10 -Credential admin -Id 1 -Name 'Matthew D'
 
@@ -541,12 +611,21 @@ function Update-AddressBookEntry {
         [byte]
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(1, 5)]
-        $Title3
+        $Title3,
+
+        [switch]
+        $SkipCertificateCheck
     )
 
     begin {
         try {
-            $session = Connect-Session -Hostname $Hostname -Credential $Credential
+            $connection = @{
+                Hostname   = $Hostname
+                Credential = $Credential
+                SkipCertificateCheck = $SkipCertificateCheck
+            }
+
+            $session = Connect-Session @connection
         } catch {
             $PSCmdlet.ThrowTerminatingError($_)
         }
@@ -587,12 +666,19 @@ function Update-AddressBookEntry {
                 "Updating address book entry with ID of $Id.",
                 "Update address book entry with ID of ${Id}?",
                 "Confirm address book update.")) {
-            Invoke-SOAPRequest -Hostname $Hostname -Body $template -Method $method > $null
+            $request = @{
+                Hostname = $Hostname
+                Body     = $template
+                Method   = $method
+                SkipCertificateCheck = $SkipCertificateCheck
+            }
+
+            Invoke-SOAPRequest @request > $null
         }
     }
 
     end {
-        Disconnect-Session $Hostname $session
+        Disconnect-Session -Hostname $Hostname -Session $session -SkipCertificateCheck:$SkipCertificateCheck
     }
 }
 
@@ -646,6 +732,13 @@ function Update-AddressBookEntry {
 
     Title3 is a range from 1 to 5, and is another option for grouping users on
     the scanner.
+
+.Parameter SkipCertificateCheck
+    Skips certificate validation checks. This includes all validation such as expiration,
+    revocation, trusted root authority, etc.
+
+    > [!WARNING] Using this parameter is not secure and is not recommended. This switch is only intended to be
+    used against known hosts using a self-signed certificate for testing purposes. Use at your own risk.
 
 .Example
     PS> $entry = @{
@@ -721,12 +814,21 @@ function Add-AddressBookEntry {
         [byte]
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(1, 5)]
-        $Title3
+        $Title3,
+
+        [switch]
+        $SkipCertificateCheck
     )
 
     begin {
         try {
-            $session = Connect-Session -Hostname $Hostname -Credential $Credential
+            $connection = @{
+                Hostname   = $Hostname
+                Credential = $Credential
+                SkipCertificateCheck = $SkipCertificateCheck
+            }
+
+            $session = Connect-Session @connection
         } catch {
             $PSCmdlet.ThrowTerminatingError($_)
         }
@@ -764,9 +866,16 @@ function Add-AddressBookEntry {
                 "Adding address book entries for $allNames",
                 "Add address book entry for ${allNames}?",
                 'Confirm address book addition.')) {
-            Invoke-SOAPRequest -Hostname $Hostname -Body $template -Method $method > $null
+            $request = @{
+                Hostname = $Hostname
+                Body     = $template
+                Method   = $method
+                SkipCertificateCheck = $SkipCertificateCheck
+            }
+
+            Invoke-SOAPRequest @request > $null
         }
-        Disconnect-Session $Hostname $session
+        Disconnect-Session -Hostname $Hostname -Session $session -SkipCertificateCheck:$SkipCertificateCheck
     }
 }
 
@@ -790,6 +899,13 @@ function Add-AddressBookEntry {
 
 .Parameter Id
     The IDs to be removed. Find the IDs from Get-AddressBookEntry.
+
+.Parameter SkipCertificateCheck
+    Skips certificate validation checks. This includes all validation such as expiration,
+    revocation, trusted root authority, etc.
+
+    > [!WARNING] Using this parameter is not secure and is not recommended. This switch is only intended to be
+    used against known hosts using a self-signed certificate for testing purposes. Use at your own risk.
 
 .Example
     PS> Remove-AddressBookEntry -Hostname https://10.10.10.10 -Credential admin -Id 1, 2
@@ -818,12 +934,21 @@ function Remove-AddressBookEntry {
 
         [int[]]
         [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
-        $Id
+        $Id,
+
+        [switch]
+        $SkipCertificateCheck
     )
 
     begin {
         try {
-            $session = Connect-Session -Hostname $Hostname -Credential $Credential
+            $connection = @{
+                Hostname   = $Hostname
+                Credential = $Credential
+                SkipCertificateCheck = $SkipCertificateCheck
+            }
+
+            $session = Connect-Session @connection
         } catch {
             $PSCmdlet.ThrowTerminatingError($_)
         }
@@ -856,10 +981,17 @@ function Remove-AddressBookEntry {
                 "Removing IDs $allID.",
                 "Remove IDs ${allID}?",
                 'Confirm removing entries')) {
-            Invoke-SOAPRequest -Hostname $Hostname -Body $template -Method $method > $null
+            $request = @{
+                Hostname = $Hostname
+                Body     = $template
+                Method   = $method
+                SkipCertificateCheck = $SkipCertificateCheck
+            }
+
+            Invoke-SOAPRequest @request > $null
         }
 
-        Disconnect-Session $Hostname $session
+        Disconnect-Session -Hostname $Hostname -Session $session -SkipCertificateCheck:$SkipCertificateCheck
     }
 }
 
@@ -871,15 +1003,25 @@ function Disconnect-Session {
 
         [string]
         [Parameter(Mandatory)]
-        $Session
+        $Session,
+
+        [switch]
+        $SkipCertificateCheck
     )
 
     $method = [RicohMethodType]::terminateSession
     $template = Get-Template $method
     $template.Envelope.Body.$method.sessionId = $session
 
+    $request = @{
+        Hostname = $Hostname
+        Body     = $template
+        Method   = $method
+        SkipCertificateCheck = $SkipCertificateCheck
+    }
+
     try {
-        Invoke-SOAPRequest -Hostname $Hostname -Body $template -Method $method > $null
+        Invoke-SOAPRequest @request > $null
     } catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
