@@ -177,8 +177,14 @@ function Search-AddressBookEntry {
         $response = Invoke-SOAPRequest @request
         $totalResults = $response.Envelope.Body.searchObjectsResponse.numOfResults
 
-        $response |
-        Select-Xml -Namespace $namespaces -XPath '/s:Envelope/s:Body/u:searchObjectsResponse/rowList/item/item[propName/text()="id"]/propVal/text()' |
+        $selection = @{
+            Xml = $response
+            Namespace = $namespaces
+            XPath =
+                '/s:Envelope/s:Body/u:searchObjectsResponse/rowList/item/item[propName/text()="id"]/propVal/text()'
+        }
+
+        Select-Xml @selection |
         Select-Object -First ([System.Math]::Min($totalResults - $offset, 50)) |
         ForEach-Object {
             $id = $_.Node.Value
@@ -858,7 +864,12 @@ function Add-AddressBookEntry {
     }
 
     end {
-        $names = Select-Xml -Xml $template -Namespace $namespaces -XPath '/s:Envelope/s:Body/u:putObjects/propListList/item/item[propName/text()="name"]/propVal'
+        $selection = @{
+            Xml       = $template
+            Namespace = $namespaces
+            XPath     = '/s:Envelope/s:Body/u:putObjects/propListList/item/item[propName/text()="name"]/propVal'
+        }
+        $names = Select-Xml @selection
 
         $allNames = $names -join ', '
         if ($PSCmdlet.ShouldProcess(
