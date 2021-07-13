@@ -118,14 +118,11 @@ function Connect-Session {
     $method = [RicohMethodType]::startSession
     $template = Get-Template $method
 
-    $encodedUsername = ConvertTo-Base64 $Credential.UserName
-    $encodedPassword = ConvertTo-Base64 $Credential.GetNetworkCredential().Password
+    $scheme = ConvertTo-Base64 BASIC
+    $username = ConvertTo-Base64 $Credential.UserName
+    $password = ConvertTo-Base64 $Credential.GetNetworkCredential().Password
     $template.Envelope.Body.$method.stringIn =
-                # SCHEME = ConvertTo-Base64 'BASIC'
-                @("SCHEME=QkFTSUM=",
-                  "UID:UserName=$encodedUsername",
-                  "PWD:Password=$encodedPassword",
-                  "PES:Encoding=") -join ';'
+        "SCHEME=$scheme;UID:UserName=$username;PWD:Password=$password;PES:Encoding="
     $template.Envelope.Body.$method.lockMode =
         if ($ReadOnly) {
             'S'
