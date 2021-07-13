@@ -1,10 +1,8 @@
 #=====================================================================#
 #                                                                     #
 #  Ricoh Multi Function Printer (MFP) Address Book PowerShell Module  #
-#  Original Author: Alexander Krause                                  #
-#  Author: Matthew Desjardins                                         #
-#  Creation Date: 10.04.2013                                          #
-#  Modified Date: 24.05.2021                                          #
+#  Created By: Alexander Krause                                       #
+#  Mantainer: Matthew Desjardins                                      #
 #                                                                     #
 #=====================================================================#
 
