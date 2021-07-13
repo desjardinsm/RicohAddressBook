@@ -178,16 +178,20 @@ function Search-AddressBookEntry {
         }
 
         $response = Invoke-SOAPRequest @request
-        $numberOfResults = $response.Envelope.Body.searchObjectsResponse.numOfResults - 10
+        $totalResults = $response.Envelope.Body.searchObjectsResponse.numOfResults
 
         $response |
         Select-Xml -Namespace $namespaces -XPath '/s:Envelope/s:Body/u:searchObjectsResponse/rowList/item/item[propName/text()="id"]/propVal/text()' |
-        Select-Object -First ([System.Math]::Min($numberOfResults - $offset, 50)) |
-        ForEach-Object {[uint32]$_.Node.Value}
+        Select-Object -First ([System.Math]::Min($totalResults - $offset, 50)) |
+        ForEach-Object {
+            $id = $_.Node.Value
+            if ($id.Length -lt 10) {
+                [uint32]$id
+            }
+        }
 
         $offset += 50
-        $numberRemaining = $numberOfResults - $offset
-    } while ($numberRemaining -gt 0)
+    } while ($response.Envelope.Body.searchObjectsResponse.returnValue -ne 'EOD')
 }
 
 enum TagId {
