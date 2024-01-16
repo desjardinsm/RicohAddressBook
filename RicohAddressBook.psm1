@@ -508,7 +508,7 @@ function Get-TagIdValue {
 
 .Parameter Id
     The ID of the address book entry to modify. Find the ID from
-    Get-AddressBookEntry.
+    Get-AddressBookEntry. ID is **not** the Index.
 
 .Parameter Name
     The new name for the address book entry.
@@ -987,7 +987,7 @@ function Add-AddressBookEntry {
     The username and password to use to connect to the Ricoh printer.
 
 .Parameter Id
-    The IDs to be removed. Find the IDs from Get-AddressBookEntry.
+    The IDs to be removed. Find the IDs from Get-AddressBookEntry. ID is **not** the Index.
 
 .Parameter SkipCertificateCheck
     Skips certificate validation checks. This includes all validation such as expiration,
