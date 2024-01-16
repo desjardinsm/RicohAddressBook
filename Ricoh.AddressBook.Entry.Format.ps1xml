@@ -11,6 +11,9 @@
                     <TableRowEntry>
                         <TableColumnItems>
                             <TableColumnItem>
+                                <PropertyName>ID</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
                                 <PropertyName>Index</PropertyName>
                             </TableColumnItem>
                             <TableColumnItem>
@@ -18,6 +21,9 @@
                             </TableColumnItem>
                             <TableColumnItem>
                                 <PropertyName>RemoteFolderPath</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>EmailAddress</PropertyName>
                             </TableColumnItem>
                         </TableColumnItems>
                     </TableRowEntry>
