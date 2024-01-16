@@ -456,8 +456,8 @@ function Get-AddressBookEntry {
 
         if (Test-Property $properties 'mail:') {
             $output.EmailAddress  = $properties['mail:address']
-            $output.IsSender      = [bool]$properties['isSender']
-            $output.IsDestination = [bool]$properties['isDestination']
+            $output.IsSender      = $properties['isSender'] -eq 'true'
+            $output.IsDestination = $properties['isDestination'] -eq 'true'
         }
 
         [PSCustomObject]$output
