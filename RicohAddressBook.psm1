@@ -519,38 +519,38 @@ function Get-TagIdValue {
 .Parameter ScanAccount
     The account to use to save the scanned files to a network location.
 
-.Parameters FolderPath
+.Parameter FolderPath
     The network path used to save scanned files.
 
-.Parameters EmailAddress
+.Parameter EmailAddress
     The email address used to send scanned files.
 
-.Parameters IsSender
+.Parameter IsSender
     Whether the given email address is registered as a sender.
 
-.Parameters IsDestination
+.Parameter IsDestination
     Whether the given email address is registered as a destination.
 
-.Parameters DisplayPriority
+.Parameter DisplayPriority
     The display order of the user in address book list. Sorting is done first by
     DisplayPriority, then by ID.
 
-.Parameters Frequent
+.Parameter Frequent
     Whether the user is to be added to the frequently used list.
 
-.Parameters Title1
+.Parameter Title1
     The heading to list this user under for Title1.
 
     Title1 is usually the default grouping, and is the one that lists users by
     letters (AB, CD, etc.) on the scanner.
 
-.Parameters Title2
+.Parameter Title2
     The heading to list this user under for Title2.
 
     Title2 is a range from 1 to 10, and is another option for grouping users on
     the scanner.
 
-.Parameters Title3
+.Parameter Title3
     The heading to list this user under for Title3.
 
     Title3 is a range from 1 to 5, and is another option for grouping users on
@@ -758,34 +758,34 @@ function Update-AddressBookEntry {
 .Parameter ScanAccount
     The account to use to save the scanned files to a network location.
 
-.Parameters FolderPath
+.Parameter FolderPath
     The network path used to save scanned files.
 
-.Parameters EmailAddress
+.Parameter EmailAddress
     The email address used to send scanned files.
 
-.Parameters IsSender
+.Parameter IsSender
     Whether the given email address is registered as a sender.
 
-.Parameters IsDestination
+.Parameter IsDestination
     Whether the given email address is registered as a destination.
 
-.Parameters Frequent
+.Parameter Frequent
     Whether the user is to be added to the frequently used list.
 
-.Parameters Title1
+.Parameter Title1
     The heading to list this user under for Title1.
 
     Title1 is usually the default grouping, and is the one that lists users by
     letters (AB, CD, etc.) on the scanner.
 
-.Parameters Title2
+.Parameter Title2
     The heading to list this user under for Title2.
 
     Title2 is a range from 1 to 10, and is another option for grouping users on
     the scanner.
 
-.Parameters Title3
+.Parameter Title3
     The heading to list this user under for Title3.
 
     Title3 is a range from 1 to 5, and is another option for grouping users on
