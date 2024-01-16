@@ -522,6 +522,15 @@ function Get-TagIdValue {
 .Parameters FolderPath
     The network path used to save scanned files.
 
+.Parameters EmailAddress
+    The email address used to send scanned files.
+
+.Parameters IsSender
+    Whether the given email address is registered as a sender.
+
+.Parameters IsDestination
+    Whether the given email address is registered as a destination.
+
 .Parameters DisplayPriority
     The display order of the user in address book list. Sorting is done first by
     DisplayPriority, then by ID.
@@ -606,6 +615,18 @@ function Update-AddressBookEntry {
         [Parameter(ValueFromPipelineByPropertyName)]
         $FolderPath,
 
+        [string]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        $EmailAddress,
+
+        [switch]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        $IsSender,
+
+        [switch]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        $IsDestination,
+
         [byte]
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(1, 10)]
@@ -662,6 +683,15 @@ function Update-AddressBookEntry {
         }
         if ($PSBoundParameters.ContainsKey('FolderPath')) {
             $properties['remoteFolder:path'] = $FolderPath
+        }
+        if ($PSBoundParameters.ContainsKey('EmailAddress')) {
+            $properties['mail:address'] = $EmailAddress
+        }
+        if ($PSBoundParameters.ContainsKey('IsSender')) {
+            $properties['isSender'] = $IsSender.ToString().ToLower()
+        }
+        if ($PSBoundParameters.ContainsKey('IsDestination')) {
+            $properties['isDestination'] = $IsDestination.ToString().ToLower()
         }
         if ($PSBoundParameters.ContainsKey('Name')) {
             $properties['name'] = $Name
@@ -730,6 +760,15 @@ function Update-AddressBookEntry {
 
 .Parameters FolderPath
     The network path used to save scanned files.
+
+.Parameters EmailAddress
+    The email address used to send scanned files.
+
+.Parameters IsSender
+    Whether the given email address is registered as a sender.
+
+.Parameters IsDestination
+    Whether the given email address is registered as a destination.
 
 .Parameters Frequent
     Whether the user is to be added to the frequently used list.
@@ -810,12 +849,24 @@ function Add-AddressBookEntry {
         $LongName,
 
         [pscredential]
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         $ScanAccount,
 
         [string]
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         $FolderPath,
+
+        [string]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        $EmailAddress,
+
+        [switch]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        $IsSender,
+
+        [switch]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        $IsDestination,
 
         [switch]
         [Parameter(ValueFromPipelineByPropertyName)]
@@ -867,13 +918,27 @@ function Add-AddressBookEntry {
             'entryType'                = 'user'
             'name'                     = $Name
             'longName'                 = $LongName
-            'remoteFolder:path'        = $FolderPath
-            'remoteFolder:accountName' = $ScanAccount.UserName
-            'remoteFolder:password'    = ConvertTo-Base64 $ScanAccount.GetNetworkCredential().Password
-            'remoteFolder:port'        = 21
-            'remoteFolder:select'      = 'private'
             'tagId'                    = $tagId
-            'isDestination'            = 'true'
+        }
+
+        if ($PSBoundParameters.ContainsKey('FolderPath')) {
+            Add-PropertyList $entry @{
+                'remoteFolder:path'        = $FolderPath
+                'remoteFolder:accountName' = $ScanAccount.UserName
+                'remoteFolder:password'    = ConvertTo-Base64 $ScanAccount.GetNetworkCredential().Password
+                'remoteFolder:port'        = 21
+                'remoteFolder:select'      = 'private'
+                'isDestination'            = 'true'
+            }
+        }
+
+        if ($PSBoundParameters.ContainsKey('EmailAddress')) {
+            Add-PropertyList $entry @{
+                'mail:'         = 'true'
+                'mail:address'  = $EmailAddress
+                'isSender'      = $IsSender.ToString().ToLower()
+                'isDestination' = $IsDestination.ToString().ToLower()
+            }
         }
     }
 
