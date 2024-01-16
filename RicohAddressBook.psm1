@@ -528,8 +528,14 @@ function Get-TagIdValue {
 .Parameter IsSender
     Whether the given email address is registered as a sender.
 
+    This is a switch parameter. You must include it to set it to true,
+    or set it to false by specifying -IsSender:$false.
+
 .Parameter IsDestination
     Whether the given email address is registered as a destination.
+
+    This is a switch parameter. You must include it to set it to true,
+    or set it to false by specifying -IsDestination:$false.
 
 .Parameter DisplayPriority
     The display order of the user in address book list. Sorting is done first by
@@ -537,6 +543,9 @@ function Get-TagIdValue {
 
 .Parameter Frequent
     Whether the user is to be added to the frequently used list.
+
+    This is a switch parameter. You must include it to set it to true,
+    or set it to false by specifying -Frequent:$false.
 
 .Parameter Title1
     The heading to list this user under for Title1.
@@ -767,11 +776,20 @@ function Update-AddressBookEntry {
 .Parameter IsSender
     Whether the given email address is registered as a sender.
 
+    This is a switch parameter. You must include it to set it to true,
+    or set it to false by specifying -IsSender:$false.
+
 .Parameter IsDestination
     Whether the given email address is registered as a destination.
 
+    This is a switch parameter. You must include it to set it to true,
+    or set it to false by specifying -IsDestination:$false.
+
 .Parameter Frequent
     Whether the user is to be added to the frequently used list.
+
+    This is a switch parameter. You must include it to set it to true,
+    or set it to false by specifying -Frequent:$false.
 
 .Parameter Title1
     The heading to list this user under for Title1.
