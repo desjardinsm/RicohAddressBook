@@ -473,8 +473,8 @@ function Get-TagIdValue {
     )
 
     $tags = [System.Collections.Generic.List[byte]]::new(4)
-    if ($Parameters.ContainsKey('Frequent')) {
-        $tags.Add([byte]$Parameters.Frequent.IsPresent)
+    if ($Parameters.Frequent) {
+        $tags.Add(1)
     }
     if ($Parameters.ContainsKey('Title1')) {
         $tags.Add([byte]$Title1)
