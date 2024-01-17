@@ -684,7 +684,7 @@ function Update-AddressBookEntry {
 
         $properties = @{}
 
-        if (-not [string]::IsNullOrEmpty($ScanAccount)) {
+        if ($null -ne $ScanAccount) {
             $properties['remoteFolder:accountName'] = $ScanAccount.UserName
             $properties['remoteFolder:password'] = ConvertTo-Base64 $ScanAccount.GetNetworkCredential().Password
         }
