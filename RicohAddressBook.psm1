@@ -467,22 +467,17 @@ function Get-AddressBookEntry {
 }
 
 function Get-TagIdValue {
-    param(
-        [hashtable]
-        $Parameters
-    )
-
     $tags = [System.Collections.Generic.List[byte]]::new(4)
-    if ($Parameters.Frequent) {
+    if ($Frequent) {
         $tags.Add(1)
     }
-    if ($Parameters.ContainsKey('Title1')) {
+    if ($null -ne $Title1) {
         $tags.Add([byte]$Title1)
     }
-    if ($Parameters.ContainsKey('Title2')) {
+    if (0 -ne $Title2) {
         $tags.Add($Title2 + 11)
     }
-    if ($Parameters.ContainsKey('Title3')) {
+    if (0 -ne $Title3) {
         $tags.Add($Title3 + 21)
     }
     $tags -join ','
@@ -711,7 +706,7 @@ function Update-AddressBookEntry {
         }
 
         # Tags (Frequent, Title1, Title2, Title3)
-        $tags = Get-TagIdValue $PSBoundParameters
+        $tags = Get-TagIdValue
         if (-not [string]::IsNullOrEmpty($tags)) {
             $properties['tagId'] = $tags
         }
@@ -924,7 +919,7 @@ function Add-AddressBookEntry {
 
     process {
         # Tags (Frequent, Title1, Title2, Title3)
-        $tagId = Get-TagIdValue $PSBoundParameters
+        $tagId = Get-TagIdValue
 
         $entry = $template.CreateElement('item')
         $template.Envelope.Body.$method.propListList.AppendChild($entry) > $null
