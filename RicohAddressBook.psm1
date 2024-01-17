@@ -713,13 +713,21 @@ function Update-AddressBookEntry {
 
         $properties = @{}
 
+        if (-not [string]::IsNullOrEmpty($Name)) {
+            $properties['name'] = $Name
+        }
+        if (-not [string]::IsNullOrEmpty($LongName)) {
+            $properties['longName'] = $LongName
+        }
+
+        if (-not [string]::IsNullOrEmpty($FolderPath)) {
+            $properties['remoteFolder:path'] = $FolderPath
+        }
         if ($null -ne $ScanAccount) {
             $properties['remoteFolder:accountName'] = $ScanAccount.UserName
             $properties['remoteFolder:password'] = ConvertTo-Base64 $ScanAccount.GetNetworkCredential().Password
         }
-        if (-not [string]::IsNullOrEmpty($FolderPath)) {
-            $properties['remoteFolder:path'] = $FolderPath
-        }
+
         if (-not [string]::IsNullOrEmpty($EmailAddress)) {
             $properties['mail:address'] = $EmailAddress
         }
@@ -729,12 +737,7 @@ function Update-AddressBookEntry {
         if ($null -ne $IsDestination) {
             $properties['isDestination'] = $IsDestination.ToString().ToLower()
         }
-        if (-not [string]::IsNullOrEmpty($Name)) {
-            $properties['name'] = $Name
-        }
-        if (-not [string]::IsNullOrEmpty($LongName)) {
-            $properties['longName'] = $LongName
-        }
+
         if (0 -ne $DisplayPriority) {
             $properties['displayedOrder'] = $DisplayPriority
         }
