@@ -522,6 +522,9 @@ function Get-TagIdValue {
 .Parameter LongName
     The new "long name" for the address book entry.
 
+.Parameter FolderPath
+    The network path used to save scanned files.
+
 .Parameter ScanAccount
     The account to use to save the scanned files to a network location.
 
@@ -529,9 +532,6 @@ function Get-TagIdValue {
     cmdlet and store the results to a variable. Otherwise, just passing a string
     will open a dialog box for the user to enter a password. See the help for
     Get-Credential for information on using this in a script non-interactively.
-
-.Parameter FolderPath
-    The network path used to save scanned files.
 
 .Parameter EmailAddress
     The email address used to send scanned files.
@@ -643,13 +643,13 @@ function Update-AddressBookEntry {
         [Parameter(ValueFromPipelineByPropertyName)]
         $LongName,
 
-        [pscredential]
-        [Parameter(ValueFromPipelineByPropertyName)]
-        $ScanAccount,
-
         [string]
         [Parameter(ValueFromPipelineByPropertyName)]
         $FolderPath,
+
+        [pscredential]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        $ScanAccount,
 
         [string]
         [Parameter(ValueFromPipelineByPropertyName)]
@@ -796,6 +796,9 @@ function Update-AddressBookEntry {
 .Parameter LongName
     The "long name" for the address book entry.
 
+.Parameter FolderPath
+    The network path used to save scanned files.
+
 .Parameter ScanAccount
     The account to use to save the scanned files to a network location.
 
@@ -803,9 +806,6 @@ function Update-AddressBookEntry {
     cmdlet and store the results to a variable. Otherwise, just passing a string
     will open a dialog box for the user to enter a password. See the help for
     Get-Credential for information on using this in a script non-interactively.
-
-.Parameter FolderPath
-    The network path used to save scanned files.
 
 .Parameter EmailAddress
     The email address used to send scanned files.
@@ -895,15 +895,15 @@ function Add-AddressBookEntry {
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         $LongName,
 
-        [pscredential]
-        [Parameter(ParameterSetName = 'Folder', Mandatory, ValueFromPipelineByPropertyName)]
-        [Parameter(ParameterSetName = 'FolderAndEmail', Mandatory, ValueFromPipelineByPropertyName)]
-        $ScanAccount,
-
         [string]
         [Parameter(ParameterSetName = 'Folder', Mandatory, ValueFromPipelineByPropertyName)]
         [Parameter(ParameterSetName = 'FolderAndEmail', Mandatory, ValueFromPipelineByPropertyName)]
         $FolderPath,
+
+        [pscredential]
+        [Parameter(ParameterSetName = 'Folder', Mandatory, ValueFromPipelineByPropertyName)]
+        [Parameter(ParameterSetName = 'FolderAndEmail', Mandatory, ValueFromPipelineByPropertyName)]
+        $ScanAccount,
 
         [string]
         [Parameter(ParameterSetName = 'Email', Mandatory, ValueFromPipelineByPropertyName)]
