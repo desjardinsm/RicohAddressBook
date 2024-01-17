@@ -311,11 +311,12 @@ function Test-Property {
     permitted.
 
 .Parameter SkipCertificateCheck
-    Skips certificate validation checks. This includes all validation such as expiration,
-    revocation, trusted root authority, etc.
+    Skips certificate validation checks. This includes all validation such as
+    expiration, revocation, trusted root authority, etc.
 
-    > [!WARNING] Using this parameter is not secure and is not recommended. This switch is only intended to be
-    used against known hosts using a self-signed certificate for testing purposes. Use at your own risk.
+    > [!WARNING] Using this parameter is not secure and is not recommended. This
+    switch is only intended to be used against known hosts using a self-signed
+    certificate for testing purposes. Use at your own risk.
 
 .Inputs
     None. You cannot pipe objects to Get-AddressBookEntry.
@@ -552,11 +553,12 @@ function Get-TagIdValue {
     the scanner.
 
 .Parameter SkipCertificateCheck
-    Skips certificate validation checks. This includes all validation such as expiration,
-    revocation, trusted root authority, etc.
+    Skips certificate validation checks. This includes all validation such as
+    expiration, revocation, trusted root authority, etc.
 
-    > [!WARNING] Using this parameter is not secure and is not recommended. This switch is only intended to be
-    used against known hosts using a self-signed certificate for testing purposes. Use at your own risk.
+    > [!WARNING] Using this parameter is not secure and is not recommended. This
+    switch is only intended to be used against known hosts using a self-signed
+    certificate for testing purposes. Use at your own risk.
 
 .Example
     PS> Update-AddressBookEntry -Hostname https://10.10.10.10 -Credential admin -Id 1 -Name 'Matthew D'
@@ -732,12 +734,11 @@ function Update-AddressBookEntry {
     Adds address book entries to a Ricoh multi-function printer
 
 .Description
-    Add-AddressBookEntry adds address book entries to Ricoh
-    multi-function printers.
+    Add-AddressBookEntry adds address book entries to Ricoh multi-function
+    printers.
 
 .Parameter Hostname
-    The hostname of the printer from which address book entries are to be
-    added.
+    The hostname of the printer from which address book entries are to be added.
 
     By default, it will use HTTP; if HTTPS is required, specify that in the URI,
     like "-Hostname https://printername"
@@ -788,11 +789,12 @@ function Update-AddressBookEntry {
     the scanner.
 
 .Parameter SkipCertificateCheck
-    Skips certificate validation checks. This includes all validation such as expiration,
-    revocation, trusted root authority, etc.
+    Skips certificate validation checks. This includes all validation such as
+    expiration, revocation, trusted root authority, etc.
 
-    > [!WARNING] Using this parameter is not secure and is not recommended. This switch is only intended to be
-    used against known hosts using a self-signed certificate for testing purposes. Use at your own risk.
+    > [!WARNING] Using this parameter is not secure and is not recommended. This
+    switch is only intended to be used against known hosts using a self-signed
+    certificate for testing purposes. Use at your own risk.
 
 .Example
     PS> $entry = @{
@@ -989,14 +991,16 @@ function Add-AddressBookEntry {
     The username and password to use to connect to the Ricoh printer.
 
 .Parameter Id
-    The IDs to be removed. Find the IDs from Get-AddressBookEntry. ID is **not** the Index.
+    The IDs to be removed. Find the IDs from Get-AddressBookEntry. ID is **not**
+    the Index.
 
 .Parameter SkipCertificateCheck
-    Skips certificate validation checks. This includes all validation such as expiration,
-    revocation, trusted root authority, etc.
+    Skips certificate validation checks. This includes all validation such as
+    expiration, revocation, trusted root authority, etc.
 
-    > [!WARNING] Using this parameter is not secure and is not recommended. This switch is only intended to be
-    used against known hosts using a self-signed certificate for testing purposes. Use at your own risk.
+    > [!WARNING] Using this parameter is not secure and is not recommended. This
+    switch is only intended to be used against known hosts using a self-signed
+    certificate for testing purposes. Use at your own risk.
 
 .Example
     PS> Remove-AddressBookEntry -Hostname https://10.10.10.10 -Credential admin -Id 1, 2
