@@ -694,7 +694,7 @@ function Update-AddressBookEntry {
         if (-not [string]::IsNullOrEmpty($LongName)) {
             $properties['longName'] = $LongName
         }
-        if ($DisplayPriority -ne 0) {
+        if (0 -ne $DisplayPriority) {
             $properties['displayedOrder'] = $DisplayPriority
         }
 
