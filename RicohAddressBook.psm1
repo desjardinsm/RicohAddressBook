@@ -629,11 +629,9 @@ function Update-AddressBookEntry {
         $EmailAddress,
 
         [switch]
-        [Parameter(ValueFromPipelineByPropertyName)]
         $IsSender,
 
         [switch]
-        [Parameter(ValueFromPipelineByPropertyName)]
         $IsDestination,
 
         [byte]
@@ -880,11 +878,9 @@ function Add-AddressBookEntry {
         $EmailAddress,
 
         [switch]
-        [Parameter(ValueFromPipelineByPropertyName)]
         $IsSender,
 
         [switch]
-        [Parameter(ValueFromPipelineByPropertyName)]
         $IsDestination,
 
         [switch]
