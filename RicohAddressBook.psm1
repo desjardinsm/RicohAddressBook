@@ -621,7 +621,7 @@ function Get-TagIdValue {
     Updates multiple entries based on objects received in the pipeline.
 #>
 function Update-AddressBookEntry {
-    [CmdletBinding(SupportsShouldProcess)]
+    [CmdletBinding(SupportsShouldProcess, PositionalBinding = $false)]
     param(
         [uri]
         [Parameter(Mandatory)]
@@ -1076,7 +1076,7 @@ function Add-AddressBookEntry {
     while the first command has the Ricoh address book open.
 #>
 function Remove-AddressBookEntry {
-    [CmdletBinding(SupportsShouldProcess)]
+    [CmdletBinding(SupportsShouldProcess, PositionalBinding = $false)]
     param(
         [uri]
         [Parameter(Mandatory)]
