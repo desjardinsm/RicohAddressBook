@@ -534,11 +534,23 @@ function Get-TagIdValue {
 .Parameter Frequent
     Whether the user is to be added to the frequently used list.
 
+    Frequent, Title1, Title2, and Title3 are all stored in the scanner as
+    attributes of a single property, and updating any single value will reset
+    the value of the other properties unless they are also provided. In
+    addition, at least one value must be set in order for the entry to be
+    visible on the scanner.
+
 .Parameter Title1
     The heading to list this user under for Title1.
 
     Title1 is usually the default grouping, and is the one that lists users by
     letters (AB, CD, etc.) on the scanner.
+
+    Frequent, Title1, Title2, and Title3 are all stored in the scanner as
+    attributes of a single property, and updating any single value will reset
+    the value of the other properties unless they are also provided. In
+    addition, at least one value must be set in order for the entry to be
+    visible on the scanner.
 
 .Parameter Title2
     The heading to list this user under for Title2.
@@ -546,11 +558,23 @@ function Get-TagIdValue {
     Title2 is a range from 1 to 10, and is another option for grouping users on
     the scanner.
 
+    Frequent, Title1, Title2, and Title3 are all stored in the scanner as
+    attributes of a single property, and updating any single value will reset
+    the value of the other properties unless they are also provided. In
+    addition, at least one value must be set in order for the entry to be
+    visible on the scanner.
+
 .Parameter Title3
     The heading to list this user under for Title3.
 
     Title3 is a range from 1 to 5, and is another option for grouping users on
     the scanner.
+
+    Frequent, Title1, Title2, and Title3 are all stored in the scanner as
+    attributes of a single property, and updating any single value will reset
+    the value of the other properties unless they are also provided. In
+    addition, at least one value must be set in order for the entry to be
+    visible on the scanner.
 
 .Parameter SkipCertificateCheck
     Skips certificate validation checks. This includes all validation such as
