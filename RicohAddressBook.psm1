@@ -718,6 +718,7 @@ function Update-AddressBookEntry {
             $properties['tagId'] = $tags
         }
 
+        $template.Envelope.Body.putObjectProps.propList.IsEmpty = $true # Empties the node
         Add-PropertyList $template.Envelope.Body.putObjectProps.propList $properties
 
         if ($PSCmdlet.ShouldProcess(
