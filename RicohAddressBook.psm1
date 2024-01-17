@@ -303,6 +303,11 @@ function Test-Property {
 .Parameter Credential
     The username and password to use to connect to the Ricoh printer.
 
+    To reuse the credentials between commands, you can use the Get-Credential
+    cmdlet and store the results to a variable. Otherwise, just passing a string
+    will open a dialog box for the user to enter a password. See the help for
+    Get-Credential for information on using this in a script non-interactively.
+
 .Parameter Id
     Only retrieve address book entries matching this ID.
 
@@ -502,6 +507,11 @@ function Get-TagIdValue {
 .Parameter Credential
     The username and password to use to connect to the Ricoh printer.
 
+    To reuse the credentials between commands, you can use the Get-Credential
+    cmdlet and store the results to a variable. Otherwise, just passing a string
+    will open a dialog box for the user to enter a password. See the help for
+    Get-Credential for information on using this in a script non-interactively.
+
 .Parameter Id
     The ID of the address book entry to modify. Find the ID from
     Get-AddressBookEntry. ID is **not** the Index.
@@ -514,6 +524,11 @@ function Get-TagIdValue {
 
 .Parameter ScanAccount
     The account to use to save the scanned files to a network location.
+
+    To reuse the credentials between commands, you can use the Get-Credential
+    cmdlet and store the results to a variable. Otherwise, just passing a string
+    will open a dialog box for the user to enter a password. See the help for
+    Get-Credential for information on using this in a script non-interactively.
 
 .Parameter FolderPath
     The network path used to save scanned files.
@@ -770,6 +785,11 @@ function Update-AddressBookEntry {
 .Parameter Credential
     The username and password to use to connect to the Ricoh printer.
 
+    To reuse the credentials between commands, you can use the Get-Credential
+    cmdlet and store the results to a variable. Otherwise, just passing a string
+    will open a dialog box for the user to enter a password. See the help for
+    Get-Credential for information on using this in a script non-interactively.
+
 .Parameter Name
     The name for the address book entry.
 
@@ -778,6 +798,11 @@ function Update-AddressBookEntry {
 
 .Parameter ScanAccount
     The account to use to save the scanned files to a network location.
+
+    To reuse the credentials between commands, you can use the Get-Credential
+    cmdlet and store the results to a variable. Otherwise, just passing a string
+    will open a dialog box for the user to enter a password. See the help for
+    Get-Credential for information on using this in a script non-interactively.
 
 .Parameter FolderPath
     The network path used to save scanned files.
@@ -1018,6 +1043,11 @@ function Add-AddressBookEntry {
 
 .Parameter Credential
     The username and password to use to connect to the Ricoh printer.
+
+    To reuse the credentials between commands, you can use the Get-Credential
+    cmdlet and store the results to a variable. Otherwise, just passing a string
+    will open a dialog box for the user to enter a password. See the help for
+    Get-Credential for information on using this in a script non-interactively.
 
 .Parameter Id
     The IDs to be removed. Find the IDs from Get-AddressBookEntry. ID is **not**
