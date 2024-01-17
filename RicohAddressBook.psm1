@@ -936,7 +936,7 @@ function Add-AddressBookEntry {
             'tagId'                    = $tagId
         }
 
-        if ($PSBoundParameters.ContainsKey('FolderPath')) {
+        if (-not [string]::IsNullOrEmpty($FolderPath)) {
             Add-PropertyList $entry @{
                 'remoteFolder:path'        = $FolderPath
                 'remoteFolder:accountName' = $ScanAccount.UserName
@@ -947,7 +947,7 @@ function Add-AddressBookEntry {
             }
         }
 
-        if ($PSBoundParameters.ContainsKey('EmailAddress')) {
+        if (-not [string]::IsNullOrEmpty($EmailAddress)) {
             Add-PropertyList $entry @{
                 'mail:'         = 'true'
                 'mail:address'  = $EmailAddress
