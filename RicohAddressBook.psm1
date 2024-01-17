@@ -523,14 +523,8 @@ function Get-TagIdValue {
 .Parameter IsSender
     Whether the given email address is registered as a sender.
 
-    This is a switch parameter. You must include it to set it to true,
-    or set it to false by specifying -IsSender:$false.
-
 .Parameter IsDestination
     Whether the given email address is registered as a destination.
-
-    This is a switch parameter. You must include it to set it to true,
-    or set it to false by specifying -IsDestination:$false.
 
 .Parameter DisplayPriority
     The display order of the user in address book list. Sorting is done first by
@@ -538,9 +532,6 @@ function Get-TagIdValue {
 
 .Parameter Frequent
     Whether the user is to be added to the frequently used list.
-
-    This is a switch parameter. You must include it to set it to true,
-    or set it to false by specifying -Frequent:$false.
 
 .Parameter Title1
     The heading to list this user under for Title1.
@@ -623,10 +614,12 @@ function Update-AddressBookEntry {
         [Parameter(ValueFromPipelineByPropertyName)]
         $EmailAddress,
 
-        [switch]
+        [nullable[bool]]
+        [Parameter(ValueFromPipelineByPropertyName)]
         $IsSender,
 
-        [switch]
+        [nullable[bool]]
+        [Parameter(ValueFromPipelineByPropertyName)]
         $IsDestination,
 
         [byte]
@@ -634,7 +627,7 @@ function Update-AddressBookEntry {
         [ValidateRange(1, 10)]
         $DisplayPriority,
 
-        [switch]
+        [nullable[bool]]
         [Parameter(ValueFromPipelineByPropertyName)]
         $Frequent,
 
@@ -689,10 +682,10 @@ function Update-AddressBookEntry {
         if (-not [string]::IsNullOrEmpty($EmailAddress)) {
             $properties['mail:address'] = $EmailAddress
         }
-        if ($PSBoundParameters.ContainsKey('IsSender')) {
+        if ($null -ne $IsSender) {
             $properties['isSender'] = $IsSender.ToString().ToLower()
         }
-        if ($PSBoundParameters.ContainsKey('IsDestination')) {
+        if ($null -ne $IsDestination) {
             $properties['isDestination'] = $IsDestination.ToString().ToLower()
         }
         if (-not [string]::IsNullOrEmpty($Name)) {
@@ -770,20 +763,11 @@ function Update-AddressBookEntry {
 .Parameter IsSender
     Whether the given email address is registered as a sender.
 
-    This is a switch parameter. You must include it to set it to true,
-    or set it to false by specifying -IsSender:$false.
-
 .Parameter IsDestination
     Whether the given email address is registered as a destination.
 
-    This is a switch parameter. You must include it to set it to true,
-    or set it to false by specifying -IsDestination:$false.
-
 .Parameter Frequent
     Whether the user is to be added to the frequently used list.
-
-    This is a switch parameter. You must include it to set it to true,
-    or set it to false by specifying -Frequent:$false.
 
 .Parameter Title1
     The heading to list this user under for Title1.
@@ -872,13 +856,15 @@ function Add-AddressBookEntry {
         [Parameter(ValueFromPipelineByPropertyName)]
         $EmailAddress,
 
-        [switch]
+        [nullable[bool]]
+        [Parameter(ValueFromPipelineByPropertyName)]
         $IsSender,
 
-        [switch]
+        [nullable[bool]]
+        [Parameter(ValueFromPipelineByPropertyName)]
         $IsDestination,
 
-        [switch]
+        [nullable[bool]]
         [Parameter(ValueFromPipelineByPropertyName)]
         $Frequent,
 
@@ -943,6 +929,12 @@ function Add-AddressBookEntry {
         }
 
         if (-not [string]::IsNullOrEmpty($EmailAddress)) {
+            if ($null -eq $IsSender) {
+                $IsSender = $false
+            }
+            if ($null -eq $IsDestination) {
+                $IsDestination = $true
+            }
             Add-PropertyList $entry @{
                 'mail:'         = 'true'
                 'mail:address'  = $EmailAddress
