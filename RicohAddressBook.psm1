@@ -684,14 +684,14 @@ function Update-AddressBookEntry {
 
         $properties = @{}
 
-        if ($PSBoundParameters.ContainsKey('ScanAccount')) {
+        if (-not [string]::IsNullOrEmpty($ScanAccount)) {
             $properties['remoteFolder:accountName'] = $ScanAccount.UserName
             $properties['remoteFolder:password'] = ConvertTo-Base64 $ScanAccount.GetNetworkCredential().Password
         }
-        if ($PSBoundParameters.ContainsKey('FolderPath')) {
+        if (-not [string]::IsNullOrEmpty($FolderPath)) {
             $properties['remoteFolder:path'] = $FolderPath
         }
-        if ($PSBoundParameters.ContainsKey('EmailAddress')) {
+        if (-not [string]::IsNullOrEmpty($EmailAddress)) {
             $properties['mail:address'] = $EmailAddress
         }
         if ($PSBoundParameters.ContainsKey('IsSender')) {
@@ -700,13 +700,13 @@ function Update-AddressBookEntry {
         if ($PSBoundParameters.ContainsKey('IsDestination')) {
             $properties['isDestination'] = $IsDestination.ToString().ToLower()
         }
-        if ($PSBoundParameters.ContainsKey('Name')) {
+        if (-not [string]::IsNullOrEmpty($Name)) {
             $properties['name'] = $Name
         }
-        if ($PSBoundParameters.ContainsKey('LongName')) {
+        if (-not [string]::IsNullOrEmpty($LongName)) {
             $properties['longName'] = $LongName
         }
-        if ($PSBoundParameters.ContainsKey('DisplayPriority')) {
+        if ($DisplayPriority -ne 0) {
             $properties['displayedOrder'] = $DisplayPriority
         }
 
