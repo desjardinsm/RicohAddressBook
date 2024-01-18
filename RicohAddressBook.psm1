@@ -169,11 +169,12 @@ function Search-AddressBookEntry {
     # This function operates on batches of 50, as scanners that have more than
     # that in their address book will only return the first 50.
     do {
-        $template.Envelope.Body.$method.rowOffset = [string]$offset
+        [xml] $message = $template.Clone()
+        $message.Envelope.Body.$method.rowOffset = [string]$offset
 
         $request = @{
             Hostname = $Hostname
-            Body     = $template
+            Body     = $message
             Method   = $method
             SkipCertificateCheck = $SkipCertificateCheck
         }
@@ -379,7 +380,6 @@ function Get-AddressBookEntry {
     [xml] $template = Get-Template $method
     $template.Envelope.Body.$method.sessionId = $session
 
-    $objectIdList = $template.Envelope.Body.$method.objectIdList
     if ($null -eq $Id) {
         $selection = @{
             Hostname = $Hostname
@@ -389,18 +389,18 @@ function Get-AddressBookEntry {
         $Id = Search-AddressBookEntry @selection
     }
     $entries = do {
-        $objectIdList.IsEmpty = $true # Empties the node
+        [xml] $message = $template.Clone()
         $Id |
         Select-Object -First 50 |
         ForEach-Object {
-            $item = $template.CreateElement('item')
+            $item = $message.CreateElement('item')
             $item.InnerText = "entry:$_"
-            $objectIdList.AppendChild($item) > $null
+            $message.Envelope.Body.$method.objectIdList.AppendChild($item) > $null
         }
 
         $request = @{
             Hostname = $Hostname
-            Body     = $template
+            Body     = $message
             Method   = $method
             SkipCertificateCheck = $SkipCertificateCheck
         }
@@ -713,7 +713,8 @@ function Update-AddressBookEntry {
     }
 
     process {
-        $content = $template.Envelope.Body.$method
+        $message = $template.Clone()
+        $content = $message.Envelope.Body.$method
         $content.objectId = "entry:$Id"
 
         $properties = @{}
@@ -753,7 +754,6 @@ function Update-AddressBookEntry {
             $properties['tagId'] = $tags
         }
 
-        $content.propList.IsEmpty = $true # Empties the node
         Add-PropertyList $content.propList $properties
 
         if ($PSCmdlet.ShouldProcess(
@@ -762,7 +762,7 @@ function Update-AddressBookEntry {
                 "Confirm address book update.")) {
             $request = @{
                 Hostname = $Hostname
-                Body     = $template
+                Body     = $message
                 Method   = $method
                 SkipCertificateCheck = $SkipCertificateCheck
             }
