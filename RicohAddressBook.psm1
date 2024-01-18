@@ -388,6 +388,9 @@ function Get-AddressBookEntry {
         }
         $Id = Search-AddressBookEntry @selection
     }
+    # This function operates on batches of 50, as scanners that have more than
+    # that in their address book will return an error if more than 50 entries
+    # are requested at once.
     $entries = do {
         [xml] $message = $template.Clone()
         $Id |
