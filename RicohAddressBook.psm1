@@ -87,6 +87,7 @@ function Invoke-SOAPRequest {
 }
 
 function Get-Template {
+    [OutputType([xml])]
     param(
         [RicohMethodType]
         [Parameter(Mandatory)]
@@ -116,7 +117,7 @@ function Connect-Session {
     )
 
     $method = [RicohMethodType]::startSession
-    $template = Get-Template $method
+    [xml] $template = Get-Template $method
 
     $scheme = ConvertTo-Base64 BASIC
     $username = ConvertTo-Base64 $Credential.UserName
@@ -160,7 +161,7 @@ function Search-AddressBookEntry {
     )
 
     $method = [RicohMethodType]::searchObjects
-    $template = Get-Template $method
+    [xml] $template = Get-Template $method
     $template.Envelope.Body.$method.sessionId = $Session
 
     $offset = 0
@@ -372,7 +373,7 @@ function Get-AddressBookEntry {
     }
 
     $method = [RicohMethodType]::getObjectsProps
-    $template = Get-Template $method
+    [xml] $template = Get-Template $method
     $template.Envelope.Body.$method.sessionId = $session
 
     $objectIdList = $template.Envelope.Body.getObjectsProps.objectIdList
@@ -704,7 +705,7 @@ function Update-AddressBookEntry {
         }
 
         $method = [RicohMethodType]::putObjectProps
-        $template = Get-Template $method
+        [xml] $template = Get-Template $method
         $template.Envelope.Body.$method.sessionId = $session
     }
 
@@ -958,7 +959,7 @@ function Add-AddressBookEntry {
             $PSCmdlet.ThrowTerminatingError($_)
         }
         $method = [RicohMethodType]::putObjects
-        $template = Get-Template $method
+        [xml] $template = Get-Template $method
         $template.Envelope.Body.$method.sessionId = $session
     }
 
@@ -1111,7 +1112,7 @@ function Remove-AddressBookEntry {
         }
 
         $method = [RicohMethodType]::deleteObjects
-        $template = Get-Template $method
+        [xml] $template = Get-Template $method
         $template.Envelope.Body.$method.sessionId = $session
 
         $objectIdList = $template.Envelope.Body.deleteObjects.objectIdList
@@ -1167,7 +1168,7 @@ function Disconnect-Session {
     )
 
     $method = [RicohMethodType]::terminateSession
-    $template = Get-Template $method
+    [xml] $template = Get-Template $method
     $template.Envelope.Body.$method.sessionId = $session
 
     $request = @{
