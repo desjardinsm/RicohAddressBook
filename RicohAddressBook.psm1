@@ -225,32 +225,16 @@ function Get-Title1Tag {
     )
 
     switch ([char]::ToUpper($Letter)) {
-        A { [TagId]::AB }
-        B { [TagId]::AB }
-        C { [TagId]::CD }
-        D { [TagId]::CD }
-        E { [TagId]::EF }
-        F { [TagId]::EF }
-        G { [TagId]::GH }
-        H { [TagId]::GH }
-        I { [TagId]::IJK }
-        J { [TagId]::IJK }
-        K { [TagId]::IJK }
-        L { [TagId]::LMN }
-        M { [TagId]::LMN }
-        N { [TagId]::LMN }
-        O { [TagId]::OPQ }
-        P { [TagId]::OPQ }
-        Q { [TagId]::OPQ }
-        R { [TagId]::RST }
-        S { [TagId]::RST }
-        T { [TagId]::RST }
-        U { [TagId]::UVW }
-        V { [TagId]::UVW }
-        W { [TagId]::UVW }
-        X { [TagId]::XYZ }
-        Y { [TagId]::XYZ }
-        Z { [TagId]::XYZ }
+        {'A', 'B' -contains $_} { [TagId]::AB; break }
+        {'C', 'D' -contains $_} { [TagId]::CD; break }
+        {'E', 'F' -contains $_} { [TagId]::EF; break }
+        {'G', 'H' -contains $_} { [TagId]::GH; break }
+        {'I', 'J', 'K' -contains $_} { [TagId]::IJK; break }
+        {'L', 'M', 'N' -contains $_} { [TagId]::LMN; break }
+        {'O', 'P', 'Q' -contains $_} { [TagId]::OPQ; break }
+        {'R', 'S', 'T' -contains $_} { [TagId]::RST; break }
+        {'U', 'V', 'W' -contains $_} { [TagId]::UVW; break }
+        {'X', 'Y', 'Z' -contains $_} { [TagId]::XYZ; break }
     }
 }
 
