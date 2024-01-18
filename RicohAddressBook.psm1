@@ -166,6 +166,8 @@ function Search-AddressBookEntry {
     $template.Envelope.Body.$method.sessionId = $Session
 
     $offset = 0
+    # This function operates on batches of 50, as scanners that have more than
+    # that in their address book will only return the first 50.
     do {
         $template.Envelope.Body.$method.rowOffset = [string]$offset
 
