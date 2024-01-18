@@ -34,6 +34,7 @@ $namespaces = @{
 }
 
 function Invoke-SOAPRequest {
+    [OutputType([xml])]
     param(
         [uri]
         [Parameter(Mandatory)]
@@ -140,7 +141,7 @@ function Connect-Session {
     }
 
     try {
-        $response = Invoke-SOAPRequest @request
+        [xml] $response = Invoke-SOAPRequest @request
         $response.Envelope.Body.startSessionResponse.stringOut
     } catch {
         $PSCmdlet.ThrowTerminatingError($_)
@@ -179,7 +180,7 @@ function Search-AddressBookEntry {
             SkipCertificateCheck = $SkipCertificateCheck
         }
 
-        $response = Invoke-SOAPRequest @request
+        [xml] $response = Invoke-SOAPRequest @request
         $totalResults = $response.Envelope.Body.searchObjectsResponse.numOfResults
 
         $selection = @{
@@ -716,7 +717,7 @@ function Update-AddressBookEntry {
     }
 
     process {
-        $message = $template.Clone()
+        [xml] $message = $template.Clone()
         $content = $message.Envelope.Body.$method
         $content.objectId = "entry:$Id"
 
