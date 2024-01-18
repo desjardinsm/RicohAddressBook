@@ -181,7 +181,8 @@ function Search-AddressBookEntry {
         }
 
         [xml] $response = Invoke-SOAPRequest @request
-        $totalResults = $response.Envelope.Body.searchObjectsResponse.numOfResults
+        $responseBody = $response.Envelope.Body.searchObjectsResponse
+        $totalResults = $responseBody.numOfResults
 
         $selection = @{
             Xml = $response
@@ -200,7 +201,7 @@ function Search-AddressBookEntry {
         }
 
         $offset += 50
-    } while ($response.Envelope.Body.searchObjectsResponse.returnValue -ne 'EOD')
+    } while ($responseBody.returnValue -ne 'EOD')
 }
 
 enum TagId {
