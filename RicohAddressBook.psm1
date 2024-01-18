@@ -118,13 +118,14 @@ function Connect-Session {
 
     $method = [RicohMethodType]::startSession
     [xml] $template = Get-Template $method
+    $content = $template.Envelope.Body.$method
 
     $scheme = ConvertTo-Base64 BASIC
     $username = ConvertTo-Base64 $Credential.UserName
     $password = ConvertTo-Base64 $Credential.GetNetworkCredential().Password
-    $template.Envelope.Body.$method.stringIn =
+    $content.stringIn =
         "SCHEME=$scheme;UID:UserName=$username;PWD:Password=$password;PES:Encoding="
-    $template.Envelope.Body.$method.lockMode =
+    $content.lockMode =
         if ($ReadOnly) {
             'S'
         } else {
@@ -376,7 +377,7 @@ function Get-AddressBookEntry {
     [xml] $template = Get-Template $method
     $template.Envelope.Body.$method.sessionId = $session
 
-    $objectIdList = $template.Envelope.Body.getObjectsProps.objectIdList
+    $objectIdList = $template.Envelope.Body.$method.objectIdList
     if ($null -eq $Id) {
         $selection = @{
             Hostname = $Hostname
@@ -710,7 +711,8 @@ function Update-AddressBookEntry {
     }
 
     process {
-        $template.Envelope.Body.$method.objectId = "entry:$Id"
+        $content = $template.Envelope.Body.$method
+        $content.objectId = "entry:$Id"
 
         $properties = @{}
 
@@ -749,8 +751,8 @@ function Update-AddressBookEntry {
             $properties['tagId'] = $tags
         }
 
-        $template.Envelope.Body.putObjectProps.propList.IsEmpty = $true # Empties the node
-        Add-PropertyList $template.Envelope.Body.putObjectProps.propList $properties
+        $content.propList.IsEmpty = $true # Empties the node
+        Add-PropertyList $content.propList $properties
 
         if ($PSCmdlet.ShouldProcess(
                 "Updating address book entry with ID of $Id.",
@@ -960,7 +962,8 @@ function Add-AddressBookEntry {
         }
         $method = [RicohMethodType]::putObjects
         [xml] $template = Get-Template $method
-        $template.Envelope.Body.$method.sessionId = $session
+        $content = $template.Envelope.Body.$method
+        $content.sessionId = $session
     }
 
     process {
@@ -968,7 +971,7 @@ function Add-AddressBookEntry {
         $tagId = Get-TagIdValue
 
         $entry = $template.CreateElement('item')
-        $template.Envelope.Body.$method.propListList.AppendChild($entry) > $null
+        $content.propListList.AppendChild($entry) > $null
 
         Add-PropertyList $entry @{
             'entryType'                = 'user'
@@ -1113,16 +1116,15 @@ function Remove-AddressBookEntry {
 
         $method = [RicohMethodType]::deleteObjects
         [xml] $template = Get-Template $method
-        $template.Envelope.Body.$method.sessionId = $session
-
-        $objectIdList = $template.Envelope.Body.deleteObjects.objectIdList
+        $content = $template.Envelope.Body.$method
+        $content.sessionId = $session
     }
 
     process {
         foreach ($item in $Id) {
             $element = $template.CreateElement('item')
             $element.InnerText = "entry:$item"
-            $objectIdList.AppendChild($element) > $null
+            $content.objectIdList.AppendChild($element) > $null
         }
     }
 
