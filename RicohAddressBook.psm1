@@ -62,25 +62,24 @@ function Invoke-SOAPRequest {
         ContentType = 'text/xml'
         Body        = $Body
         Headers     = @{
-            SOAPAction =
-                "http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#$Method"
+            SOAPAction = "http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#$Method"
         }
     }
 
     try {
-        $response =
-            if (-not $SkipCertificateCheck) {
-                Invoke-WebRequest @webRequest
-            } elseif ((Get-Command Invoke-WebRequest).Parameters.ContainsKey('SkipCertificateCheck')) {
-                Invoke-WebRequest -SkipCertificateCheck @webRequest
-            } else {
-                $originalCallback = [System.Net.ServicePointManager]::ServerCertificateValidationCallback
-                [System.Net.ServicePointManager]::ServerCertificateValidationCallback = {
-                    $true
-                }
-                Invoke-WebRequest @webRequest
-                [System.Net.ServicePointManager]::ServerCertificateValidationCallback = $originalCallback
+        $response = if (-not $SkipCertificateCheck) {
+            Invoke-WebRequest @webRequest
+        } elseif ((Get-Command Invoke-WebRequest).Parameters.ContainsKey('SkipCertificateCheck')) {
+            Invoke-WebRequest -SkipCertificateCheck @webRequest
+        } else {
+            $originalCallback = [System.Net.ServicePointManager]::ServerCertificateValidationCallback
+            [System.Net.ServicePointManager]::ServerCertificateValidationCallback = {
+                $true
             }
+            Invoke-WebRequest @webRequest
+            [System.Net.ServicePointManager]::ServerCertificateValidationCallback = $originalCallback
+        }
+
         [xml]$response
     } catch {
         $PSCmdlet.ThrowTerminatingError($_)
@@ -124,19 +123,17 @@ function Connect-Session {
     $scheme = ConvertTo-Base64 BASIC
     $username = ConvertTo-Base64 $Credential.UserName
     $password = ConvertTo-Base64 $Credential.GetNetworkCredential().Password
-    $content.stringIn =
-        "SCHEME=$scheme;UID:UserName=$username;PWD:Password=$password;PES:Encoding="
-    $content.lockMode =
-        if ($ReadOnly) {
-            'S'
-        } else {
-            'X'
-        }
+    $content.stringIn = "SCHEME=$scheme;UID:UserName=$username;PWD:Password=$password;PES:Encoding="
+    $content.lockMode = if ($ReadOnly) {
+        'S'
+    } else {
+        'X'
+    }
 
     $request = @{
-        Hostname = $Hostname
-        Body     = $template
-        Method   = $method
+        Hostname             = $Hostname
+        Body                 = $template
+        Method               = $method
         SkipCertificateCheck = $SkipCertificateCheck
     }
 
@@ -174,9 +171,9 @@ function Search-AddressBookEntry {
         $message.Envelope.Body.$method.rowOffset = [string]$offset
 
         $request = @{
-            Hostname = $Hostname
-            Body     = $message
-            Method   = $method
+            Hostname             = $Hostname
+            Body                 = $message
+            Method               = $method
             SkipCertificateCheck = $SkipCertificateCheck
         }
 
@@ -185,20 +182,19 @@ function Search-AddressBookEntry {
         $totalResults = $responseBody.numOfResults
 
         $selection = @{
-            Xml = $response
+            Xml       = $response
             Namespace = $namespaces
-            XPath =
-                '/s:Envelope/s:Body/u:searchObjectsResponse/rowList/item/item[propName/text()="id"]/propVal/text()'
+            XPath     = '/s:Envelope/s:Body/u:searchObjectsResponse/rowList/item/item[propName/text()="id"]/propVal/text()'
         }
 
         Select-Xml @selection |
-        Select-Object -First ([System.Math]::Min($totalResults - $offset, 50)) |
-        ForEach-Object {
-            $id = $_.Node.Value
-            if ($id.Length -lt 10) {
-                [uint32]$id
+            Select-Object -First ([System.Math]::Min($totalResults - $offset, 50)) |
+            ForEach-Object {
+                $id = $_.Node.Value
+                if ($id.Length -lt 10) {
+                    [uint32]$id
+                }
             }
-        }
 
         $offset += 50
     } while ($responseBody.returnValue -ne 'EOD')
@@ -225,16 +221,16 @@ function Get-Title1Tag {
     )
 
     switch ([char]::ToUpper($Letter)) {
-        {'A', 'B' -contains $_} { [TagId]::AB; break }
-        {'C', 'D' -contains $_} { [TagId]::CD; break }
-        {'E', 'F' -contains $_} { [TagId]::EF; break }
-        {'G', 'H' -contains $_} { [TagId]::GH; break }
-        {'I', 'J', 'K' -contains $_} { [TagId]::IJK; break }
-        {'L', 'M', 'N' -contains $_} { [TagId]::LMN; break }
-        {'O', 'P', 'Q' -contains $_} { [TagId]::OPQ; break }
-        {'R', 'S', 'T' -contains $_} { [TagId]::RST; break }
-        {'U', 'V', 'W' -contains $_} { [TagId]::UVW; break }
-        {'X', 'Y', 'Z' -contains $_} { [TagId]::XYZ; break }
+        { 'A', 'B' -contains $_ } { [TagId]::AB; break }
+        { 'C', 'D' -contains $_ } { [TagId]::CD; break }
+        { 'E', 'F' -contains $_ } { [TagId]::EF; break }
+        { 'G', 'H' -contains $_ } { [TagId]::GH; break }
+        { 'I', 'J', 'K' -contains $_ } { [TagId]::IJK; break }
+        { 'L', 'M', 'N' -contains $_ } { [TagId]::LMN; break }
+        { 'O', 'P', 'Q' -contains $_ } { [TagId]::OPQ; break }
+        { 'R', 'S', 'T' -contains $_ } { [TagId]::RST; break }
+        { 'U', 'V', 'W' -contains $_ } { [TagId]::UVW; break }
+        { 'X', 'Y', 'Z' -contains $_ } { [TagId]::XYZ; break }
     }
 }
 
@@ -251,10 +247,10 @@ function Add-PropertyList {
 
     foreach ($pair in $Properties.GetEnumerator()) {
         $item = $document.CreateElement('item')
-        $propertyName  = $document.CreateElement('propName')
+        $propertyName = $document.CreateElement('propName')
         $propertyValue = $document.CreateElement('propVal')
 
-        $propertyName.InnerText  = $pair.Key
+        $propertyName.InnerText = $pair.Key
         $propertyValue.InnerText = $pair.Value
 
         $item.AppendChild($propertyName)  > $null
@@ -352,8 +348,8 @@ function Get-AddressBookEntry {
 
     try {
         $connection = @{
-            Hostname   = $Hostname
-            Credential = $Credential
+            Hostname             = $Hostname
+            Credential           = $Credential
             SkipCertificateCheck = $SkipCertificateCheck
         }
 
@@ -368,8 +364,8 @@ function Get-AddressBookEntry {
 
     if ($null -eq $Id) {
         $selection = @{
-            Hostname = $Hostname
-            Session  = $session
+            Hostname             = $Hostname
+            Session              = $session
             SkipCertificateCheck = $SkipCertificateCheck
         }
         $Id = Search-AddressBookEntry @selection
@@ -380,22 +376,22 @@ function Get-AddressBookEntry {
     $entries = do {
         [xml] $message = $template.Clone()
         $Id |
-        Select-Object -First 50 |
-        ForEach-Object {
-            $item = $message.CreateElement('item')
-            $item.InnerText = "entry:$_"
-            $message.Envelope.Body.$method.objectIdList.AppendChild($item) > $null
-        }
+            Select-Object -First 50 |
+            ForEach-Object {
+                $item = $message.CreateElement('item')
+                $item.InnerText = "entry:$_"
+                $message.Envelope.Body.$method.objectIdList.AppendChild($item) > $null
+            }
 
         $request = @{
-            Hostname = $Hostname
-            Body     = $message
-            Method   = $method
+            Hostname             = $Hostname
+            Body                 = $message
+            Method               = $method
             SkipCertificateCheck = $SkipCertificateCheck
         }
 
         Invoke-SOAPRequest @request |
-        Select-Xml -Namespace $namespaces -XPath '/s:Envelope/s:Body/u:getObjectsPropsResponse/returnValue/item'
+            Select-Xml -Namespace $namespaces -XPath '/s:Envelope/s:Body/u:getObjectsPropsResponse/returnValue/item'
 
         $Id = $Id | Select-Object -Skip 50
     } while ($Id.Count -gt 0)
@@ -415,11 +411,11 @@ function Get-AddressBookEntry {
         $output = [ordered]@{
             PSTypeName = 'Ricoh.AddressBook.Entry'
 
-            ID       = [uint32]$properties['id']
-            Index    = [uint32]$properties['index']
-            Priority = [uint32]$properties['displayedOrder']
-            Name     = $properties['name']
-            LongName = $properties['longName']
+            ID         = [uint32]$properties['id']
+            Index      = [uint32]$properties['index']
+            Priority   = [uint32]$properties['displayedOrder']
+            Name       = $properties['name']
+            LongName   = $properties['longName']
         }
 
         $output.Frequent = $false
@@ -427,10 +423,10 @@ function Get-AddressBookEntry {
             1 {
                 $output.Frequent = $true
             }
-            {2..11 -contains $_} {
+            { 2..11 -contains $_ } {
                 $output.Title1 = [TagId]$_
             }
-            {12..21 -contains $_} {
+            { 12..21 -contains $_ } {
                 $output.Title2 = $_ - 11
             }
             default {
@@ -454,8 +450,8 @@ function Get-AddressBookEntry {
         }
 
         if (Test-Property $properties 'mail:') {
-            $output.EmailAddress  = $properties['mail:address']
-            $output.IsSender      = $properties['isSender'] -eq 'true'
+            $output.EmailAddress = $properties['mail:address']
+            $output.IsSender = $properties['isSender'] -eq 'true'
             $output.IsDestination = $properties['isDestination'] -eq 'true'
         }
 
@@ -686,8 +682,8 @@ function Update-AddressBookEntry {
     begin {
         try {
             $connection = @{
-                Hostname   = $Hostname
-                Credential = $Credential
+                Hostname             = $Hostname
+                Credential           = $Credential
                 SkipCertificateCheck = $SkipCertificateCheck
             }
 
@@ -748,11 +744,11 @@ function Update-AddressBookEntry {
         if ($PSCmdlet.ShouldProcess(
                 "Updating address book entry with ID of $Id.",
                 "Update address book entry with ID of ${Id}?",
-                "Confirm address book update.")) {
+                'Confirm address book update.')) {
             $request = @{
-                Hostname = $Hostname
-                Body     = $message
-                Method   = $method
+                Hostname             = $Hostname
+                Body                 = $message
+                Method               = $method
                 SkipCertificateCheck = $SkipCertificateCheck
             }
 
@@ -942,8 +938,8 @@ function Add-AddressBookEntry {
     begin {
         try {
             $connection = @{
-                Hostname   = $Hostname
-                Credential = $Credential
+                Hostname             = $Hostname
+                Credential           = $Credential
                 SkipCertificateCheck = $SkipCertificateCheck
             }
 
@@ -965,10 +961,10 @@ function Add-AddressBookEntry {
         $content.propListList.AppendChild($entry) > $null
 
         Add-PropertyList $entry @{
-            'entryType'                = 'user'
-            'name'                     = $Name
-            'longName'                 = $LongName
-            'tagId'                    = $tagId
+            'entryType' = 'user'
+            'name'      = $Name
+            'longName'  = $LongName
+            'tagId'     = $tagId
         }
 
         if (-not [string]::IsNullOrEmpty($FolderPath)) {
@@ -1012,9 +1008,9 @@ function Add-AddressBookEntry {
                 "Add address book entry for ${allNames}?",
                 'Confirm address book addition.')) {
             $request = @{
-                Hostname = $Hostname
-                Body     = $template
-                Method   = $method
+                Hostname             = $Hostname
+                Body                 = $template
+                Method               = $method
                 SkipCertificateCheck = $SkipCertificateCheck
             }
 
@@ -1095,8 +1091,8 @@ function Remove-AddressBookEntry {
     begin {
         try {
             $connection = @{
-                Hostname   = $Hostname
-                Credential = $Credential
+                Hostname             = $Hostname
+                Credential           = $Credential
                 SkipCertificateCheck = $SkipCertificateCheck
             }
 
@@ -1120,22 +1116,22 @@ function Remove-AddressBookEntry {
     }
 
     end {
-        $entries =
-            Select-Xml -Xml $template -Namespace $namespaces -XPath '/s:Envelope/s:Body/u:deleteObjects/objectIdList/item' |
+        $entries = Select-Xml -Xml $template -Namespace $namespaces -XPath '/s:Envelope/s:Body/u:deleteObjects/objectIdList/item' |
             ForEach-Object {
                 if ($_.Node.InnerText -match '^entry:(\d+)$') {
                     $Matches[1]
                 }
             }
+
         $allID = $entries -join ', '
         if ($PSCmdlet.ShouldProcess(
                 "Removing IDs $allID.",
                 "Remove IDs ${allID}?",
                 'Confirm removing entries')) {
             $request = @{
-                Hostname = $Hostname
-                Body     = $template
-                Method   = $method
+                Hostname             = $Hostname
+                Body                 = $template
+                Method               = $method
                 SkipCertificateCheck = $SkipCertificateCheck
             }
 
@@ -1165,9 +1161,9 @@ function Disconnect-Session {
     $template.Envelope.Body.$method.sessionId = $session
 
     $request = @{
-        Hostname = $Hostname
-        Body     = $template
-        Method   = $method
+        Hostname             = $Hostname
+        Body                 = $template
+        Method               = $method
         SkipCertificateCheck = $SkipCertificateCheck
     }
 
