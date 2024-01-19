@@ -72,12 +72,15 @@ function Invoke-SOAPRequest {
         } elseif ((Get-Command Invoke-WebRequest).Parameters.ContainsKey('SkipCertificateCheck')) {
             Invoke-WebRequest -SkipCertificateCheck @webRequest
         } else {
-            $originalCallback = [System.Net.ServicePointManager]::ServerCertificateValidationCallback
-            [System.Net.ServicePointManager]::ServerCertificateValidationCallback = {
-                $true
+            try {
+                $originalCallback = [System.Net.ServicePointManager]::ServerCertificateValidationCallback
+                [System.Net.ServicePointManager]::ServerCertificateValidationCallback = {
+                    $true
+                }
+                Invoke-WebRequest @webRequest
+            } finally {
+                [System.Net.ServicePointManager]::ServerCertificateValidationCallback = $originalCallback
             }
-            Invoke-WebRequest @webRequest
-            [System.Net.ServicePointManager]::ServerCertificateValidationCallback = $originalCallback
         }
 
         [xml]$response
