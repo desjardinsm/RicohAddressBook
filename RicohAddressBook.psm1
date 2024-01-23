@@ -897,8 +897,8 @@ function Add-AddressBookEntry {
         $FolderPath,
 
         [pscredential]
-        [Parameter(ParameterSetName = 'Folder', Mandatory, ValueFromPipelineByPropertyName)]
-        [Parameter(ParameterSetName = 'FolderAndEmail', Mandatory, ValueFromPipelineByPropertyName)]
+        [Parameter(ParameterSetName = 'Folder', ValueFromPipelineByPropertyName)]
+        [Parameter(ParameterSetName = 'FolderAndEmail', ValueFromPipelineByPropertyName)]
         $ScanAccount,
 
         [string]
@@ -973,8 +973,12 @@ function Add-AddressBookEntry {
 
         if (-not [string]::IsNullOrEmpty($FolderPath)) {
             add 'remoteFolder:path' $FolderPath
-            add 'remoteFolder:accountName' $ScanAccount.UserName
-            add 'remoteFolder:password' (ConvertTo-Base64 $ScanAccount.GetNetworkCredential().Password)
+
+            if ($null -ne $ScanAccount) {
+                add 'remoteFolder:accountName' $ScanAccount.UserName
+                add 'remoteFolder:password' (ConvertTo-Base64 $ScanAccount.GetNetworkCredential().Password)
+            }
+
             add 'remoteFolder:port' 21
             add 'remoteFolder:select' 'private'
         }
