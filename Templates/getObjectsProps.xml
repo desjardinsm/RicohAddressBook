@@ -25,8 +25,6 @@
         <item>auth:name</item>
         <item>mail:</item>
         <item>mail:address</item>
-        <item>mail:parameter</item>
-        <item>mail:isDirectSMTP</item>
         <item>remoteFolder:</item>
         <item>remoteFolder:type</item>
         <item>remoteFolder:path</item>
