@@ -876,7 +876,7 @@ function Update-AddressBookEntry {
     Adds multiple entries based on objects received in the pipeline.
 #>
 function Add-AddressBookEntry {
-    [CmdletBinding(SupportsShouldProcess)]
+    [CmdletBinding(SupportsShouldProcess, PositionalBinding = $false)]
     param(
         [uri]
         [Parameter(Mandatory)]
