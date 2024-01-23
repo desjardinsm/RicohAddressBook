@@ -237,30 +237,29 @@ function Get-Title1Tag {
     }
 }
 
-function Add-PropertyList {
+function Add-Property {
     param(
         [System.Xml.XmlNode]
         $Parent,
 
-        [hashtable]
-        $Properties
+        [string]
+        $Key,
+
+        [object]
+        $Value
     )
 
     $document = $Parent.OwnerDocument
+    $item = $document.CreateElement('item')
+    $propertyName = $document.CreateElement('propName')
+    $propertyValue = $document.CreateElement('propVal')
 
-    foreach ($pair in $Properties.GetEnumerator()) {
-        $item = $document.CreateElement('item')
-        $propertyName = $document.CreateElement('propName')
-        $propertyValue = $document.CreateElement('propVal')
+    $propertyName.InnerText = $Key
+    $propertyValue.InnerText = $Value
 
-        $propertyName.InnerText = $pair.Key
-        $propertyValue.InnerText = $pair.Value
-
-        $item.AppendChild($propertyName)  > $null
-        $item.AppendChild($propertyValue) > $null
-
-        $Parent.AppendChild($item) > $null
-    }
+    $item.AppendChild($propertyName)  > $null
+    $item.AppendChild($propertyValue) > $null
+    $Parent.AppendChild($item)        > $null
 }
 
 function Test-Property {
@@ -705,44 +704,44 @@ function Update-AddressBookEntry {
         $content = $message.Envelope.Body.$method
         $content.objectId = "entry:$Id"
 
-        $properties = @{}
+        function add($key, $value) {
+            Add-Property $content.propList $key $value
+        }
 
         if (-not [string]::IsNullOrEmpty($Name)) {
-            $properties['name'] = $Name
+            add 'name' $Name
         }
         if (-not [string]::IsNullOrEmpty($LongName)) {
-            $properties['longName'] = $LongName
+            add 'longName' $LongName
         }
 
         if (-not [string]::IsNullOrEmpty($FolderPath)) {
-            $properties['remoteFolder:path'] = $FolderPath
+            add 'remoteFolder:path' $FolderPath
         }
         if ($null -ne $ScanAccount) {
-            $properties['remoteFolder:accountName'] = $ScanAccount.UserName
-            $properties['remoteFolder:password'] = ConvertTo-Base64 $ScanAccount.GetNetworkCredential().Password
+            add 'remoteFolder:accountName' $ScanAccount.UserName
+            add 'remoteFolder:password' (ConvertTo-Base64 $ScanAccount.GetNetworkCredential().Password)
         }
 
         if (-not [string]::IsNullOrEmpty($EmailAddress)) {
-            $properties['mail:address'] = $EmailAddress
+            add 'mail:address' $EmailAddress
         }
         if ($null -ne $IsSender) {
-            $properties['isSender'] = $IsSender.ToString().ToLower()
+            add 'isSender' $IsSender.ToString().ToLower()
         }
         if ($null -ne $IsDestination) {
-            $properties['isDestination'] = $IsDestination.ToString().ToLower()
+            add 'isDestination' $IsDestination.ToString().ToLower()
         }
 
         if (0 -ne $DisplayPriority) {
-            $properties['displayedOrder'] = $DisplayPriority
+            add 'displayedOrder' $DisplayPriority
         }
 
         # Tags (Frequent, Title1, Title2, Title3)
         $tags = Get-TagIdValue
         if (-not [string]::IsNullOrEmpty($tags)) {
-            $properties['tagId'] = $tags
+            add 'tagId' $tags
         }
-
-        Add-PropertyList $content.propList $properties
 
         if ($PSCmdlet.ShouldProcess(
                 "Updating address book entry with ID of $Id.",
@@ -963,38 +962,36 @@ function Add-AddressBookEntry {
         $entry = $template.CreateElement('item')
         $content.propListList.AppendChild($entry) > $null
 
-        Add-PropertyList $entry @{
-            'entryType' = 'user'
-            'name'      = $Name
-            'longName'  = $LongName
-            'tagId'     = $tagId
+        function add($key, $value) {
+            Add-Property $entry $key $value
         }
 
+        add 'entryType' 'user'
+        add 'name' $Name
+        add 'longName' $LongName
+        add 'tagId' $tagId
+
         if (-not [string]::IsNullOrEmpty($FolderPath)) {
-            Add-PropertyList $entry @{
-                'remoteFolder:path'        = $FolderPath
-                'remoteFolder:accountName' = $ScanAccount.UserName
-                'remoteFolder:password'    = ConvertTo-Base64 $ScanAccount.GetNetworkCredential().Password
-                'remoteFolder:port'        = 21
-                'remoteFolder:select'      = 'private'
-                'isDestination'            = 'true'
-            }
+            add 'remoteFolder:path' $FolderPath
+            add 'remoteFolder:accountName' $ScanAccount.UserName
+            add 'remoteFolder:password' (ConvertTo-Base64 $ScanAccount.GetNetworkCredential().Password)
+            add 'remoteFolder:port' 21
+            add 'remoteFolder:select' 'private'
         }
 
         if (-not [string]::IsNullOrEmpty($EmailAddress)) {
             if ($null -eq $IsSender) {
                 $IsSender = $false
             }
-            if ($null -eq $IsDestination) {
-                $IsDestination = $true
-            }
-            Add-PropertyList $entry @{
-                'mail:'         = 'true'
-                'mail:address'  = $EmailAddress
-                'isSender'      = $IsSender.ToString().ToLower()
-                'isDestination' = $IsDestination.ToString().ToLower()
-            }
+            add 'mail:' 'true'
+            add 'mail:address' $EmailAddress
+            add 'isSender' $IsSender.ToString().ToLower()
         }
+
+        if ($null -eq $IsDestination) {
+            $IsDestination = $true
+        }
+        add 'isDestination' $IsDestination.ToString().ToLower()
     }
 
     end {
