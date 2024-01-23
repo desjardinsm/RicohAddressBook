@@ -237,31 +237,6 @@ function Get-Title1Tag {
     }
 }
 
-function Add-Property {
-    param(
-        [System.Xml.XmlNode]
-        $Parent,
-
-        [string]
-        $Key,
-
-        [object]
-        $Value
-    )
-
-    $document = $Parent.OwnerDocument
-    $item = $document.CreateElement('item')
-    $propertyName = $document.CreateElement('propName')
-    $propertyValue = $document.CreateElement('propVal')
-
-    $propertyName.InnerText = $Key
-    $propertyValue.InnerText = $Value
-
-    $item.AppendChild($propertyName)  > $null
-    $item.AppendChild($propertyValue) > $null
-    $Parent.AppendChild($item)        > $null
-}
-
 function Test-Property {
     param(
         [hashtable]
@@ -462,6 +437,31 @@ function Get-AddressBookEntry {
     }
 
     Disconnect-Session -Hostname $Hostname -Session $session -SkipCertificateCheck:$SkipCertificateCheck
+}
+
+function Add-Property {
+    param(
+        [System.Xml.XmlNode]
+        $Parent,
+
+        [string]
+        $Key,
+
+        [object]
+        $Value
+    )
+
+    $document = $Parent.OwnerDocument
+    $item = $document.CreateElement('item')
+    $propertyName = $document.CreateElement('propName')
+    $propertyValue = $document.CreateElement('propVal')
+
+    $propertyName.InnerText = $Key
+    $propertyValue.InnerText = $Value
+
+    $item.AppendChild($propertyName)  > $null
+    $item.AppendChild($propertyValue) > $null
+    $Parent.AppendChild($item)        > $null
 }
 
 function Get-TagIdValue {
