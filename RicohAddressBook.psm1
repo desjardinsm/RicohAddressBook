@@ -304,8 +304,8 @@ function Test-Property {
     10.10.10.10 using HTTPS. It will prompt for a password.
 #>
 function Get-AddressBookEntry {
-    [OutputType('Ricoh.AddressBook.Entry')]
     [CmdletBinding(PositionalBinding = $false)]
+    [OutputType('Ricoh.AddressBook.Entry')]
     param(
         [uri]
         [Parameter(Mandatory)]
