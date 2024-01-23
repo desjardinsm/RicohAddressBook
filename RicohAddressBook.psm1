@@ -217,6 +217,8 @@ enum TagId {
 }
 
 function Get-Title1Tag {
+    [CmdletBinding()]
+    [OutputType([TagId])]
     param(
         [char]
         [ValidatePattern('^[A-Za-z]$')]
