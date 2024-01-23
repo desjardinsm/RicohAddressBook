@@ -454,8 +454,9 @@ function Get-AddressBookEntry {
         if (Test-Property $properties 'mail:') {
             $output.EmailAddress = $properties['mail:address']
             $output.IsSender = $properties['isSender'] -eq 'true'
-            $output.IsDestination = $properties['isDestination'] -eq 'true'
         }
+
+        $output.IsDestination = $properties['isDestination'] -eq 'true'
 
         [PSCustomObject]$output
     }
@@ -911,8 +912,7 @@ function Add-AddressBookEntry {
         $IsSender,
 
         [nullable[bool]]
-        [Parameter(ParameterSetName = 'Email', ValueFromPipelineByPropertyName)]
-        [Parameter(ParameterSetName = 'FolderAndEmail', ValueFromPipelineByPropertyName)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         $IsDestination,
 
         [nullable[bool]]
