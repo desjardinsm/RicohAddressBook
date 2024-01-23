@@ -222,6 +222,7 @@ function Get-Title1Tag {
     param(
         [char]
         [ValidatePattern('^[A-Za-z]$')]
+        [Parameter(Mandatory)]
         $Letter
     )
 
