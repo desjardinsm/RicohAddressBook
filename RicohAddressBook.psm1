@@ -532,17 +532,20 @@ function Get-TagIdValue {
     The email address used to send scanned files.
 
 .Parameter IsSender
-    Whether the given email address is registered as a sender.
+    A boolean indicating whether the given email address is registered as a
+    sender.
 
 .Parameter IsDestination
-    Whether the given email address is registered as a destination.
+    A boolean indicating whether the given email address is registered as a
+    destination.
 
 .Parameter DisplayPriority
     The display order of the user in address book list. Sorting is done first by
     DisplayPriority, then by ID.
 
 .Parameter Frequent
-    Whether the user is to be added to the frequently used list.
+    A switch indicating whether the user is to be added to the frequently used
+    list.
 
     Frequent, Title1, Title2, and Title3 are all stored in the scanner as
     attributes of a single property, and updating any single value will reset
@@ -810,13 +813,17 @@ function Update-AddressBookEntry {
     The email address used to send scanned files.
 
 .Parameter IsSender
-    Whether the given email address is registered as a sender.
+    A boolean indicating whether the given email address is registered as a
+    sender. Omit to use the default value of $false.
 
 .Parameter IsDestination
-    Whether the given email address is registered as a destination.
+    A boolean indicating whether the given email address is registered as a
+    destination. Omit to use the default value of $true.
 
 .Parameter Frequent
-    Whether the user is to be added to the frequently used list.
+    A switch indicating whether the user is to be added to the frequently used
+    list. At least one of either Frequent, Title1, Title2, or Title3 should be
+    set.
 
 .Parameter Title1
     The heading to list this user under for Title1.
