@@ -654,10 +654,12 @@ function Update-AddressBookEntry {
         $EmailAddress,
 
         [nullable[bool]]
+        [ValidateNotNull()]
         [Parameter(ValueFromPipelineByPropertyName)]
         $IsSender,
 
         [nullable[bool]]
+        [ValidateNotNull()]
         [Parameter(ValueFromPipelineByPropertyName)]
         $IsDestination,
 
@@ -917,12 +919,14 @@ function Add-AddressBookEntry {
         $EmailAddress,
 
         [nullable[bool]]
+        [ValidateNotNull()]
         [Parameter(ParameterSetName = 'Email', ValueFromPipelineByPropertyName)]
         [Parameter(ParameterSetName = 'FolderAndEmail', ValueFromPipelineByPropertyName)]
         [PSDefaultValue(Help = $false, Value = $false)]
         $IsSender,
 
         [nullable[bool]]
+        [ValidateNotNull()]
         [Parameter(ValueFromPipelineByPropertyName)]
         [PSDefaultValue(Help = $true, Value = $true)]
         $IsDestination,
