@@ -919,10 +919,12 @@ function Add-AddressBookEntry {
         [nullable[bool]]
         [Parameter(ParameterSetName = 'Email', ValueFromPipelineByPropertyName)]
         [Parameter(ParameterSetName = 'FolderAndEmail', ValueFromPipelineByPropertyName)]
+        [PSDefaultValue(Help = $false, Value = $false)]
         $IsSender,
 
         [nullable[bool]]
         [Parameter(ValueFromPipelineByPropertyName)]
+        [PSDefaultValue(Help = $true, Value = $true)]
         $IsDestination,
 
         [switch]
