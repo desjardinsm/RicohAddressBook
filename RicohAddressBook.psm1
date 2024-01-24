@@ -327,6 +327,10 @@ function Get-AddressBookEntry {
     )
 
     try {
+        $disconnect = @{
+            Hostname             = $Hostname
+            SkipCertificateCheck = $SkipCertificateCheck
+        }
         $connection = @{
             Hostname             = $Hostname
             Credential           = $Credential
@@ -334,112 +338,115 @@ function Get-AddressBookEntry {
         }
 
         $session = Connect-Session @connection -ReadOnly
+        $disconnect.Session = $session
+
+        $method = [RicohMethodType]::getObjectsProps
+        [xml] $template = Get-Template $method
+        $template.Envelope.Body.$method.sessionId = $session
+
+        if ($null -eq $Id) {
+            $selection = @{
+                Hostname             = $Hostname
+                Session              = $session
+                SkipCertificateCheck = $SkipCertificateCheck
+            }
+            $Id = Search-AddressBookEntry @selection
+        }
+        # This function operates on batches of 50, as scanners that have more than
+        # that in their address book will return an error if more than 50 entries
+        # are requested at once.
+        $entries = do {
+            [xml] $message = $template.Clone()
+            $Id |
+                Select-Object -First 50 |
+                ForEach-Object {
+                    $item = $message.CreateElement('item')
+                    $item.InnerText = "entry:$_"
+                    $message.Envelope.Body.$method.objectIdList.AppendChild($item) > $null
+                }
+
+            $request = @{
+                Hostname             = $Hostname
+                Body                 = $message
+                Method               = $method
+                SkipCertificateCheck = $SkipCertificateCheck
+            }
+
+            Invoke-SOAPRequest @request |
+                Select-Xml -Namespace $namespaces -XPath '/s:Envelope/s:Body/u:getObjectsPropsResponse/returnValue/item'
+
+            $Id = $Id | Select-Object -Skip 50
+        } while ($Id.Count -gt 0)
+
+        foreach ($entry in $entries) {
+            $properties = @{}
+            foreach ($property in $entry.Node.ChildNodes) {
+                if (-not [string]::IsNullOrEmpty($property.propVal)) {
+                    $properties[$property.propName] = $property.propVal
+                }
+            }
+
+            if (-not [string]::IsNullOrEmpty($Name) -and $properties['name'] -notlike $Name) {
+                continue
+            }
+
+            $output = [ordered]@{
+                PSTypeName = 'Ricoh.AddressBook.Entry'
+
+                ID         = [uint32]$properties['id']
+                Index      = [uint32]$properties['index']
+                Priority   = [uint32]$properties['displayedOrder']
+                Name       = $properties['name']
+                LongName   = $properties['longName']
+            }
+
+            $output.Frequent = $false
+            switch ($properties['tagId'] -split ',') {
+                1 {
+                    $output.Frequent = $true
+                }
+                { 2..11 -contains $_ } {
+                    $output.Title1 = [TagId]$_
+                }
+                { 12..21 -contains $_ } {
+                    $output.Title2 = $_ - 11
+                }
+                default {
+                    $output.Title3 = $_ - 21
+                }
+            }
+
+            if ($properties['lastAccessDateTime'] -ne '1970-01-01T00:00:00Z') {
+                $output.LastUsed = [datetime]$properties['lastAccessDateTime']
+            }
+
+            if (Test-Property $properties 'auth:') {
+                $output.UserCode = $properties['auth:name']
+            }
+
+            if (Test-Property $properties 'remoteFolder:') {
+                $output.RemoteFolderType = $properties['remoteFolder:type']
+                $output.RemoteFolderPath = $properties['remoteFolder:path']
+                $output.RemoteFolderPort = [uint32]$properties['remoteFolder:port']
+                $output.RemoteFolderAccount = $properties['remoteFolder:accountName']
+            }
+
+            if (Test-Property $properties 'mail:') {
+                $output.EmailAddress = $properties['mail:address']
+                $output.IsSender = $properties['isSender'] -eq 'true'
+            }
+
+            $output.IsDestination = $properties['isDestination'] -eq 'true'
+
+            [PSCustomObject]$output
+        }
     } catch {
         $PSCmdlet.ThrowTerminatingError($_)
+    } finally {
+        if ($null -ne $disconnect.Session) {
+            Disconnect-Session @disconnect
+        }
     }
-
-    $method = [RicohMethodType]::getObjectsProps
-    [xml] $template = Get-Template $method
-    $template.Envelope.Body.$method.sessionId = $session
-
-    if ($null -eq $Id) {
-        $selection = @{
-            Hostname             = $Hostname
-            Session              = $session
-            SkipCertificateCheck = $SkipCertificateCheck
-        }
-        $Id = Search-AddressBookEntry @selection
-    }
-    # This function operates on batches of 50, as scanners that have more than
-    # that in their address book will return an error if more than 50 entries
-    # are requested at once.
-    $entries = do {
-        [xml] $message = $template.Clone()
-        $Id |
-            Select-Object -First 50 |
-            ForEach-Object {
-                $item = $message.CreateElement('item')
-                $item.InnerText = "entry:$_"
-                $message.Envelope.Body.$method.objectIdList.AppendChild($item) > $null
-            }
-
-        $request = @{
-            Hostname             = $Hostname
-            Body                 = $message
-            Method               = $method
-            SkipCertificateCheck = $SkipCertificateCheck
-        }
-
-        Invoke-SOAPRequest @request |
-            Select-Xml -Namespace $namespaces -XPath '/s:Envelope/s:Body/u:getObjectsPropsResponse/returnValue/item'
-
-        $Id = $Id | Select-Object -Skip 50
-    } while ($Id.Count -gt 0)
-
-    foreach ($entry in $entries) {
-        $properties = @{}
-        foreach ($property in $entry.Node.ChildNodes) {
-            if (-not [string]::IsNullOrEmpty($property.propVal)) {
-                $properties[$property.propName] = $property.propVal
-            }
-        }
-
-        if (-not [string]::IsNullOrEmpty($Name) -and $properties['name'] -notlike $Name) {
-            continue
-        }
-
-        $output = [ordered]@{
-            PSTypeName = 'Ricoh.AddressBook.Entry'
-
-            ID         = [uint32]$properties['id']
-            Index      = [uint32]$properties['index']
-            Priority   = [uint32]$properties['displayedOrder']
-            Name       = $properties['name']
-            LongName   = $properties['longName']
-        }
-
-        $output.Frequent = $false
-        switch ($properties['tagId'] -split ',') {
-            1 {
-                $output.Frequent = $true
-            }
-            { 2..11 -contains $_ } {
-                $output.Title1 = [TagId]$_
-            }
-            { 12..21 -contains $_ } {
-                $output.Title2 = $_ - 11
-            }
-            default {
-                $output.Title3 = $_ - 21
-            }
-        }
-
-        if ($properties['lastAccessDateTime'] -ne '1970-01-01T00:00:00Z') {
-            $output.LastUsed = [datetime]$properties['lastAccessDateTime']
-        }
-
-        if (Test-Property $properties 'auth:') {
-            $output.UserCode = $properties['auth:name']
-        }
-
-        if (Test-Property $properties 'remoteFolder:') {
-            $output.RemoteFolderType = $properties['remoteFolder:type']
-            $output.RemoteFolderPath = $properties['remoteFolder:path']
-            $output.RemoteFolderPort = [uint32]$properties['remoteFolder:port']
-            $output.RemoteFolderAccount = $properties['remoteFolder:accountName']
-        }
-
-        if (Test-Property $properties 'mail:') {
-            $output.EmailAddress = $properties['mail:address']
-            $output.IsSender = $properties['isSender'] -eq 'true'
-        }
-
-        $output.IsDestination = $properties['isDestination'] -eq 'true'
-
-        [PSCustomObject]$output
-    }
-
-    Disconnect-Session -Hostname $Hostname -Session $session -SkipCertificateCheck:$SkipCertificateCheck
 }
 
 function Add-Property {
@@ -692,6 +699,10 @@ function Update-AddressBookEntry {
 
     begin {
         try {
+            $disconnect = @{
+                Hostname             = $Hostname
+                SkipCertificateCheck = $SkipCertificateCheck
+            }
             $connection = @{
                 Hostname             = $Hostname
                 Credential           = $Credential
@@ -699,76 +710,84 @@ function Update-AddressBookEntry {
             }
 
             $session = Connect-Session @connection
+            $disconnect.Session = $session
+
+            $method = [RicohMethodType]::putObjectProps
+            [xml] $template = Get-Template $method
+            $template.Envelope.Body.$method.sessionId = $session
         } catch {
+            if ($null -ne $disconnect.Session) {
+                Disconnect-Session @disconnect
+            }
             $PSCmdlet.ThrowTerminatingError($_)
         }
-
-        $method = [RicohMethodType]::putObjectProps
-        [xml] $template = Get-Template $method
-        $template.Envelope.Body.$method.sessionId = $session
     }
 
     process {
-        [xml] $message = $template.Clone()
-        $content = $message.Envelope.Body.$method
-        $content.objectId = "entry:$Id"
+        try {
+            [xml] $message = $template.Clone()
+            $content = $message.Envelope.Body.$method
+            $content.objectId = "entry:$Id"
 
-        function add($key, $value) {
-            Add-Property $content.propList $key $value
-        }
-
-        if (-not [string]::IsNullOrEmpty($Name)) {
-            add 'name' $Name
-        }
-        if (-not [string]::IsNullOrEmpty($LongName)) {
-            add 'longName' $LongName
-        }
-
-        if (-not [string]::IsNullOrEmpty($FolderPath)) {
-            add 'remoteFolder:path' $FolderPath
-        }
-        if ($null -ne $ScanAccount) {
-            add 'remoteFolder:accountName' $ScanAccount.UserName
-            add 'remoteFolder:password' (ConvertTo-Base64 $ScanAccount.GetNetworkCredential().Password)
-        }
-
-        if (-not [string]::IsNullOrEmpty($EmailAddress)) {
-            add 'mail:address' $EmailAddress
-        }
-        if ($null -ne $IsSender) {
-            add 'isSender' $IsSender.ToString().ToLower()
-        }
-        if ($null -ne $IsDestination) {
-            add 'isDestination' $IsDestination.ToString().ToLower()
-        }
-
-        if (0 -ne $DisplayPriority) {
-            add 'displayedOrder' $DisplayPriority
-        }
-
-        # Tags (Frequent, Title1, Title2, Title3)
-        $tags = Get-TagIdValue
-        if (-not [string]::IsNullOrEmpty($tags)) {
-            add 'tagId' $tags
-        }
-
-        if ($PSCmdlet.ShouldProcess(
-                "Updating address book entry with ID of $Id.",
-                "Update address book entry with ID of ${Id}?",
-                'Confirm address book update.')) {
-            $request = @{
-                Hostname             = $Hostname
-                Body                 = $message
-                Method               = $method
-                SkipCertificateCheck = $SkipCertificateCheck
+            function add($key, $value) {
+                Add-Property $content.propList $key $value
             }
 
-            Invoke-SOAPRequest @request > $null
+            if (-not [string]::IsNullOrEmpty($Name)) {
+                add 'name' $Name
+            }
+            if (-not [string]::IsNullOrEmpty($LongName)) {
+                add 'longName' $LongName
+            }
+
+            if (-not [string]::IsNullOrEmpty($FolderPath)) {
+                add 'remoteFolder:path' $FolderPath
+            }
+            if ($null -ne $ScanAccount) {
+                add 'remoteFolder:accountName' $ScanAccount.UserName
+                add 'remoteFolder:password' (ConvertTo-Base64 $ScanAccount.GetNetworkCredential().Password)
+            }
+
+            if (-not [string]::IsNullOrEmpty($EmailAddress)) {
+                add 'mail:address' $EmailAddress
+            }
+            if ($null -ne $IsSender) {
+                add 'isSender' $IsSender.ToString().ToLower()
+            }
+            if ($null -ne $IsDestination) {
+                add 'isDestination' $IsDestination.ToString().ToLower()
+            }
+
+            if (0 -ne $DisplayPriority) {
+                add 'displayedOrder' $DisplayPriority
+            }
+
+            # Tags (Frequent, Title1, Title2, Title3)
+            $tags = Get-TagIdValue
+            if (-not [string]::IsNullOrEmpty($tags)) {
+                add 'tagId' $tags
+            }
+
+            if ($PSCmdlet.ShouldProcess(
+                    "Updating address book entry with ID of $Id.",
+                    "Update address book entry with ID of ${Id}?",
+                    'Confirm address book update.')) {
+                $request = @{
+                    Hostname             = $Hostname
+                    Body                 = $message
+                    Method               = $method
+                    SkipCertificateCheck = $SkipCertificateCheck
+                }
+
+                Invoke-SOAPRequest @request > $null
+            }
+        } catch {
+            Write-Error $_
         }
     }
 
     end {
-        Disconnect-Session -Hostname $Hostname -Session $session -SkipCertificateCheck:$SkipCertificateCheck
+        Disconnect-Session @disconnect
     }
 }
 
@@ -955,6 +974,10 @@ function Add-AddressBookEntry {
 
     begin {
         try {
+            $disconnect = @{
+                Hostname             = $Hostname
+                SkipCertificateCheck = $SkipCertificateCheck
+            }
             $connection = @{
                 Hostname             = $Hostname
                 Credential           = $Credential
@@ -962,82 +985,96 @@ function Add-AddressBookEntry {
             }
 
             $session = Connect-Session @connection
+            $disconnect.Session = $session
+
+            $method = [RicohMethodType]::putObjects
+            [xml] $template = Get-Template $method
+            $content = $template.Envelope.Body.$method
+            $content.sessionId = $session
         } catch {
+            if ($null -ne $disconnect.Session) {
+                Disconnect-Session @disconnect
+            }
             $PSCmdlet.ThrowTerminatingError($_)
         }
-        $method = [RicohMethodType]::putObjects
-        [xml] $template = Get-Template $method
-        $content = $template.Envelope.Body.$method
-        $content.sessionId = $session
     }
 
     process {
-        # Tags (Frequent, Title1, Title2, Title3)
-        $tagId = Get-TagIdValue
+        try {
+            # Tags (Frequent, Title1, Title2, Title3)
+            $tagId = Get-TagIdValue
 
-        $entry = $template.CreateElement('item')
+            $entry = $template.CreateElement('item')
 
-        function add($key, $value) {
-            Add-Property $entry $key $value
-        }
-
-        add 'entryType' 'user'
-        add 'name' $Name
-        add 'longName' $LongName
-        add 'tagId' $tagId
-
-        if (-not [string]::IsNullOrEmpty($FolderPath)) {
-            add 'remoteFolder:path' $FolderPath
-
-            if ($null -ne $ScanAccount) {
-                add 'remoteFolder:accountName' $ScanAccount.UserName
-                add 'remoteFolder:password' (ConvertTo-Base64 $ScanAccount.GetNetworkCredential().Password)
+            function add($key, $value) {
+                Add-Property $entry $key $value
             }
 
-            add 'remoteFolder:port' 21
-            add 'remoteFolder:select' 'private'
-        }
+            add 'entryType' 'user'
+            add 'name' $Name
+            add 'longName' $LongName
+            add 'tagId' $tagId
 
-        if (-not [string]::IsNullOrEmpty($EmailAddress)) {
-            if ($null -eq $IsSender) {
-                $IsSender = $false
+            if (-not [string]::IsNullOrEmpty($FolderPath)) {
+                add 'remoteFolder:path' $FolderPath
+
+                if ($null -ne $ScanAccount) {
+                    add 'remoteFolder:accountName' $ScanAccount.UserName
+                    add 'remoteFolder:password' (ConvertTo-Base64 $ScanAccount.GetNetworkCredential().Password)
+                }
+
+                add 'remoteFolder:port' 21
+                add 'remoteFolder:select' 'private'
             }
-            add 'mail:' 'true'
-            add 'mail:address' $EmailAddress
-            add 'isSender' $IsSender.ToString().ToLower()
-        }
 
-        if ($null -eq $IsDestination) {
-            $IsDestination = $true
-        }
-        add 'isDestination' $IsDestination.ToString().ToLower()
+            if (-not [string]::IsNullOrEmpty($EmailAddress)) {
+                if ($null -eq $IsSender) {
+                    $IsSender = $false
+                }
+                add 'mail:' 'true'
+                add 'mail:address' $EmailAddress
+                add 'isSender' $IsSender.ToString().ToLower()
+            }
 
-        $content.propListList.AppendChild($entry) > $null
+            if ($null -eq $IsDestination) {
+                $IsDestination = $true
+            }
+            add 'isDestination' $IsDestination.ToString().ToLower()
+
+            $content.propListList.AppendChild($entry) > $null
+        } catch {
+            Write-Error $_
+        }
     }
 
     end {
-        $selection = @{
-            Xml       = $template
-            Namespace = $namespaces
-            XPath     = '/s:Envelope/s:Body/u:putObjects/propListList/item/item[propName/text()="name"]/propVal'
-        }
-        $names = Select-Xml @selection
-
-        $allNames = $names -join ', '
-        if ($PSCmdlet.ShouldProcess(
-                "Adding address book entries for $allNames",
-                "Add address book entry for ${allNames}?",
-                'Confirm address book addition.')) {
-            $request = @{
-                Hostname             = $Hostname
-                Body                 = $template
-                Method               = $method
-                SkipCertificateCheck = $SkipCertificateCheck
+        try {
+            $selection = @{
+                Xml       = $template
+                Namespace = $namespaces
+                XPath     = '/s:Envelope/s:Body/u:putObjects/propListList/item/item[propName/text()="name"]/propVal'
             }
+            $names = Select-Xml @selection
 
-            Invoke-SOAPRequest @request > $null
+            $allNames = $names -join ', '
+            if ($PSCmdlet.ShouldProcess(
+                    "Adding address book entries for $allNames",
+                    "Add address book entry for ${allNames}?",
+                    'Confirm address book addition.')) {
+                $request = @{
+                    Hostname             = $Hostname
+                    Body                 = $template
+                    Method               = $method
+                    SkipCertificateCheck = $SkipCertificateCheck
+                }
+
+                Invoke-SOAPRequest @request > $null
+            }
+        } catch {
+            $PSCmdlet.ThrowTerminatingError($_)
+        } finally {
+            Disconnect-Session @disconnect
         }
-        Disconnect-Session -Hostname $Hostname -Session $session -SkipCertificateCheck:$SkipCertificateCheck
     }
 }
 
@@ -1111,6 +1148,10 @@ function Remove-AddressBookEntry {
 
     begin {
         try {
+            $disconnect = @{
+                Hostname             = $Hostname
+                SkipCertificateCheck = $SkipCertificateCheck
+            }
             $connection = @{
                 Hostname             = $Hostname
                 Credential           = $Credential
@@ -1118,48 +1159,60 @@ function Remove-AddressBookEntry {
             }
 
             $session = Connect-Session @connection
+            $disconnect.Session = $session
+
+            $method = [RicohMethodType]::deleteObjects
+            [xml] $template = Get-Template $method
+            $content = $template.Envelope.Body.$method
+            $content.sessionId = $session
         } catch {
+            if ($null -ne $disconnect.Session) {
+                Disconnect-Session @disconnect
+            }
             $PSCmdlet.ThrowTerminatingError($_)
         }
-
-        $method = [RicohMethodType]::deleteObjects
-        [xml] $template = Get-Template $method
-        $content = $template.Envelope.Body.$method
-        $content.sessionId = $session
     }
 
     process {
         foreach ($item in $Id) {
-            $element = $template.CreateElement('item')
-            $element.InnerText = "entry:$item"
-            $content.objectIdList.AppendChild($element) > $null
+            try {
+                $element = $template.CreateElement('item')
+                $element.InnerText = "entry:$item"
+                $content.objectIdList.AppendChild($element) > $null
+            } catch {
+                Write-Error $_
+            }
         }
     }
 
     end {
-        $entries = Select-Xml -Xml $template -Namespace $namespaces -XPath '/s:Envelope/s:Body/u:deleteObjects/objectIdList/item' |
-            ForEach-Object {
-                if ($_.Node.InnerText -match '^entry:(\d+)$') {
-                    $Matches[1]
+        try {
+            $entries = Select-Xml -Xml $template -Namespace $namespaces -XPath '/s:Envelope/s:Body/u:deleteObjects/objectIdList/item' |
+                ForEach-Object {
+                    if ($_.Node.InnerText -match '^entry:(\d+)$') {
+                        $Matches[1]
+                    }
                 }
-            }
 
-        $allID = $entries -join ', '
-        if ($PSCmdlet.ShouldProcess(
-                "Removing IDs $allID.",
-                "Remove IDs ${allID}?",
-                'Confirm removing entries')) {
-            $request = @{
-                Hostname             = $Hostname
-                Body                 = $template
-                Method               = $method
-                SkipCertificateCheck = $SkipCertificateCheck
-            }
+            $allID = $entries -join ', '
+            if ($PSCmdlet.ShouldProcess(
+                    "Removing IDs $allID.",
+                    "Remove IDs ${allID}?",
+                    'Confirm removing entries')) {
+                $request = @{
+                    Hostname             = $Hostname
+                    Body                 = $template
+                    Method               = $method
+                    SkipCertificateCheck = $SkipCertificateCheck
+                }
 
-            Invoke-SOAPRequest @request > $null
+                Invoke-SOAPRequest @request > $null
+            }
+        } catch {
+            $PSCmdlet.ThrowTerminatingError($_)
+        } finally {
+            Disconnect-Session @disconnect
         }
-
-        Disconnect-Session -Hostname $Hostname -Session $session -SkipCertificateCheck:$SkipCertificateCheck
     }
 }
 
