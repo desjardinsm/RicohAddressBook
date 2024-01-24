@@ -663,7 +663,7 @@ function Update-AddressBookEntry {
         [ValidateRange(1, 10)]
         $DisplayPriority,
 
-        [nullable[bool]]
+        [switch]
         [Parameter(ValueFromPipelineByPropertyName)]
         $Frequent,
 
@@ -918,7 +918,7 @@ function Add-AddressBookEntry {
         [Parameter(ValueFromPipelineByPropertyName)]
         $IsDestination,
 
-        [nullable[bool]]
+        [switch]
         [Parameter(ValueFromPipelineByPropertyName)]
         $Frequent,
 
