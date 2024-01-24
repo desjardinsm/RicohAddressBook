@@ -976,7 +976,6 @@ function Add-AddressBookEntry {
         $tagId = Get-TagIdValue
 
         $entry = $template.CreateElement('item')
-        $content.propListList.AppendChild($entry) > $null
 
         function add($key, $value) {
             Add-Property $entry $key $value
@@ -1012,6 +1011,8 @@ function Add-AddressBookEntry {
             $IsDestination = $true
         }
         add 'isDestination' $IsDestination.ToString().ToLower()
+
+        $content.propListList.AppendChild($entry) > $null
     }
 
     end {
