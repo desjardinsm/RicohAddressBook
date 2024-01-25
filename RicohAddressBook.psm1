@@ -499,6 +499,13 @@ function Get-TagIdValue {
     Update-AddressBookEntry modifies address book entries on Ricoh
     multi-function printers.
 
+    For the non-required parameters, they can be omitted in order to not modify
+    their values. The one exception to this is if Frequent is true, or if
+    Title1, Title2, or Title3 are provided, the value of the other three will be
+    reset (unless a value is also provided for them). This is because these four
+    values are stored on the scanner as a single property, and setting one
+    without the other three will set that property to that single value.
+
 .Parameter Hostname
     The hostname of the printer from which address book entries are to be
     modified.
@@ -543,8 +550,10 @@ function Get-TagIdValue {
     sender.
 
 .Parameter IsDestination
-    A boolean indicating whether the given email address is registered as a
-    destination.
+    A boolean indicating whether the given entry is registered as a destination.
+
+    If this value is set to false, this entry will not be visible on the scanner
+    as a valid destination.
 
 .Parameter DisplayPriority
     The display order of the user in address book list. Sorting is done first by
@@ -838,8 +847,11 @@ function Update-AddressBookEntry {
     sender. Omit to use the default value of $false.
 
 .Parameter IsDestination
-    A boolean indicating whether the given email address is registered as a
-    destination. Omit to use the default value of $true.
+    A boolean indicating whether the given entry is registered as a destination.
+    Omit to use the default value of $true.
+
+    If this value is set to false, this entry will not be visible on the scanner
+    as a valid destination.
 
 .Parameter Frequent
     A switch indicating whether the user is to be added to the frequently used
