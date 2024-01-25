@@ -395,9 +395,9 @@ function Get-AddressBookEntry {
 
                 ID         = [uint32]$properties['id']
                 Index      = [uint32]$properties['index']
-                Priority   = [uint32]$properties['displayedOrder']
                 Name       = $properties['name']
                 LongName   = $properties['longName']
+                Priority   = [uint32]$properties['displayedOrder']
             }
 
             $output.Frequent = $false
@@ -416,12 +416,12 @@ function Get-AddressBookEntry {
                 }
             }
 
-            if ($properties['lastAccessDateTime'] -ne '1970-01-01T00:00:00Z') {
-                $output.LastUsed = [datetime]$properties['lastAccessDateTime']
-            }
-
             if (Test-Property $properties 'auth:') {
                 $output.UserCode = $properties['auth:name']
+            }
+
+            if ($properties['lastAccessDateTime'] -ne '1970-01-01T00:00:00Z') {
+                $output.LastUsed = [datetime]$properties['lastAccessDateTime']
             }
 
             if (Test-Property $properties 'remoteFolder:') {
@@ -531,30 +531,6 @@ function Get-TagIdValue {
 .Parameter LongName
     The new "long name" for the address book entry.
 
-.Parameter FolderPath
-    The network path used to save scanned files.
-
-.Parameter ScanAccount
-    The account to use to save the scanned files to a network location.
-
-    To reuse the credentials between commands, you can use the Get-Credential
-    cmdlet and store the results to a variable. Otherwise, just passing a string
-    will open a dialog box for the user to enter a password. See the help for
-    Get-Credential for information on using this in a script non-interactively.
-
-.Parameter EmailAddress
-    The email address used to send scanned files.
-
-.Parameter IsSender
-    A boolean indicating whether the given email address is registered as a
-    sender.
-
-.Parameter IsDestination
-    A boolean indicating whether the given entry is registered as a destination.
-
-    If this value is set to false, this entry will not be visible on the scanner
-    as a valid destination.
-
 .Parameter DisplayPriority
     The display order of the user in address book list. Sorting is done first by
     DisplayPriority, then by ID.
@@ -604,6 +580,30 @@ function Get-TagIdValue {
     the value of the other properties unless they are also provided. In
     addition, at least one value must be set in order for the entry to be
     visible on the scanner.
+
+.Parameter FolderPath
+    The network path used to save scanned files.
+
+.Parameter ScanAccount
+    The account to use to save the scanned files to a network location.
+
+    To reuse the credentials between commands, you can use the Get-Credential
+    cmdlet and store the results to a variable. Otherwise, just passing a string
+    will open a dialog box for the user to enter a password. See the help for
+    Get-Credential for information on using this in a script non-interactively.
+
+.Parameter EmailAddress
+    The email address used to send scanned files.
+
+.Parameter IsSender
+    A boolean indicating whether the given email address is registered as a
+    sender.
+
+.Parameter IsDestination
+    A boolean indicating whether the given entry is registered as a destination.
+
+    If this value is set to false, this entry will not be visible on the scanner
+    as a valid destination.
 
 .Parameter SkipCertificateCheck
     Skips certificate validation checks. This includes all validation such as
@@ -657,28 +657,6 @@ function Update-AddressBookEntry {
         [Parameter(ValueFromPipelineByPropertyName)]
         $LongName,
 
-        [string]
-        [Parameter(ValueFromPipelineByPropertyName)]
-        $FolderPath,
-
-        [pscredential]
-        [Parameter(ValueFromPipelineByPropertyName)]
-        $ScanAccount,
-
-        [string]
-        [Parameter(ValueFromPipelineByPropertyName)]
-        $EmailAddress,
-
-        [nullable[bool]]
-        [ValidateNotNull()]
-        [Parameter(ValueFromPipelineByPropertyName)]
-        $IsSender,
-
-        [nullable[bool]]
-        [ValidateNotNull()]
-        [Parameter(ValueFromPipelineByPropertyName)]
-        $IsDestination,
-
         [byte]
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(1, 10)]
@@ -701,6 +679,28 @@ function Update-AddressBookEntry {
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(1, 5)]
         $Title3,
+
+        [string]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        $FolderPath,
+
+        [pscredential]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        $ScanAccount,
+
+        [string]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        $EmailAddress,
+
+        [nullable[bool]]
+        [ValidateNotNull()]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        $IsSender,
+
+        [nullable[bool]]
+        [ValidateNotNull()]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        $IsDestination,
 
         [switch]
         $SkipCertificateCheck
@@ -749,6 +749,16 @@ function Update-AddressBookEntry {
                 add 'longName' $LongName
             }
 
+            if (0 -ne $DisplayPriority) {
+                add 'displayedOrder' $DisplayPriority
+            }
+
+            # Tags (Frequent, Title1, Title2, Title3)
+            $tagId = Get-TagIdValue
+            if (-not [string]::IsNullOrEmpty($tagId)) {
+                add 'tagId' $tagId
+            }
+
             if (-not [string]::IsNullOrEmpty($FolderPath)) {
                 add 'remoteFolder:path' $FolderPath
             }
@@ -765,16 +775,6 @@ function Update-AddressBookEntry {
             }
             if ($null -ne $IsDestination) {
                 add 'isDestination' $IsDestination.ToString().ToLower()
-            }
-
-            if (0 -ne $DisplayPriority) {
-                add 'displayedOrder' $DisplayPriority
-            }
-
-            # Tags (Frequent, Title1, Title2, Title3)
-            $tagId = Get-TagIdValue
-            if (-not [string]::IsNullOrEmpty($tagId)) {
-                add 'tagId' $tagId
             }
 
             if ($PSCmdlet.ShouldProcess(
@@ -828,6 +828,29 @@ function Update-AddressBookEntry {
 .Parameter LongName
     The "long name" for the address book entry.
 
+.Parameter Frequent
+    A switch indicating whether the user is to be added to the frequently used
+    list. At least one of either Frequent, Title1, Title2, or Title3 should be
+    set.
+
+.Parameter Title1
+    The heading to list this user under for Title1.
+
+    Title1 is usually the default grouping, and is the one that lists users by
+    letters (AB, CD, etc.) on the scanner.
+
+.Parameter Title2
+    The heading to list this user under for Title2.
+
+    Title2 is a range from 1 to 10, and is another option for grouping users on
+    the scanner.
+
+.Parameter Title3
+    The heading to list this user under for Title3.
+
+    Title3 is a range from 1 to 5, and is another option for grouping users on
+    the scanner.
+
 .Parameter FolderPath
     The network path used to save scanned files.
 
@@ -852,29 +875,6 @@ function Update-AddressBookEntry {
 
     If this value is set to false, this entry will not be visible on the scanner
     as a valid destination.
-
-.Parameter Frequent
-    A switch indicating whether the user is to be added to the frequently used
-    list. At least one of either Frequent, Title1, Title2, or Title3 should be
-    set.
-
-.Parameter Title1
-    The heading to list this user under for Title1.
-
-    Title1 is usually the default grouping, and is the one that lists users by
-    letters (AB, CD, etc.) on the scanner.
-
-.Parameter Title2
-    The heading to list this user under for Title2.
-
-    Title2 is a range from 1 to 10, and is another option for grouping users on
-    the scanner.
-
-.Parameter Title3
-    The heading to list this user under for Title3.
-
-    Title3 is a range from 1 to 5, and is another option for grouping users on
-    the scanner.
 
 .Parameter SkipCertificateCheck
     Skips certificate validation checks. This includes all validation such as
@@ -934,6 +934,24 @@ function Add-AddressBookEntry {
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         $LongName,
 
+        [switch]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        $Frequent,
+
+        [TagId]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        $Title1,
+
+        [byte]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(1, 10)]
+        $Title2,
+
+        [byte]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(1, 5)]
+        $Title3,
+
         [string]
         [Parameter(ParameterSetName = 'Folder', Mandatory, ValueFromPipelineByPropertyName)]
         [Parameter(ParameterSetName = 'FolderAndEmail', Mandatory, ValueFromPipelineByPropertyName)]
@@ -961,24 +979,6 @@ function Add-AddressBookEntry {
         [Parameter(ValueFromPipelineByPropertyName)]
         [PSDefaultValue(Help = $true, Value = $true)]
         $IsDestination,
-
-        [switch]
-        [Parameter(ValueFromPipelineByPropertyName)]
-        $Frequent,
-
-        [TagId]
-        [Parameter(ValueFromPipelineByPropertyName)]
-        $Title1,
-
-        [byte]
-        [Parameter(ValueFromPipelineByPropertyName)]
-        [ValidateRange(1, 10)]
-        $Title2,
-
-        [byte]
-        [Parameter(ValueFromPipelineByPropertyName)]
-        [ValidateRange(1, 5)]
-        $Title3,
 
         [switch]
         $SkipCertificateCheck

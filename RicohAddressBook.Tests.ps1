@@ -874,22 +874,22 @@ Describe 'Get-AddressBookEntry' {
                             <selectProps xsi:type="soap-enc:Array" soap-enc:arrayType="xs:string[]">
                                 <item>id</item>
                                 <item>index</item>
-                                <item>displayedOrder</item>
                                 <item>name</item>
                                 <item>longName</item>
+                                <item>displayedOrder</item>
                                 <item>tagId</item>
-                                <item>lastAccessDateTime</item>
-                                <item>isDestination</item>
-                                <item>isSender</item>
                                 <item>auth:</item>
                                 <item>auth:name</item>
-                                <item>mail:</item>
-                                <item>mail:address</item>
+                                <item>lastAccessDateTime</item>
                                 <item>remoteFolder:</item>
                                 <item>remoteFolder:type</item>
                                 <item>remoteFolder:path</item>
                                 <item>remoteFolder:port</item>
                                 <item>remoteFolder:accountName</item>
+                                <item>mail:</item>
+                                <item>mail:address</item>
+                                <item>isSender</item>
+                                <item>isDestination</item>
                             </selectProps>
                         </u:getObjectsProps>
                     </s:Body>
@@ -935,22 +935,22 @@ Describe 'Get-AddressBookEntry' {
                             <selectProps xsi:type="soap-enc:Array" soap-enc:arrayType="xs:string[]">
                                 <item>id</item>
                                 <item>index</item>
-                                <item>displayedOrder</item>
                                 <item>name</item>
                                 <item>longName</item>
+                                <item>displayedOrder</item>
                                 <item>tagId</item>
-                                <item>lastAccessDateTime</item>
-                                <item>isDestination</item>
-                                <item>isSender</item>
                                 <item>auth:</item>
                                 <item>auth:name</item>
-                                <item>mail:</item>
-                                <item>mail:address</item>
+                                <item>lastAccessDateTime</item>
                                 <item>remoteFolder:</item>
                                 <item>remoteFolder:type</item>
                                 <item>remoteFolder:path</item>
                                 <item>remoteFolder:port</item>
                                 <item>remoteFolder:accountName</item>
+                                <item>mail:</item>
+                                <item>mail:address</item>
+                                <item>isSender</item>
+                                <item>isDestination</item>
                             </selectProps>
                         </u:getObjectsProps>
                     </s:Body>
@@ -989,22 +989,22 @@ Describe 'Get-AddressBookEntry' {
                         <selectProps xsi:type="soap-enc:Array" soap-enc:arrayType="xs:string[]">
                             <item>id</item>
                             <item>index</item>
-                            <item>displayedOrder</item>
                             <item>name</item>
                             <item>longName</item>
+                            <item>displayedOrder</item>
                             <item>tagId</item>
-                            <item>lastAccessDateTime</item>
-                            <item>isDestination</item>
-                            <item>isSender</item>
                             <item>auth:</item>
                             <item>auth:name</item>
-                            <item>mail:</item>
-                            <item>mail:address</item>
+                            <item>lastAccessDateTime</item>
                             <item>remoteFolder:</item>
                             <item>remoteFolder:type</item>
                             <item>remoteFolder:path</item>
                             <item>remoteFolder:port</item>
                             <item>remoteFolder:accountName</item>
+                            <item>mail:</item>
+                            <item>mail:address</item>
+                            <item>isSender</item>
+                            <item>isDestination</item>
                         </selectProps>
                     </u:getObjectsProps>
                 </s:Body>
