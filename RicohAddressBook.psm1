@@ -1016,6 +1016,10 @@ function Add-AddressBookEntry {
             # Tags (Frequent, Title1, Title2, Title3)
             $tagId = Get-TagIdValue
 
+            if ([string]::IsNullOrEmpty($tagId)) {
+                throw 'At least of the following is required: Frequent, Title1, Title2, or Title3'
+            }
+
             $entry = $template.CreateElement('item')
 
             function add($key, $value) {

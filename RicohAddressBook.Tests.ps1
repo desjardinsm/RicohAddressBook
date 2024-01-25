@@ -232,7 +232,7 @@ Describe 'Connect-Session' {
     Context 'With an editing method' {
         It -ForEach @(
             @{ Function = 'Update'; Arguments = @{ Id = 1 } }
-            @{ Function = 'Add'; Arguments = @{ Name = 'A'; LongName = 'B'; EmailAddress = 'example@example.com' } }
+            @{ Function = 'Add'; Arguments = @{ Name = 'A'; LongName = 'B'; EmailAddress = 'example@example.com'; Frequent = $true } }
             @{ Function = 'Remove'; Arguments = @{Id = @(1) } }
         ) 'Creates a connection with an X lock mode for <Function>-AddressBookEntry' {
             & "$Function-AddressBookEntry" @commonParameters @Arguments
@@ -267,7 +267,7 @@ Describe 'Disconnect-Session' {
     It -ForEach @(
         @{ Function = 'Get'; Arguments = @{} }
         @{ Function = 'Update'; Arguments = @{ Id = 1 } }
-        @{ Function = 'Add'; Arguments = @{ Name = 'A'; LongName = 'B'; EmailAddress = 'example@example.com' } }
+        @{ Function = 'Add'; Arguments = @{ Name = 'A'; LongName = 'B'; EmailAddress = 'example@example.com'; Frequent = $true } }
         @{ Function = 'Remove'; Arguments = @{Id = @(1) } }
     ) 'Disconnects the session for <Function>-AddressBookEntry' {
         & "$Function-AddressBookEntry" @commonParameters @Arguments
@@ -563,6 +563,7 @@ Describe 'Disconnect-Session' {
                                 Name       = 'Name 1'
                                 LongName   = 'Long Name 1'
                                 FolderPath = '\\folder\path1'
+                                Frequent   = $true
                             }
                             [PSCustomObject]@{
                                 Name        = 'Name 2'
@@ -572,11 +573,13 @@ Describe 'Disconnect-Session' {
                                     'NewScanAccount',
                                     (ConvertTo-SecureString -String 'throws' -AsPlainText -Force)
                                 )
+                                Title2      = 1
                             }
                             [PSCustomObject]@{
                                 Name       = 'Name 3'
                                 LongName   = 'Long Name 3'
                                 FolderPath = '\\folder\path3'
+                                Title1     = 'LMN'
                             }
                         ) | Add-AddressBookEntry @commonParameters 2> $null
 
@@ -609,7 +612,7 @@ Describe 'Disconnect-Session' {
                                                 </item>
                                                 <item>
                                                     <propName>tagId</propName>
-                                                    <propVal></propVal>
+                                                    <propVal>1</propVal>
                                                 </item>
                                                 <item>
                                                     <propName>remoteFolder:path</propName>
@@ -643,7 +646,7 @@ Describe 'Disconnect-Session' {
                                                 </item>
                                                 <item>
                                                     <propName>tagId</propName>
-                                                    <propVal></propVal>
+                                                    <propVal>7</propVal>
                                                 </item>
                                                 <item>
                                                     <propName>remoteFolder:path</propName>
@@ -1463,22 +1466,26 @@ Describe 'Add-AddressBookEntry' {
                 EmailAddress  = 'email2@example.com'
                 IsSender      = $true
                 IsDestination = $true
+                Frequent      = $true
             }
             [PSCustomObject]@{
                 Name       = 'Without ScanAccount'
                 LongName   = 'Without a ScanAccount'
                 FolderPath = '\\folder\path'
+                Title1     = 'EF'
             }
             [PSCustomObject]@{
                 Name          = 'With False IsDestination'
                 LongName      = 'With a False IsDestination'
                 EmailAddress  = 'email@example.com'
                 IsDestination = $false
+                Title2        = 2
             }
             [PSCustomObject]@{
                 Name         = 'With Default Values'
                 LongName     = 'With Default IsSender/IsDestination'
                 EmailAddress = 'email@example.com'
+                Title3       = 3
             }
         ) | Add-AddressBookEntry @commonParameters
 
@@ -1587,7 +1594,7 @@ Describe 'Add-AddressBookEntry' {
                                 </item>
                                 <item>
                                     <propName>tagId</propName>
-                                    <propVal></propVal>
+                                    <propVal>1</propVal>
                                 </item>
                                 <item>
                                     <propName>remoteFolder:path</propName>
@@ -1641,7 +1648,7 @@ Describe 'Add-AddressBookEntry' {
                                 </item>
                                 <item>
                                     <propName>tagId</propName>
-                                    <propVal></propVal>
+                                    <propVal>4</propVal>
                                 </item>
                                 <item>
                                     <propName>remoteFolder:path</propName>
@@ -1675,7 +1682,7 @@ Describe 'Add-AddressBookEntry' {
                                 </item>
                                 <item>
                                     <propName>tagId</propName>
-                                    <propVal></propVal>
+                                    <propVal>13</propVal>
                                 </item>
                                 <item>
                                     <propName>mail:</propName>
@@ -1709,7 +1716,7 @@ Describe 'Add-AddressBookEntry' {
                                 </item>
                                 <item>
                                     <propName>tagId</propName>
-                                    <propVal></propVal>
+                                    <propVal>24</propVal>
                                 </item>
                                 <item>
                                     <propName>mail:</propName>
@@ -1862,7 +1869,7 @@ Describe 'SupportsShouldProcess' {
 
     It -ForEach @(
         @{ Function = 'Update'; Arguments = @{ Id = 1 } }
-        @{ Function = 'Add'; Arguments = @{ Name = 'A'; LongName = 'B'; EmailAddress = 'email@example.com' } }
+        @{ Function = 'Add'; Arguments = @{ Name = 'A'; LongName = 'B'; EmailAddress = 'email@example.com'; Frequent = $true } }
         @{ Function = 'Remove'; Arguments = @{ Id = @(1) } }
     ) '<Function>-AddressBookEntry does not call Invoke-WebRequest if -WhatIf is provided' {
         & "$Function-AddressBookEntry" @commonParameters @Arguments -WhatIf
