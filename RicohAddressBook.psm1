@@ -828,6 +828,10 @@ function Update-AddressBookEntry {
 .Parameter LongName
     The "long name" for the address book entry.
 
+.Parameter DisplayPriority
+    The display order of the user in address book list. Sorting is done first by
+    DisplayPriority, then by ID.
+
 .Parameter Frequent
     A switch indicating whether the user is to be added to the frequently used
     list. At least one of either Frequent, Title1, Title2, or Title3 should be
@@ -937,6 +941,11 @@ function Add-AddressBookEntry {
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         $LongName,
 
+        [byte]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateRange(1, 10)]
+        $DisplayPriority = 5,
+
         [switch]
         [Parameter(ValueFromPipelineByPropertyName)]
         $Frequent,
@@ -1032,6 +1041,7 @@ function Add-AddressBookEntry {
             add 'entryType' 'user'
             add 'name' $Name
             add 'longName' $LongName
+            add 'displayedOrder' $DisplayPriority
             add 'tagId' $tagId
 
             if (-not [string]::IsNullOrEmpty($FolderPath)) {

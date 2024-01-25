@@ -611,6 +611,10 @@ Describe 'Disconnect-Session' {
                                                     <propVal>Long Name 1</propVal>
                                                 </item>
                                                 <item>
+                                                    <propName>displayedOrder</propName>
+                                                    <propVal>5</propVal>
+                                                </item>
+                                                <item>
                                                     <propName>tagId</propName>
                                                     <propVal>1</propVal>
                                                 </item>
@@ -643,6 +647,10 @@ Describe 'Disconnect-Session' {
                                                 <item>
                                                     <propName>longName</propName>
                                                     <propVal>Long Name 3</propVal>
+                                                </item>
+                                                <item>
+                                                    <propName>displayedOrder</propName>
+                                                    <propVal>5</propVal>
                                                 </item>
                                                 <item>
                                                     <propName>tagId</propName>
@@ -1438,12 +1446,13 @@ Describe 'Add-AddressBookEntry' {
     It 'Adds each element of the pipeline separately' {
         @(
             [PSCustomObject]@{
-                Name        = 'By Folder'
-                LongName    = 'By Folder Path'
-                Frequent    = $true
-                Title1      = 'CD'
-                FolderPath  = '\\folder\path'
-                ScanAccount = [pscredential]::new(
+                Name            = 'By Folder'
+                LongName        = 'By Folder Path'
+                DisplayPriority = 4
+                Frequent        = $true
+                Title1          = 'CD'
+                FolderPath      = '\\folder\path'
+                ScanAccount     = [pscredential]::new(
                     'ScanAccount',
                     (ConvertTo-SecureString -String 'MockPassword' -AsPlainText -Force)
                 )
@@ -1517,6 +1526,10 @@ Describe 'Add-AddressBookEntry' {
                                     <propVal>By Folder Path</propVal>
                                 </item>
                                 <item>
+                                    <propName>displayedOrder</propName>
+                                    <propVal>4</propVal>
+                                </item>
+                                <item>
                                     <propName>tagId</propName>
                                     <propVal>1,3</propVal>
                                 </item>
@@ -1559,6 +1572,10 @@ Describe 'Add-AddressBookEntry' {
                                     <propVal>By Email Address</propVal>
                                 </item>
                                 <item>
+                                    <propName>displayedOrder</propName>
+                                    <propVal>5</propVal>
+                                </item>
+                                <item>
                                     <propName>tagId</propName>
                                     <propVal>20,25</propVal>
                                 </item>
@@ -1591,6 +1608,10 @@ Describe 'Add-AddressBookEntry' {
                                 <item>
                                     <propName>longName</propName>
                                     <propVal>By Folder Path and Email Address</propVal>
+                                </item>
+                                <item>
+                                    <propName>displayedOrder</propName>
+                                    <propVal>5</propVal>
                                 </item>
                                 <item>
                                     <propName>tagId</propName>
@@ -1647,6 +1668,10 @@ Describe 'Add-AddressBookEntry' {
                                     <propVal>Without a ScanAccount</propVal>
                                 </item>
                                 <item>
+                                    <propName>displayedOrder</propName>
+                                    <propVal>5</propVal>
+                                </item>
+                                <item>
                                     <propName>tagId</propName>
                                     <propVal>4</propVal>
                                 </item>
@@ -1681,6 +1706,10 @@ Describe 'Add-AddressBookEntry' {
                                     <propVal>With a False IsDestination</propVal>
                                 </item>
                                 <item>
+                                    <propName>displayedOrder</propName>
+                                    <propVal>5</propVal>
+                                </item>
+                                <item>
                                     <propName>tagId</propName>
                                     <propVal>13</propVal>
                                 </item>
@@ -1713,6 +1742,10 @@ Describe 'Add-AddressBookEntry' {
                                 <item>
                                     <propName>longName</propName>
                                     <propVal>With Default IsSender/IsDestination</propVal>
+                                </item>
+                                <item>
+                                    <propName>displayedOrder</propName>
+                                    <propVal>5</propVal>
                                 </item>
                                 <item>
                                     <propName>tagId</propName>
