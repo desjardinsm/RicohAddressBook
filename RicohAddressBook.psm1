@@ -901,12 +901,15 @@ function Update-AddressBookEntry {
         [PSCustomObject]@{
             Name = 'Matthew D'
             LongName = 'Matthew Desjardins'
+            Frequent = $true
+            Title1 = 'LMN'
             ScanAccount = $scanAccount
             FolderPath = '\\my\path\here'
         }
         [PSCustomObject]@{
             Name = 'John D'
             LongName = 'John Doe'
+            Title1 = 'IJK'
             ScanAccount = $scanAccount
             FolderPath = '\\my\path\here'
         }
