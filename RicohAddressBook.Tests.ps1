@@ -1777,6 +1777,53 @@ Describe 'Add-AddressBookEntry' {
             $Body.OuterXml -eq $expected.OuterXml
         }
     }
+
+    It 'Throws an error if Frequent, Title1, Title2, and Title3 are not provided' {
+        $incompleteEntry = @{
+            Name       = 'Name'
+            LongName   = 'LongName'
+            FolderPath = '\\folder\path'
+            Frequent   = $false
+        }
+
+        # Confirm that it is not a terminating error
+        { Add-AddressBookEntry @commonParameters @incompleteEntry 2> $null } |
+            Should -Not -Throw
+
+        # Then if it throws with -ErrorAction 'Stop', it must be a
+        # non-terminating error
+        { Add-AddressBookEntry @commonParameters @incompleteEntry -ErrorAction Stop 2> $null } |
+            Should -Throw
+    }
+
+    It -ForEach @(
+        @{ Frequent = $true }
+        @{ Title1 = 'AB' }
+        @{ Title2 = 1 }
+        @{ Title3 = 1 }
+        @{ Frequent = $false; Title1 = 'CD' }
+        @{ Frequent = $true; Title1 = 'EF' }
+        @{ Frequent = $true; Title2 = 2 }
+        @{ Frequent = $true; Title3 = 2 }
+        @{ Title1 = 'GH'; Title2 = 3 }
+        @{ Title1 = 'IJK'; Title3 = 3 }
+        @{ Title2 = 4; Title3 = 4 }
+    ) 'Does not throw if Frequent = <Frequent>, Title1 = <Title1>, Title2 = <Title2>, Title3 = <Title3>' {
+        $entry = @{
+            Name       = 'Name'
+            LongName   = 'LongName'
+            FolderPath = '\\folder\path'
+        }
+
+        foreach ($name in @('Frequent', 'Title1', 'Title2', 'Title3')) {
+            $value = Get-Variable -Name $name -ValueOnly -ErrorAction SilentlyContinue
+            if ($null -ne $value) {
+                $entry[$name] = $value
+            }
+        }
+
+        { Add-AddressBookEntry @commonParameters @entry } | Should -Not -Throw
+    }
 }
 
 Describe 'Remove-AddressBookEntry' {
