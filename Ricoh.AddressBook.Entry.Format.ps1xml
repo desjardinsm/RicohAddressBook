@@ -20,10 +20,13 @@
                                 <PropertyName>Name</PropertyName>
                             </TableColumnItem>
                             <TableColumnItem>
-                                <PropertyName>RemoteFolderPath</PropertyName>
+                                <PropertyName>LastUsed</PropertyName>
                             </TableColumnItem>
                             <TableColumnItem>
                                 <PropertyName>EmailAddress</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>RemoteFolderPath</PropertyName>
                             </TableColumnItem>
                         </TableColumnItems>
                     </TableRowEntry>
