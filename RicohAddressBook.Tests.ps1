@@ -1440,24 +1440,25 @@ Describe 'Add-AddressBookEntry' {
             [PSCustomObject]@{
                 Name        = 'By Folder'
                 LongName    = 'By Folder Path'
+                Frequent    = $true
+                Title1      = 'CD'
                 FolderPath  = '\\folder\path'
                 ScanAccount = [pscredential]::new(
                     'ScanAccount',
                     (ConvertTo-SecureString -String 'MockPassword' -AsPlainText -Force)
                 )
-                Frequent    = $true
-                Title1      = 'CD'
             }
             [PSCustomObject]@{
                 Name         = 'By Email'
                 LongName     = 'By Email Address'
-                EmailAddress = 'email@example.com'
                 Title2       = 9
                 Title3       = 4
+                EmailAddress = 'email@example.com'
             }
             [PSCustomObject]@{
                 Name          = 'By Folder & Email'
                 LongName      = 'By Folder Path and Email Address'
+                Frequent      = $true
                 FolderPath    = '\\second\folder\path'
                 ScanAccount   = [pscredential]::new(
                     'ScanAccount2',
@@ -1466,26 +1467,25 @@ Describe 'Add-AddressBookEntry' {
                 EmailAddress  = 'email2@example.com'
                 IsSender      = $true
                 IsDestination = $true
-                Frequent      = $true
             }
             [PSCustomObject]@{
                 Name       = 'Without ScanAccount'
                 LongName   = 'Without a ScanAccount'
-                FolderPath = '\\folder\path'
                 Title1     = 'EF'
+                FolderPath = '\\folder\path'
             }
             [PSCustomObject]@{
                 Name          = 'With False IsDestination'
                 LongName      = 'With a False IsDestination'
+                Title2        = 2
                 EmailAddress  = 'email@example.com'
                 IsDestination = $false
-                Title2        = 2
             }
             [PSCustomObject]@{
                 Name         = 'With Default Values'
+                Title3       = 3
                 LongName     = 'With Default IsSender/IsDestination'
                 EmailAddress = 'email@example.com'
-                Title3       = 3
             }
         ) | Add-AddressBookEntry @commonParameters
 
