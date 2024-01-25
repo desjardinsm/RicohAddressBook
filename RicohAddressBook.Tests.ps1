@@ -294,7 +294,7 @@ Describe 'Disconnect-Session' {
         }
     }
 
-    Context 'When an error is thrown' {
+    Context 'Errored operations still call Disconnect-Session' {
         Context 'When Connect-Session' {
             Context -ForEach @('script', 'statement') 'throws a <_>-terminating error' {
                 BeforeAll {
