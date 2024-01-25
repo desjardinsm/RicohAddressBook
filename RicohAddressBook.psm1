@@ -763,9 +763,9 @@ function Update-AddressBookEntry {
             }
 
             # Tags (Frequent, Title1, Title2, Title3)
-            $tags = Get-TagIdValue
-            if (-not [string]::IsNullOrEmpty($tags)) {
-                add 'tagId' $tags
+            $tagId = Get-TagIdValue
+            if (-not [string]::IsNullOrEmpty($tagId)) {
+                add 'tagId' $tagId
             }
 
             if ($PSCmdlet.ShouldProcess(
