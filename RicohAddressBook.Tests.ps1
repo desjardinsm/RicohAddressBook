@@ -1955,9 +1955,8 @@ Describe 'SupportsShouldProcess' {
         & "$Function-AddressBookEntry" @commonParameters @Arguments -WhatIf
 
         Should -Invoke Invoke-WebRequest -ModuleName RicohAddressBook -Exactly -Times 0 -ParameterFilter {
-            $Headers.SOAPAction -eq 'http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#putObjectProps' -or
-            $Headers.SOAPAction -eq 'http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#putObjects' -or
-            $Headers.SOAPAction -eq 'http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#deleteObjects'
+            $Headers.SOAPAction -ne 'http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#startSession' -and
+            $Headers.SOAPAction -ne 'http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#terminateSession'
         }
     }
 }
