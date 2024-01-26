@@ -1331,7 +1331,7 @@ Describe 'Update-AddressBookEntry' {
                 [Parameter(Mandatory)]
                 $Id,
 
-                [hashtable]
+                [System.Collections.IDictionary]
                 $Properties
             )
 
