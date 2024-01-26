@@ -710,8 +710,8 @@ function Update-AddressBookEntry {
 
         [string]
         [Parameter(ValueFromPipelineByPropertyName)]
-        [AllowNull()]
-        [ValidatePattern('^\d*$')]
+        [ValidatePattern('^\d+$')]
+        [ValidateLength(1, 8)]
         $UserCode,
 
         [string]
@@ -1040,6 +1040,7 @@ function Add-AddressBookEntry {
         [string]
         [Parameter(ValueFromPipelineByPropertyName)]
         [ValidatePattern('^\d+$')]
+        [ValidateLength(1, 8)]
         $UserCode,
 
         [string]
