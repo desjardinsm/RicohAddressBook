@@ -627,10 +627,6 @@ Describe 'Disconnect-Session' {
                                                     <propVal>21</propVal>
                                                 </item>
                                                 <item>
-                                                    <propName>remoteFolder:select</propName>
-                                                    <propVal>private</propVal>
-                                                </item>
-                                                <item>
                                                     <propName>isDestination</propName>
                                                     <propVal>true</propVal>
                                                 </item>
@@ -663,10 +659,6 @@ Describe 'Disconnect-Session' {
                                                 <item>
                                                     <propName>remoteFolder:port</propName>
                                                     <propVal>21</propVal>
-                                                </item>
-                                                <item>
-                                                    <propName>remoteFolder:select</propName>
-                                                    <propVal>private</propVal>
                                                 </item>
                                                 <item>
                                                     <propName>isDestination</propName>
@@ -1391,7 +1383,11 @@ Describe 'Update-AddressBookEntry' {
 
         Should -Invoke Invoke-WebRequest -ModuleName RicohAddressBook -Exactly -Times 1 -ParameterFilter {
             $Headers.SOAPAction -eq 'http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#putObjectProps' -and
-            $Body.OuterXml -eq (Get-Expected -Id 4 ([ordered]@{ 'remoteFolder:accountName' = 'NewScanAccount'; 'remoteFolder:password' = 'TmV3TW9ja1Bhc3N3b3Jk' }))
+            $Body.OuterXml -eq (Get-Expected -Id 4 ([ordered]@{
+                        'remoteFolder:select'      = 'private'
+                        'remoteFolder:accountName' = 'NewScanAccount'
+                        'remoteFolder:password'    = 'TmV3TW9ja1Bhc3N3b3Jk'
+                    }))
         }
 
         Should -Invoke Invoke-WebRequest -ModuleName RicohAddressBook -Exactly -Times 1 -ParameterFilter {
@@ -1559,6 +1555,10 @@ Describe 'Add-AddressBookEntry' {
                                     <propVal>\\folder\path</propVal>
                                 </item>
                                 <item>
+                                    <propName>remoteFolder:select</propName>
+                                    <propVal>private</propVal>
+                                </item>
+                                <item>
                                     <propName>remoteFolder:accountName</propName>
                                     <propVal>ScanAccount</propVal>
                                 </item>
@@ -1569,10 +1569,6 @@ Describe 'Add-AddressBookEntry' {
                                 <item>
                                     <propName>remoteFolder:port</propName>
                                     <propVal>21</propVal>
-                                </item>
-                                <item>
-                                    <propName>remoteFolder:select</propName>
-                                    <propVal>private</propVal>
                                 </item>
                                 <item>
                                     <propName>isDestination</propName>
@@ -1643,6 +1639,10 @@ Describe 'Add-AddressBookEntry' {
                                     <propVal>\\second\folder\path</propVal>
                                 </item>
                                 <item>
+                                    <propName>remoteFolder:select</propName>
+                                    <propVal>private</propVal>
+                                </item>
+                                <item>
                                     <propName>remoteFolder:accountName</propName>
                                     <propVal>ScanAccount2</propVal>
                                 </item>
@@ -1653,10 +1653,6 @@ Describe 'Add-AddressBookEntry' {
                                 <item>
                                     <propName>remoteFolder:port</propName>
                                     <propVal>21</propVal>
-                                </item>
-                                <item>
-                                    <propName>remoteFolder:select</propName>
-                                    <propVal>private</propVal>
                                 </item>
                                 <item>
                                     <propName>mail:</propName>
@@ -1703,10 +1699,6 @@ Describe 'Add-AddressBookEntry' {
                                 <item>
                                     <propName>remoteFolder:port</propName>
                                     <propVal>21</propVal>
-                                </item>
-                                <item>
-                                    <propName>remoteFolder:select</propName>
-                                    <propVal>private</propVal>
                                 </item>
                                 <item>
                                     <propName>isDestination</propName>
