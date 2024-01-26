@@ -21,6 +21,7 @@
                     </TableColumnHeader>
                     <TableColumnHeader>
                         <Label>UserCode</Label>
+                        <Alignment>right</Alignment>
                     </TableColumnHeader>
                     <TableColumnHeader>
                         <Label>LastUsed</Label>
