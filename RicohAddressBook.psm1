@@ -581,6 +581,9 @@ function Get-TagIdValue {
     addition, at least one value must be set in order for the entry to be
     visible on the scanner.
 
+.Parameter UserCode
+    The User Code property used for authentication management.
+
 .Parameter FolderPath
     The network path used to save scanned files.
 
@@ -682,6 +685,12 @@ function Update-AddressBookEntry {
 
         [string]
         [Parameter(ValueFromPipelineByPropertyName)]
+        [AllowNull()]
+        [ValidatePattern('^\d*$')]
+        $UserCode,
+
+        [string]
+        [Parameter(ValueFromPipelineByPropertyName)]
         $FolderPath,
 
         [pscredential]
@@ -757,6 +766,11 @@ function Update-AddressBookEntry {
             $tagId = Get-TagIdValue
             if (-not [string]::IsNullOrEmpty($tagId)) {
                 add 'tagId' $tagId
+            }
+
+            if (-not [string]::IsNullOrEmpty($UserCode)) {
+                add 'auth:' 'true'
+                add 'auth:name' $UserCode
             }
 
             if (-not [string]::IsNullOrEmpty($FolderPath)) {
@@ -854,6 +868,9 @@ function Update-AddressBookEntry {
 
     Title3 is a range from 1 to 5, and is another option for grouping users on
     the scanner.
+
+.Parameter UserCode
+    The User Code property used for authentication management.
 
 .Parameter FolderPath
     The network path used to save scanned files.
@@ -965,6 +982,11 @@ function Add-AddressBookEntry {
         $Title3,
 
         [string]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidatePattern('^\d+$')]
+        $UserCode,
+
+        [string]
         [Parameter(ParameterSetName = 'Folder', Mandatory, ValueFromPipelineByPropertyName)]
         [Parameter(ParameterSetName = 'FolderAndEmail', Mandatory, ValueFromPipelineByPropertyName)]
         $FolderPath,
@@ -1043,6 +1065,11 @@ function Add-AddressBookEntry {
             add 'longName' $LongName
             add 'displayedOrder' $DisplayPriority
             add 'tagId' $tagId
+
+            if (-not [string]::IsNullOrEmpty($UserCode)) {
+                add 'auth:' 'true'
+                add 'auth:name' $UserCode
+            }
 
             if (-not [string]::IsNullOrEmpty($FolderPath)) {
                 add 'remoteFolder:path' $FolderPath

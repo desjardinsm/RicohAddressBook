@@ -1323,6 +1323,10 @@ Describe 'Update-AddressBookEntry' {
                 Id     = 14
                 Title3 = 5
             }
+            [PSCustomObject]@{
+                Id       = 15
+                UserCode = '54321'
+            }
         ) | Update-AddressBookEntry @commonParameters
 
         function Get-Expected {
@@ -1439,6 +1443,14 @@ Describe 'Update-AddressBookEntry' {
             $Headers.SOAPAction -eq 'http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#putObjectProps' -and
             $Body.OuterXml -eq (Get-Expected -Id 14 @{ tagId = '26' })
         }
+
+        Should -Invoke Invoke-WebRequest -ModuleName RicohAddressBook -Exactly -Times 1 -ParameterFilter {
+            $Headers.SOAPAction -eq 'http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#putObjectProps' -and
+            $Body.OuterXml -eq (Get-Expected -Id 15 ([ordered]@{
+                        'auth:'     = 'true'
+                        'auth:name' = '54321'
+                    }))
+        }
     }
 }
 
@@ -1451,6 +1463,7 @@ Describe 'Add-AddressBookEntry' {
                 DisplayPriority = 4
                 Frequent        = $true
                 Title1          = 'CD'
+                UserCode        = 98765
                 FolderPath      = '\\folder\path'
                 ScanAccount     = [pscredential]::new(
                     'ScanAccount',
@@ -1532,6 +1545,14 @@ Describe 'Add-AddressBookEntry' {
                                 <item>
                                     <propName>tagId</propName>
                                     <propVal>1,3</propVal>
+                                </item>
+                                <item>
+                                    <propName>auth:</propName>
+                                    <propVal>true</propVal>
+                                </item>
+                                <item>
+                                    <propName>auth:name</propName>
+                                    <propVal>98765</propVal>
                                 </item>
                                 <item>
                                     <propName>remoteFolder:path</propName>
