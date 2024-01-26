@@ -84,6 +84,26 @@ function Invoke-SOAPRequest {
         }
 
         [xml]$response
+    } catch [System.Net.WebException] {
+        $message = [xml]$_.ErrorDetails.Message
+        $fault = $message.Envelope.Body.Fault
+
+        $errorMessage = $fault.detail.rdhError.errorDescription
+        if ([string]::IsNullOrEmpty($errorMessage)) {
+            $errorMessage = $fault.detail.rdhError.errorCode
+
+            if ([string]::IsNullOrEmpty($errorMessage)) {
+                $errorMessage = $fault.faultstring
+            }
+        }
+
+        if (-not [string]::IsNullOrEmpty($errorMessage)) {
+            $_.ErrorDetails = [System.Management.Automation.ErrorDetails]::new(
+                "The server returned an error ($errorMessage)."
+            )
+        }
+
+        $PSCmdlet.ThrowTerminatingError($_)
     } catch {
         $PSCmdlet.ThrowTerminatingError($_)
     }
