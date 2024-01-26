@@ -391,13 +391,13 @@ function Get-AddressBookEntry {
             }
 
             $output = [ordered]@{
-                PSTypeName = 'Ricoh.AddressBook.Entry'
+                PSTypeName         = 'Ricoh.AddressBook.Entry'
 
-                ID         = [uint32]$properties['id']
-                Index      = [uint32]$properties['index']
-                Name       = $properties['name']
-                LongName   = $properties['longName']
-                Priority   = [uint32]$properties['displayedOrder']
+                ID                 = [uint32]$properties['id']
+                RegistrationNumber = '{0:d5}' -f [uint32]$properties['index']
+                Name               = $properties['name']
+                LongName           = $properties['longName']
+                Priority           = [uint32]$properties['displayedOrder']
             }
 
             $output.Frequent = $false
@@ -425,10 +425,10 @@ function Get-AddressBookEntry {
             }
 
             if (Test-Property $properties 'remoteFolder:') {
-                $output.RemoteFolderType = $properties['remoteFolder:type']
-                $output.RemoteFolderPath = $properties['remoteFolder:path']
-                $output.RemoteFolderPort = [uint32]$properties['remoteFolder:port']
-                $output.RemoteFolderAccount = $properties['remoteFolder:accountName']
+                $output.FolderScanType = $properties['remoteFolder:type']
+                $output.FolderScanPath = $properties['remoteFolder:path']
+                $output.FolderScanPort = [uint32]$properties['remoteFolder:port']
+                $output.FolderScanAccount = $properties['remoteFolder:accountName']
             }
 
             if (Test-Property $properties 'mail:') {
@@ -584,10 +584,10 @@ function Get-TagIdValue {
 .Parameter UserCode
     The User Code property used for authentication management.
 
-.Parameter FolderPath
+.Parameter FolderScanPath
     The network path used to save scanned files.
 
-.Parameter ScanAccount
+.Parameter FolderScanAccount
     The account to use to save the scanned files to a network location.
 
     To reuse the credentials between commands, you can use the Get-Credential
@@ -615,17 +615,17 @@ function Get-TagIdValue {
     from this address book entry.
 
 .Parameter ForceFolderScanPath
-    Force setting the folder scan path, even if $FolderPath is empty.
+    Force setting the folder scan path, even if $FolderScanPath is empty.
 
-    If $FolderPath is empty and this switch is set, folder scanning will be
+    If $FolderScanPath is empty and this switch is set, folder scanning will be
     removed from this address book entry.
 
 .Parameter ForceFolderScanAccount
-    Force setting the folder scan account, even if $ScanAccount is empty.
+    Force setting the folder scan account, even if $FolderScanAccount is empty.
 
-    If $ScanAccount is empty and this switch is set, the folder scan account
-    will be removed from this address book entry, and folder scanning will
-    instead use the file transfer account from the device configuration.
+    If $FolderScanAccount is empty and this switch is set, the folder scan
+    account will be removed from this address book entry, and folder scanning
+    will instead use the file transfer account from the device configuration.
 
 .Parameter ForceEmailAddress
     Force setting the email address, even if $EmailAddress is empty.
@@ -716,11 +716,11 @@ function Update-AddressBookEntry {
 
         [string]
         [Parameter(ValueFromPipelineByPropertyName)]
-        $FolderPath,
+        $FolderScanPath,
 
         [pscredential]
         [Parameter(ValueFromPipelineByPropertyName)]
-        $ScanAccount,
+        $FolderScanAccount,
 
         [string]
         [Parameter(ValueFromPipelineByPropertyName)]
@@ -816,19 +816,19 @@ function Update-AddressBookEntry {
                 add 'auth:' 'false'
             }
 
-            if (-not [string]::IsNullOrEmpty($FolderPath)) {
+            if (-not [string]::IsNullOrEmpty($FolderScanPath)) {
                 add 'remoteFolder:' 'true'
                 add 'remoteFolder:type' 'smb'
-                add 'remoteFolder:path' $FolderPath
+                add 'remoteFolder:path' $FolderScanPath
                 add 'remoteFolder:port' 21
             } elseif ($ForceFolderScanPath) {
                 add 'remoteFolder:' 'false'
             }
 
-            if ($null -ne $ScanAccount) {
+            if ($null -ne $FolderScanAccount) {
                 add 'remoteFolder:select' 'private'
-                add 'remoteFolder:accountName' $ScanAccount.UserName
-                add 'remoteFolder:password' (ConvertTo-Base64 $ScanAccount.GetNetworkCredential().Password)
+                add 'remoteFolder:accountName' $FolderScanAccount.UserName
+                add 'remoteFolder:password' (ConvertTo-Base64 $FolderScanAccount.GetNetworkCredential().Password)
             } elseif ($ForceFolderScanAccount) {
                 add 'remoteFolder:select' ''
             }
@@ -928,10 +928,10 @@ function Update-AddressBookEntry {
 .Parameter UserCode
     The User Code property used for authentication management.
 
-.Parameter FolderPath
+.Parameter FolderScanPath
     The network path used to save scanned files.
 
-.Parameter ScanAccount
+.Parameter FolderScanAccount
     The account to use to save the scanned files to a network location.
 
     To reuse the credentials between commands, you can use the Get-Credential
@@ -967,8 +967,8 @@ function Update-AddressBookEntry {
         Credential = Get-Credential admin
         Name = 'Matthew D'
         LongName = 'Matthew Desjardins'
-        ScanAccount = Get-Credential ScanAccount
-        FolderPath = '\\my\path\here'
+        FolderScanPath = '\\my\path\here'
+        FolderScanAccount = Get-Credential ScanAccount
     }
     PS> Add-AddressBookEntry @entry
 
@@ -980,15 +980,15 @@ function Update-AddressBookEntry {
             LongName = 'Matthew Desjardins'
             Frequent = $true
             Title1 = 'LMN'
-            ScanAccount = $scanAccount
-            FolderPath = '\\my\path\here'
+            FolderScanPath = '\\my\path\here'
+            FolderScanAccount = $scanAccount
         }
         [PSCustomObject]@{
             Name = 'John D'
             LongName = 'John Doe'
             Title1 = 'IJK'
-            ScanAccount = $scanAccount
-            FolderPath = '\\my\path\here'
+            FolderScanPath = '\\my\path\here'
+            FolderScanAccount = $scanAccount
         }
     )
     PS> $entries | Add-AddressBookEntry -Hostname https://10.10.10.10 -Credential admin
@@ -1046,12 +1046,12 @@ function Add-AddressBookEntry {
         [string]
         [Parameter(ParameterSetName = 'Folder', Mandatory, ValueFromPipelineByPropertyName)]
         [Parameter(ParameterSetName = 'FolderAndEmail', Mandatory, ValueFromPipelineByPropertyName)]
-        $FolderPath,
+        $FolderScanPath,
 
         [pscredential]
         [Parameter(ParameterSetName = 'Folder', ValueFromPipelineByPropertyName)]
         [Parameter(ParameterSetName = 'FolderAndEmail', ValueFromPipelineByPropertyName)]
-        $ScanAccount,
+        $FolderScanAccount,
 
         [string]
         [Parameter(ParameterSetName = 'Email', Mandatory, ValueFromPipelineByPropertyName)]
@@ -1128,16 +1128,16 @@ function Add-AddressBookEntry {
                 add 'auth:name' $UserCode
             }
 
-            if (-not [string]::IsNullOrEmpty($FolderPath)) {
+            if (-not [string]::IsNullOrEmpty($FolderScanPath)) {
                 add 'remoteFolder:' 'true'
                 add 'remoteFolder:type' 'smb'
-                add 'remoteFolder:path' $FolderPath
+                add 'remoteFolder:path' $FolderScanPath
                 add 'remoteFolder:port' 21
 
-                if ($null -ne $ScanAccount) {
+                if ($null -ne $FolderScanAccount) {
                     add 'remoteFolder:select' 'private'
-                    add 'remoteFolder:accountName' $ScanAccount.UserName
-                    add 'remoteFolder:password' (ConvertTo-Base64 $ScanAccount.GetNetworkCredential().Password)
+                    add 'remoteFolder:accountName' $FolderScanAccount.UserName
+                    add 'remoteFolder:password' (ConvertTo-Base64 $FolderScanAccount.GetNetworkCredential().Password)
                 }
             }
 

@@ -7,6 +7,31 @@
                 <TypeName>Ricoh.AddressBook.Entry</TypeName>
             </ViewSelectedBy>
             <TableControl>
+                <TableHeaders>
+                    <TableColumnHeader>
+                        <Label>ID</Label>
+                        <Alignment>right</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Registration #</Label>
+                        <Alignment>right</Alignment>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>Name</Label>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>UserCode</Label>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>LastUsed</Label>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>EmailAddress</Label>
+                    </TableColumnHeader>
+                    <TableColumnHeader>
+                        <Label>FolderScanPath</Label>
+                    </TableColumnHeader>
+                </TableHeaders>
                 <TableRowEntries>
                     <TableRowEntry>
                         <TableColumnItems>
@@ -14,10 +39,13 @@
                                 <PropertyName>ID</PropertyName>
                             </TableColumnItem>
                             <TableColumnItem>
-                                <PropertyName>Index</PropertyName>
+                                <PropertyName>RegistrationNumber</PropertyName>
                             </TableColumnItem>
                             <TableColumnItem>
                                 <PropertyName>Name</PropertyName>
+                            </TableColumnItem>
+                            <TableColumnItem>
+                                <PropertyName>UserCode</PropertyName>
                             </TableColumnItem>
                             <TableColumnItem>
                                 <PropertyName>LastUsed</PropertyName>
@@ -26,7 +54,7 @@
                                 <PropertyName>EmailAddress</PropertyName>
                             </TableColumnItem>
                             <TableColumnItem>
-                                <PropertyName>RemoteFolderPath</PropertyName>
+                                <PropertyName>FolderScanPath</PropertyName>
                             </TableColumnItem>
                         </TableColumnItems>
                     </TableRowEntry>

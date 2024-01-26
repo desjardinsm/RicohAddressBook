@@ -438,8 +438,8 @@ Describe 'Disconnect-Session' {
                                 Name = 'New Name 1'
                             }
                             [PSCustomObject]@{
-                                Id          = 2
-                                ScanAccount = [pscredential]::new(
+                                Id                = 2
+                                FolderScanAccount = [pscredential]::new(
                                     'NewScanAccount',
                                     (ConvertTo-SecureString -String 'throws' -AsPlainText -Force)
                                 )
@@ -462,8 +462,8 @@ Describe 'Disconnect-Session' {
                                 Name = 'New Name 1'
                             }
                             [PSCustomObject]@{
-                                Id          = 2
-                                ScanAccount = [pscredential]::new(
+                                Id                = 2
+                                FolderScanAccount = [pscredential]::new(
                                     'NewScanAccount',
                                     (ConvertTo-SecureString -String 'throws' -AsPlainText -Force)
                                 )
@@ -532,23 +532,23 @@ Describe 'Disconnect-Session' {
                     It 'Calls Disconnect-Session' {
                         @(
                             [PSCustomObject]@{
-                                Name       = 'Name 1'
-                                LongName   = 'Long Name 1'
-                                FolderPath = '\\folder\path1'
+                                Name           = 'Name 1'
+                                LongName       = 'Long Name 1'
+                                FolderScanPath = '\\folder\path1'
                             }
                             [PSCustomObject]@{
-                                Name        = 'Name 2'
-                                LongName    = 'Long Name 2'
-                                FolderPath  = '\\folder\path2'
-                                ScanAccount = [pscredential]::new(
+                                Name              = 'Name 2'
+                                LongName          = 'Long Name 2'
+                                FolderScanPath    = '\\folder\path2'
+                                FolderScanAccount = [pscredential]::new(
                                     'NewScanAccount',
                                     (ConvertTo-SecureString -String 'throws' -AsPlainText -Force)
                                 )
                             }
                             [PSCustomObject]@{
-                                Name       = 'Name 3'
-                                LongName   = 'Long Name 3'
-                                FolderPath = '\\folder\path3'
+                                Name           = 'Name 3'
+                                LongName       = 'Long Name 3'
+                                FolderScanPath = '\\folder\path3'
                             }
                         ) | Add-AddressBookEntry @commonParameters 2> $null
 
@@ -560,26 +560,26 @@ Describe 'Disconnect-Session' {
                     It 'Adds the other elements of the pipeline' {
                         @(
                             [PSCustomObject]@{
-                                Name       = 'Name 1'
-                                LongName   = 'Long Name 1'
-                                FolderPath = '\\folder\path1'
-                                Frequent   = $true
+                                Name           = 'Name 1'
+                                LongName       = 'Long Name 1'
+                                FolderScanPath = '\\folder\path1'
+                                Frequent       = $true
                             }
                             [PSCustomObject]@{
-                                Name        = 'Name 2'
-                                LongName    = 'Long Name 2'
-                                FolderPath  = '\\folder\path2'
-                                ScanAccount = [pscredential]::new(
+                                Name              = 'Name 2'
+                                LongName          = 'Long Name 2'
+                                FolderScanPath    = '\\folder\path2'
+                                FolderScanAccount = [pscredential]::new(
                                     'NewScanAccount',
                                     (ConvertTo-SecureString -String 'throws' -AsPlainText -Force)
                                 )
-                                Title2      = 1
+                                Title2            = 1
                             }
                             [PSCustomObject]@{
-                                Name       = 'Name 3'
-                                LongName   = 'Long Name 3'
-                                FolderPath = '\\folder\path3'
-                                Title1     = 'LMN'
+                                Name           = 'Name 3'
+                                LongName       = 'Long Name 3'
+                                FolderScanPath = '\\folder\path3'
+                                Title1         = 'LMN'
                             }
                         ) | Add-AddressBookEntry @commonParameters 2> $null
 
@@ -1071,7 +1071,7 @@ Describe 'Get-AddressBookEntry' {
         $result = Get-AddressBookEntry @commonParameters
 
         $result.ID | Should -Be 1
-        $result.Index | Should -Be 1
+        $result.RegistrationNumber | Should -Be 1
         $result.Priority | Should -Be 5
         $result.Name | Should -Be 'John D'
         $result.LongName | Should -Be 'John Doe'
@@ -1081,10 +1081,10 @@ Describe 'Get-AddressBookEntry' {
         $result.Title3 | Should -Be 3
         $result.LastUsed | Should -Be ([datetime]'2023-12-21T13:26:18Z')
         $result.UserCode | Should -Be '54321'
-        $result.RemoteFolderType | Should -Be 'smb'
-        $result.RemoteFolderPath | Should -Be '\\folder\path'
-        $result.RemoteFolderPort | Should -Be 21
-        $result.RemoteFolderAccount | Should -Be 'ScanAccount'
+        $result.FolderScanType | Should -Be 'smb'
+        $result.FolderScanPath | Should -Be '\\folder\path'
+        $result.FolderScanPort | Should -Be 21
+        $result.FolderScanAccount | Should -Be 'ScanAccount'
         $result.EmailAddress | Should -Be 'john.doe@example.com'
     }
 
@@ -1282,12 +1282,12 @@ Describe 'Update-AddressBookEntry' {
             }
             [PSCustomObject]@{
                 Id                  = 3
-                FolderPath          = '\\new\folder\path'
+                FolderScanPath      = '\\new\folder\path'
                 ForceFolderScanPath = $true
             }
             [PSCustomObject]@{
                 Id                     = 4
-                ScanAccount            = [pscredential]::new(
+                FolderScanAccount      = [pscredential]::new(
                     'NewScanAccount',
                     (ConvertTo-SecureString -String 'NewMockPassword' -AsPlainText -Force)
                 )
@@ -1583,14 +1583,14 @@ Describe 'Add-AddressBookEntry' {
     It 'Adds each element of the pipeline separately' {
         @(
             [PSCustomObject]@{
-                Name            = 'By Folder'
-                LongName        = 'By Folder Path'
-                DisplayPriority = 4
-                Frequent        = $true
-                Title1          = 'CD'
-                UserCode        = 98765
-                FolderPath      = '\\folder\path'
-                ScanAccount     = [pscredential]::new(
+                Name              = 'By Folder'
+                LongName          = 'By Folder Path'
+                DisplayPriority   = 4
+                Frequent          = $true
+                Title1            = 'CD'
+                UserCode          = 98765
+                FolderScanPath    = '\\folder\path'
+                FolderScanAccount = [pscredential]::new(
                     'ScanAccount',
                     (ConvertTo-SecureString -String 'MockPassword' -AsPlainText -Force)
                 )
@@ -1603,23 +1603,23 @@ Describe 'Add-AddressBookEntry' {
                 EmailAddress = 'email@example.com'
             }
             [PSCustomObject]@{
-                Name          = 'By Folder & Email'
-                LongName      = 'By Folder Path and Email Address'
-                Frequent      = $true
-                FolderPath    = '\\second\folder\path'
-                ScanAccount   = [pscredential]::new(
+                Name              = 'By Folder & Email'
+                LongName          = 'By Folder Path and Email Address'
+                Frequent          = $true
+                FolderScanPath    = '\\second\folder\path'
+                FolderScanAccount = [pscredential]::new(
                     'ScanAccount2',
                     (ConvertTo-SecureString -String 'MockPassword2' -AsPlainText -Force)
                 )
-                EmailAddress  = 'email2@example.com'
-                IsSender      = $true
-                IsDestination = $true
+                EmailAddress      = 'email2@example.com'
+                IsSender          = $true
+                IsDestination     = $true
             }
             [PSCustomObject]@{
-                Name       = 'Without ScanAccount'
-                LongName   = 'Without a ScanAccount'
-                Title1     = 'EF'
-                FolderPath = '\\folder\path'
+                Name           = 'Without ScanAccount'
+                LongName       = 'Without a ScanAccount'
+                Title1         = 'EF'
+                FolderScanPath = '\\folder\path'
             }
             [PSCustomObject]@{
                 Name          = 'With False IsDestination'
@@ -1946,10 +1946,10 @@ Describe 'Add-AddressBookEntry' {
 
     It 'Throws an error if Frequent, Title1, Title2, and Title3 are not provided' {
         $incompleteEntry = @{
-            Name       = 'Name'
-            LongName   = 'LongName'
-            FolderPath = '\\folder\path'
-            Frequent   = $false
+            Name           = 'Name'
+            LongName       = 'LongName'
+            FolderScanPath = '\\folder\path'
+            Frequent       = $false
         }
 
         # Confirm that it is not a terminating error
@@ -1976,9 +1976,9 @@ Describe 'Add-AddressBookEntry' {
         @{ Title2 = 4; Title3 = 4 }
     ) 'Does not throw if Frequent = <Frequent>, Title1 = <Title1>, Title2 = <Title2>, Title3 = <Title3>' {
         $entry = @{
-            Name       = 'Name'
-            LongName   = 'LongName'
-            FolderPath = '\\folder\path'
+            Name           = 'Name'
+            LongName       = 'LongName'
+            FolderScanPath = '\\folder\path'
         }
 
         foreach ($name in @('Frequent', 'Title1', 'Title2', 'Title3')) {
