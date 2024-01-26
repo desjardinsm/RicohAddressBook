@@ -1073,14 +1073,13 @@ function Add-AddressBookEntry {
 
             if (-not [string]::IsNullOrEmpty($FolderPath)) {
                 add 'remoteFolder:path' $FolderPath
+                add 'remoteFolder:port' 21
 
                 if ($null -ne $ScanAccount) {
                     add 'remoteFolder:select' 'private'
                     add 'remoteFolder:accountName' $ScanAccount.UserName
                     add 'remoteFolder:password' (ConvertTo-Base64 $ScanAccount.GetNetworkCredential().Password)
                 }
-
-                add 'remoteFolder:port' 21
             }
 
             if (-not [string]::IsNullOrEmpty($EmailAddress)) {

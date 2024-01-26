@@ -1555,6 +1555,10 @@ Describe 'Add-AddressBookEntry' {
                                     <propVal>\\folder\path</propVal>
                                 </item>
                                 <item>
+                                    <propName>remoteFolder:port</propName>
+                                    <propVal>21</propVal>
+                                </item>
+                                <item>
                                     <propName>remoteFolder:select</propName>
                                     <propVal>private</propVal>
                                 </item>
@@ -1565,10 +1569,6 @@ Describe 'Add-AddressBookEntry' {
                                 <item>
                                     <propName>remoteFolder:password</propName>
                                     <propVal>TW9ja1Bhc3N3b3Jk</propVal>
-                                </item>
-                                <item>
-                                    <propName>remoteFolder:port</propName>
-                                    <propVal>21</propVal>
                                 </item>
                                 <item>
                                     <propName>isDestination</propName>
@@ -1639,6 +1639,10 @@ Describe 'Add-AddressBookEntry' {
                                     <propVal>\\second\folder\path</propVal>
                                 </item>
                                 <item>
+                                    <propName>remoteFolder:port</propName>
+                                    <propVal>21</propVal>
+                                </item>
+                                <item>
                                     <propName>remoteFolder:select</propName>
                                     <propVal>private</propVal>
                                 </item>
@@ -1649,10 +1653,6 @@ Describe 'Add-AddressBookEntry' {
                                 <item>
                                     <propName>remoteFolder:password</propName>
                                     <propVal>TW9ja1Bhc3N3b3JkMg==</propVal>
-                                </item>
-                                <item>
-                                    <propName>remoteFolder:port</propName>
-                                    <propVal>21</propVal>
                                 </item>
                                 <item>
                                     <propName>mail:</propName>
