@@ -774,14 +774,19 @@ function Update-AddressBookEntry {
             }
 
             if (-not [string]::IsNullOrEmpty($FolderPath)) {
+                add 'remoteFolder:' 'true'
+                add 'remoteFolder:type' 'smb'
                 add 'remoteFolder:path' $FolderPath
+                add 'remoteFolder:port' 21
             }
             if ($null -ne $ScanAccount) {
+                add 'remoteFolder:select' 'private'
                 add 'remoteFolder:accountName' $ScanAccount.UserName
                 add 'remoteFolder:password' (ConvertTo-Base64 $ScanAccount.GetNetworkCredential().Password)
             }
 
             if (-not [string]::IsNullOrEmpty($EmailAddress)) {
+                add 'mail:' 'true'
                 add 'mail:address' $EmailAddress
             }
             if ($null -ne $IsSender) {
@@ -1072,6 +1077,8 @@ function Add-AddressBookEntry {
             }
 
             if (-not [string]::IsNullOrEmpty($FolderPath)) {
+                add 'remoteFolder:' 'true'
+                add 'remoteFolder:type' 'smb'
                 add 'remoteFolder:path' $FolderPath
                 add 'remoteFolder:port' 21
 

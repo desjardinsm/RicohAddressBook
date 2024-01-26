@@ -619,6 +619,14 @@ Describe 'Disconnect-Session' {
                                                     <propVal>1</propVal>
                                                 </item>
                                                 <item>
+                                                    <propName>remoteFolder:</propName>
+                                                    <propVal>true</propVal>
+                                                </item>
+                                                <item>
+                                                    <propName>remoteFolder:type</propName>
+                                                    <propVal>smb</propVal>
+                                                </item>
+                                                <item>
                                                     <propName>remoteFolder:path</propName>
                                                     <propVal>\\folder\path1</propVal>
                                                 </item>
@@ -651,6 +659,14 @@ Describe 'Disconnect-Session' {
                                                 <item>
                                                     <propName>tagId</propName>
                                                     <propVal>7</propVal>
+                                                </item>
+                                                <item>
+                                                    <propName>remoteFolder:</propName>
+                                                    <propVal>true</propVal>
+                                                </item>
+                                                <item>
+                                                    <propName>remoteFolder:type</propName>
+                                                    <propVal>smb</propVal>
                                                 </item>
                                                 <item>
                                                     <propName>remoteFolder:path</propName>
@@ -1378,7 +1394,13 @@ Describe 'Update-AddressBookEntry' {
 
         Should -Invoke Invoke-WebRequest -ModuleName RicohAddressBook -Exactly -Times 1 -ParameterFilter {
             $Headers.SOAPAction -eq 'http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#putObjectProps' -and
-            $Body.OuterXml -eq (Get-Expected -Id 3 @{ 'remoteFolder:path' = '\\new\folder\path' })
+            $Body.OuterXml -eq (Get-Expected -Id 3 ([ordered]@{
+                        'remoteFolder:'     = 'true'
+                        'remoteFolder:type' = 'smb'
+                        'remoteFolder:path' = '\\new\folder\path'
+                        'remoteFolder:port' = 21
+                    })
+            )
         }
 
         Should -Invoke Invoke-WebRequest -ModuleName RicohAddressBook -Exactly -Times 1 -ParameterFilter {
@@ -1392,7 +1414,10 @@ Describe 'Update-AddressBookEntry' {
 
         Should -Invoke Invoke-WebRequest -ModuleName RicohAddressBook -Exactly -Times 1 -ParameterFilter {
             $Headers.SOAPAction -eq 'http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#putObjectProps' -and
-            $Body.OuterXml -eq (Get-Expected -Id 5 @{ 'mail:address' = 'new@example.com' })
+            $Body.OuterXml -eq (Get-Expected -Id 5 ([ordered]@{
+                        'mail:'        = 'true'
+                        'mail:address' = 'new@example.com'
+                    }))
         }
 
         Should -Invoke Invoke-WebRequest -ModuleName RicohAddressBook -Exactly -Times 1 -ParameterFilter {
@@ -1551,6 +1576,14 @@ Describe 'Add-AddressBookEntry' {
                                     <propVal>98765</propVal>
                                 </item>
                                 <item>
+                                    <propName>remoteFolder:</propName>
+                                    <propVal>true</propVal>
+                                </item>
+                                <item>
+                                    <propName>remoteFolder:type</propName>
+                                    <propVal>smb</propVal>
+                                </item>
+                                <item>
                                     <propName>remoteFolder:path</propName>
                                     <propVal>\\folder\path</propVal>
                                 </item>
@@ -1635,6 +1668,14 @@ Describe 'Add-AddressBookEntry' {
                                     <propVal>1</propVal>
                                 </item>
                                 <item>
+                                    <propName>remoteFolder:</propName>
+                                    <propVal>true</propVal>
+                                </item>
+                                <item>
+                                    <propName>remoteFolder:type</propName>
+                                    <propVal>smb</propVal>
+                                </item>
+                                <item>
                                     <propName>remoteFolder:path</propName>
                                     <propVal>\\second\folder\path</propVal>
                                 </item>
@@ -1691,6 +1732,14 @@ Describe 'Add-AddressBookEntry' {
                                 <item>
                                     <propName>tagId</propName>
                                     <propVal>4</propVal>
+                                </item>
+                                <item>
+                                    <propName>remoteFolder:</propName>
+                                    <propVal>true</propVal>
+                                </item>
+                                <item>
+                                    <propName>remoteFolder:type</propName>
+                                    <propVal>smb</propVal>
                                 </item>
                                 <item>
                                     <propName>remoteFolder:path</propName>
