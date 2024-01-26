@@ -608,6 +608,31 @@ function Get-TagIdValue {
     If this value is set to false, this entry will not be visible on the scanner
     as a valid destination.
 
+.Parameter ForceUserCode
+    Force setting the user code property, even if $UserCode is empty.
+
+    If $UserCode is empty and this switch is set, the user code will be removed
+    from this address book entry.
+
+.Parameter ForceFolderScanPath
+    Force setting the folder scan path, even if $FolderPath is empty.
+
+    If $FolderPath is empty and this switch is set, folder scanning will be
+    removed from this address book entry.
+
+.Parameter ForceFolderScanAccount
+    Force setting the folder scan account, even if $ScanAccount is empty.
+
+    If $ScanAccount is empty and this switch is set, the folder scan account
+    will be removed from this address book entry, and folder scanning will
+    instead use the file transfer account from the device configuration.
+
+.Parameter ForceEmailAddress
+    Force setting the email address, even if $EmailAddress is empty.
+
+    If $EmailAddress is empty and this switch is set, email scanning will be
+    removed from this address book entry.
+
 .Parameter SkipCertificateCheck
     Skips certificate validation checks. This includes all validation such as
     expiration, revocation, trusted root authority, etc.
@@ -712,6 +737,22 @@ function Update-AddressBookEntry {
         $IsDestination,
 
         [switch]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        $ForceUserCode,
+
+        [switch]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        $ForceFolderScanPath,
+
+        [switch]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        $ForceFolderScanAccount,
+
+        [switch]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        $ForceEmailAddress,
+
+        [switch]
         $SkipCertificateCheck
     )
 
@@ -771,6 +812,8 @@ function Update-AddressBookEntry {
             if (-not [string]::IsNullOrEmpty($UserCode)) {
                 add 'auth:' 'true'
                 add 'auth:name' $UserCode
+            } elseif ($ForceUserCode) {
+                add 'auth:' 'false'
             }
 
             if (-not [string]::IsNullOrEmpty($FolderPath)) {
@@ -778,17 +821,25 @@ function Update-AddressBookEntry {
                 add 'remoteFolder:type' 'smb'
                 add 'remoteFolder:path' $FolderPath
                 add 'remoteFolder:port' 21
+            } elseif ($ForceFolderScanPath) {
+                add 'remoteFolder:' 'false'
             }
+
             if ($null -ne $ScanAccount) {
                 add 'remoteFolder:select' 'private'
                 add 'remoteFolder:accountName' $ScanAccount.UserName
                 add 'remoteFolder:password' (ConvertTo-Base64 $ScanAccount.GetNetworkCredential().Password)
+            } elseif ($ForceFolderScanAccount) {
+                add 'remoteFolder:select' ''
             }
 
             if (-not [string]::IsNullOrEmpty($EmailAddress)) {
                 add 'mail:' 'true'
                 add 'mail:address' $EmailAddress
+            } elseif ($ForceEmailAddress) {
+                add 'mail:' 'false'
             }
+
             if ($null -ne $IsSender) {
                 add 'isSender' $IsSender.ToString().ToLower()
             }

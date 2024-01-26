@@ -1281,19 +1281,22 @@ Describe 'Update-AddressBookEntry' {
                 LongName = 'New Long Name'
             }
             [PSCustomObject]@{
-                Id         = 3
-                FolderPath = '\\new\folder\path'
+                Id                  = 3
+                FolderPath          = '\\new\folder\path'
+                ForceFolderScanPath = $true
             }
             [PSCustomObject]@{
-                Id          = 4
-                ScanAccount = [pscredential]::new(
+                Id                     = 4
+                ScanAccount            = [pscredential]::new(
                     'NewScanAccount',
                     (ConvertTo-SecureString -String 'NewMockPassword' -AsPlainText -Force)
                 )
+                ForceFolderScanAccount = $true
             }
             [PSCustomObject]@{
-                Id           = 5
-                EmailAddress = 'new@example.com'
+                Id                = 5
+                EmailAddress      = 'new@example.com'
+                ForceEmailAddress = $true
             }
             [PSCustomObject]@{
                 Id       = 6
@@ -1332,8 +1335,9 @@ Describe 'Update-AddressBookEntry' {
                 Title3 = 5
             }
             [PSCustomObject]@{
-                Id       = 15
-                UserCode = '54321'
+                Id            = 15
+                UserCode      = '54321'
+                ForceUserCode = $true
             }
         ) | Update-AddressBookEntry @commonParameters
 
@@ -1471,6 +1475,106 @@ Describe 'Update-AddressBookEntry' {
                         'auth:'     = 'true'
                         'auth:name' = '54321'
                     }))
+        }
+    }
+
+    It -ForEach @(
+        @{ Switch = 'ForceUserCode'; Result = @{ 'auth:' = 'false' } }
+        @{ Switch = 'ForceFolderScanPath'; Result = @{ 'remoteFolder:' = 'false' } }
+        @{ Switch = 'ForceFolderScanAccount'; Result = @{ 'remoteFolder:select' = '' } }
+        @{ Switch = 'ForceEmailAddress'; Result = @{ 'mail:' = 'false' } }
+    ) 'Disables the proper settings when <Switch> is $true' {
+        function Get-Expected {
+            param(
+                [uint32]
+                [Parameter(Mandatory)]
+                $Id,
+
+                [System.Collections.IDictionary]
+                $Properties
+            )
+
+            $expected = [xml]'<?xml version="1.0" encoding="utf-8"?>
+            <s:Envelope
+                    xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"
+                    s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+                <s:Body>
+                    <u:putObjectProps
+                            xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                            xmlns:soap-enc="http://schemas.xmlsoap.org/soap/encoding/"
+                            xmlns:ricoh="http://www.ricoh.co.jp/xmlns/schema/rdh/commontypes"
+                            xmlns:u="http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory">
+                        <sessionId>12345</sessionId>
+                        <objectId />
+                        <propList xsi:type="soap-enc:Array" soap-enc:arrayType="ricoh:property[]" />
+                    </u:putObjectProps>
+                </s:Body>
+            </s:Envelope>'
+            $expected.Envelope.Body.putObjectProps.objectId = "entry:$Id"
+
+            foreach ($pair in $Properties.GetEnumerator()) {
+                $item = $expected.CreateElement('item')
+                $propertyName = $expected.CreateElement('propName')
+                $propValue = $expected.CreateElement('propVal')
+
+                $propertyName.InnerText = $pair.Key
+                $propValue.InnerText = $pair.Value
+
+                $item.AppendChild($propertyName) > $null
+                $item.AppendChild($propValue) > $null
+                $expected.Envelope.Body.putObjectProps.propList.AppendChild($item) > $null
+            }
+
+            $expected.OuterXml
+        }
+
+        [PSCustomObject]@{
+            Id        = 1
+            ($Switch) = $true
+        } | Update-AddressBookEntry @commonParameters
+
+        Should -Invoke Invoke-WebRequest -ModuleName RicohAddressBook -Exactly -Times 1 -ParameterFilter {
+            $Headers.SOAPAction -eq 'http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#putObjectProps' -and
+            $Body.OuterXml -eq (Get-Expected -Id 1 $Result)
+        }
+    }
+
+    It 'The -Force* switches do not reset values further along the pipeline' {
+        @(
+            [PSCustomObject]@{
+                Id                     = 1
+                ForceUserCode          = $true
+                ForceFolderScanPath    = $true
+                ForceFolderScanAccount = $true
+                ForceEmailAddress      = $true
+            }
+            [PSCustomObject]@{
+                Id = 2
+            }
+        ) | Update-AddressBookEntry @commonParameters
+
+        Should -Invoke Invoke-WebRequest -ModuleName RicohAddressBook -Exactly -Times 1 -ParameterFilter {
+            $expected = [xml]'<?xml version="1.0" encoding="utf-8"?>
+            <s:Envelope
+                    xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"
+                    s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+                <s:Body>
+                    <u:putObjectProps
+                            xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                            xmlns:soap-enc="http://schemas.xmlsoap.org/soap/encoding/"
+                            xmlns:ricoh="http://www.ricoh.co.jp/xmlns/schema/rdh/commontypes"
+                            xmlns:u="http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory">
+                        <sessionId>12345</sessionId>
+                        <objectId>entry:2</objectId>
+                        <propList xsi:type="soap-enc:Array" soap-enc:arrayType="ricoh:property[]" />
+                    </u:putObjectProps>
+                </s:Body>
+            </s:Envelope>'
+
+            $Headers.SOAPAction -eq 'http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#putObjectProps' -and
+            $Body.OuterXml -eq $expected.OuterXml
         }
     }
 }
