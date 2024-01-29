@@ -698,19 +698,19 @@ function Update-AddressBookEntry {
         $Id,
 
         [string]
-        [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateLength(1, 20)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         $Name,
 
         [string]
-        [Alias('LongName')]
-        [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateLength(1, 16)]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [Alias('LongName')]
         $KeyDisplay,
 
         [byte]
-        [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(1, 10)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         $DisplayPriority,
 
         [switch]
@@ -722,24 +722,24 @@ function Update-AddressBookEntry {
         $Title1,
 
         [byte]
-        [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(1, 10)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         $Title2,
 
         [byte]
-        [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(1, 5)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         $Title3,
 
         [string]
-        [Parameter(ValueFromPipelineByPropertyName)]
-        [ValidatePattern('^\d+$')]
         [ValidateLength(1, 8)]
+        [ValidatePattern('^\d+$')]
+        [Parameter(ValueFromPipelineByPropertyName)]
         $UserCode,
 
         [string]
-        [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateLength(1, 256)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         $FolderScanPath,
 
         [pscredential]
@@ -747,8 +747,8 @@ function Update-AddressBookEntry {
         $FolderScanAccount,
 
         [string]
-        [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateLength(1, 128)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         $EmailAddress,
 
         [nullable[bool]]
@@ -1032,19 +1032,19 @@ function Add-AddressBookEntry {
         $Credential,
 
         [string]
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [ValidateLength(1, 20)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         $Name,
 
         [string]
-        [Alias('LongName')]
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [ValidateLength(1, 16)]
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [Alias('LongName')]
         $KeyDisplay,
 
         [byte]
-        [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(1, 10)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         $DisplayPriority = 5,
 
         [switch]
@@ -1056,25 +1056,25 @@ function Add-AddressBookEntry {
         $Title1,
 
         [byte]
-        [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(1, 10)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         $Title2,
 
         [byte]
-        [Parameter(ValueFromPipelineByPropertyName)]
         [ValidateRange(1, 5)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         $Title3,
 
         [string]
-        [Parameter(ValueFromPipelineByPropertyName)]
-        [ValidatePattern('^\d+$')]
         [ValidateLength(1, 8)]
+        [ValidatePattern('^\d+$')]
+        [Parameter(ValueFromPipelineByPropertyName)]
         $UserCode,
 
         [string]
+        [ValidateLength(1, 256)]
         [Parameter(ParameterSetName = 'Folder', Mandatory, ValueFromPipelineByPropertyName)]
         [Parameter(ParameterSetName = 'FolderAndEmail', Mandatory, ValueFromPipelineByPropertyName)]
-        [ValidateLength(1, 256)]
         $FolderScanPath,
 
         [pscredential]
@@ -1083,9 +1083,9 @@ function Add-AddressBookEntry {
         $FolderScanAccount,
 
         [string]
+        [ValidateLength(1, 128)]
         [Parameter(ParameterSetName = 'Email', Mandatory, ValueFromPipelineByPropertyName)]
         [Parameter(ParameterSetName = 'FolderAndEmail', Mandatory, ValueFromPipelineByPropertyName)]
-        [ValidateLength(1, 128)]
         $EmailAddress,
 
         [nullable[bool]]
