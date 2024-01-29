@@ -416,7 +416,7 @@ function Get-AddressBookEntry {
                 ID                 = [uint32]$properties['id']
                 RegistrationNumber = '{0:d5}' -f [uint32]$properties['index']
                 Name               = $properties['name']
-                LongName           = $properties['longName']
+                KeyDisplay         = $properties['longName']
                 Priority           = [uint32]$properties['displayedOrder']
             }
 
@@ -548,8 +548,8 @@ function Get-TagIdValue {
 .Parameter Name
     The new name for the address book entry.
 
-.Parameter LongName
-    The new "long name" for the address book entry.
+.Parameter KeyDisplay
+    The new key display for the address book entry.
 
 .Parameter DisplayPriority
     The display order of the user in address book list. Sorting is done first by
@@ -702,8 +702,9 @@ function Update-AddressBookEntry {
         $Name,
 
         [string]
+        [Alias('LongName')]
         [Parameter(ValueFromPipelineByPropertyName)]
-        $LongName,
+        $KeyDisplay,
 
         [byte]
         [Parameter(ValueFromPipelineByPropertyName)]
@@ -815,8 +816,8 @@ function Update-AddressBookEntry {
             if (-not [string]::IsNullOrEmpty($Name)) {
                 add 'name' $Name
             }
-            if (-not [string]::IsNullOrEmpty($LongName)) {
-                add 'longName' $LongName
+            if (-not [string]::IsNullOrEmpty($KeyDisplay)) {
+                add 'longName' $KeyDisplay
             }
 
             if (0 -ne $DisplayPriority) {
@@ -915,8 +916,8 @@ function Update-AddressBookEntry {
 .Parameter Name
     The name for the address book entry.
 
-.Parameter LongName
-    The "long name" for the address book entry.
+.Parameter KeyDisplay
+    The key display for the address book entry.
 
 .Parameter DisplayPriority
     The display order of the user in address book list. Sorting is done first by
@@ -986,7 +987,7 @@ function Update-AddressBookEntry {
         Hostname = 'https://10.10.10.10'
         Credential = Get-Credential admin
         Name = 'Matthew D'
-        LongName = 'Matthew Desjardins'
+        KeyDisplay = 'Matthew Desjardins'
         FolderScanPath = '\\my\path\here'
         FolderScanAccount = Get-Credential ScanAccount
     }
@@ -997,7 +998,7 @@ function Update-AddressBookEntry {
     PS> $entries = @(
         [PSCustomObject]@{
             Name = 'Matthew D'
-            LongName = 'Matthew Desjardins'
+            KeyDisplay = 'Matthew Desjardins'
             Frequent = $true
             Title1 = 'LMN'
             FolderScanPath = '\\my\path\here'
@@ -1005,7 +1006,7 @@ function Update-AddressBookEntry {
         }
         [PSCustomObject]@{
             Name = 'John D'
-            LongName = 'John Doe'
+            KeyDisplay = 'John Doe'
             Title1 = 'IJK'
             FolderScanPath = '\\my\path\here'
             FolderScanAccount = $scanAccount
@@ -1031,8 +1032,9 @@ function Add-AddressBookEntry {
         $Name,
 
         [string]
+        [Alias('LongName')]
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
-        $LongName,
+        $KeyDisplay,
 
         [byte]
         [Parameter(ValueFromPipelineByPropertyName)]
@@ -1139,7 +1141,7 @@ function Add-AddressBookEntry {
 
             add 'entryType' 'user'
             add 'name' $Name
-            add 'longName' $LongName
+            add 'longName' $KeyDisplay
             add 'displayedOrder' $DisplayPriority
             add 'tagId' $tagId
 
@@ -1255,7 +1257,7 @@ function Add-AddressBookEntry {
 
 .Example
     PS> $users = Get-AddressBookEntry -Hostname https://10.10.10.10 -Credential admin |
-                 Where-Object {[string]::IsNullOrEmpty($_.LongName)}
+                 Where-Object {[string]::IsNullOrEmpty($_.KeyDisplay)}
     PS> $users | Remove-AddressBookEntry -Hostname https://10.10.10.10 -Credential admin
 
     These need to be run as separate commands, as the second command cannot run

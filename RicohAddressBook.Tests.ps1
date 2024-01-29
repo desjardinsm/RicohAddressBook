@@ -232,7 +232,7 @@ Describe 'Connect-Session' {
     Context 'With an editing method' {
         It -ForEach @(
             @{ Function = 'Update'; Arguments = @{ Id = 1 } }
-            @{ Function = 'Add'; Arguments = @{ Name = 'A'; LongName = 'B'; EmailAddress = 'example@example.com'; Frequent = $true } }
+            @{ Function = 'Add'; Arguments = @{ Name = 'A'; KeyDisplay = 'B'; EmailAddress = 'example@example.com'; Frequent = $true } }
             @{ Function = 'Remove'; Arguments = @{Id = @(1) } }
         ) 'Creates a connection with an X lock mode for <Function>-AddressBookEntry' {
             & "$Function-AddressBookEntry" @commonParameters @Arguments
@@ -267,7 +267,7 @@ Describe 'Disconnect-Session' {
     It -ForEach @(
         @{ Function = 'Get'; Arguments = @{} }
         @{ Function = 'Update'; Arguments = @{ Id = 1 } }
-        @{ Function = 'Add'; Arguments = @{ Name = 'A'; LongName = 'B'; EmailAddress = 'example@example.com'; Frequent = $true } }
+        @{ Function = 'Add'; Arguments = @{ Name = 'A'; KeyDisplay = 'B'; EmailAddress = 'example@example.com'; Frequent = $true } }
         @{ Function = 'Remove'; Arguments = @{Id = @(1) } }
     ) 'Disconnects the session for <Function>-AddressBookEntry' {
         & "$Function-AddressBookEntry" @commonParameters @Arguments
@@ -319,7 +319,7 @@ Describe 'Disconnect-Session' {
                 It -ForEach @(
                     @{ Function = 'Get'; Arguments = @{} }
                     @{ Function = 'Update'; Arguments = @{ Id = 1 } }
-                    @{ Function = 'Add'; Arguments = @{ Name = 'A'; LongName = 'B'; EmailAddress = 'example@example.com' } }
+                    @{ Function = 'Add'; Arguments = @{ Name = 'A'; KeyDisplay = 'B'; EmailAddress = 'example@example.com' } }
                     @{ Function = 'Remove'; Arguments = @{Id = @(1) } }
                 ) '<Function>-AddressBookEntry does not need to call Disconnect-Session' {
                     try {
@@ -357,7 +357,7 @@ Describe 'Disconnect-Session' {
                 It -ForEach @(
                     @{ Function = 'Get'; Arguments = @{} }
                     @{ Function = 'Update'; Arguments = @{ Id = 1 } }
-                    @{ Function = 'Add'; Arguments = @{ Name = 'A'; LongName = 'B'; EmailAddress = 'example@example.com' } }
+                    @{ Function = 'Add'; Arguments = @{ Name = 'A'; KeyDisplay = 'B'; EmailAddress = 'example@example.com' } }
                     @{ Function = 'Remove'; Arguments = @{Id = @(1) } }
                 ) '<Function>-AddressBookEntry calls Disconnect-Session' {
                     try {
@@ -395,7 +395,7 @@ Describe 'Disconnect-Session' {
 
                 It -ForEach @(
                     @{ Function = 'Update'; Arguments = @{ Id = 1 } }
-                    @{ Function = 'Add'; Arguments = @{ Name = 'A'; LongName = 'B'; EmailAddress = 'example@example.com' } }
+                    @{ Function = 'Add'; Arguments = @{ Name = 'A'; KeyDisplay = 'B'; EmailAddress = 'example@example.com' } }
                     @{ Function = 'Remove'; Arguments = @{Id = @(1) } }
                 ) '<Function>-AddressBookEntry calls Disconnect-Session' {
                     try {
@@ -533,12 +533,12 @@ Describe 'Disconnect-Session' {
                         @(
                             [PSCustomObject]@{
                                 Name           = 'Name 1'
-                                LongName       = 'Long Name 1'
+                                KeyDisplay     = 'Key Display 1'
                                 FolderScanPath = '\\folder\path1'
                             }
                             [PSCustomObject]@{
                                 Name              = 'Name 2'
-                                LongName          = 'Long Name 2'
+                                KeyDisplay        = 'Key Display 2'
                                 FolderScanPath    = '\\folder\path2'
                                 FolderScanAccount = [pscredential]::new(
                                     'NewScanAccount',
@@ -547,7 +547,7 @@ Describe 'Disconnect-Session' {
                             }
                             [PSCustomObject]@{
                                 Name           = 'Name 3'
-                                LongName       = 'Long Name 3'
+                                KeyDisplay     = 'Key Display 3'
                                 FolderScanPath = '\\folder\path3'
                             }
                         ) | Add-AddressBookEntry @commonParameters 2> $null
@@ -561,13 +561,13 @@ Describe 'Disconnect-Session' {
                         @(
                             [PSCustomObject]@{
                                 Name           = 'Name 1'
-                                LongName       = 'Long Name 1'
+                                KeyDisplay     = 'Key Display 1'
                                 FolderScanPath = '\\folder\path1'
                                 Frequent       = $true
                             }
                             [PSCustomObject]@{
                                 Name              = 'Name 2'
-                                LongName          = 'Long Name 2'
+                                KeyDisplay        = 'Key Display 2'
                                 FolderScanPath    = '\\folder\path2'
                                 FolderScanAccount = [pscredential]::new(
                                     'NewScanAccount',
@@ -577,7 +577,7 @@ Describe 'Disconnect-Session' {
                             }
                             [PSCustomObject]@{
                                 Name           = 'Name 3'
-                                LongName       = 'Long Name 3'
+                                KeyDisplay     = 'Key Display 3'
                                 FolderScanPath = '\\folder\path3'
                                 Title1         = 'LMN'
                             }
@@ -608,7 +608,7 @@ Describe 'Disconnect-Session' {
                                                 </item>
                                                 <item>
                                                     <propName>longName</propName>
-                                                    <propVal>Long Name 1</propVal>
+                                                    <propVal>Key Display 1</propVal>
                                                 </item>
                                                 <item>
                                                     <propName>displayedOrder</propName>
@@ -650,7 +650,7 @@ Describe 'Disconnect-Session' {
                                                 </item>
                                                 <item>
                                                     <propName>longName</propName>
-                                                    <propVal>Long Name 3</propVal>
+                                                    <propVal>Key Display 3</propVal>
                                                 </item>
                                                 <item>
                                                     <propName>displayedOrder</propName>
@@ -1074,7 +1074,7 @@ Describe 'Get-AddressBookEntry' {
         $result.RegistrationNumber | Should -Be 1
         $result.Priority | Should -Be 5
         $result.Name | Should -Be 'John D'
-        $result.LongName | Should -Be 'John Doe'
+        $result.KeyDisplay | Should -Be 'John Doe'
         $result.Frequent | Should -BeTrue
         $result.Title1 | Should -Be 'IJK'
         $result.Title2 | Should -Be 2
@@ -1277,8 +1277,8 @@ Describe 'Update-AddressBookEntry' {
                 Name = 'New Name'
             }
             [PSCustomObject]@{
-                Id       = 2
-                LongName = 'New Long Name'
+                Id         = 2
+                KeyDisplay = 'New Key Display'
             }
             [PSCustomObject]@{
                 Id                  = 3
@@ -1393,7 +1393,7 @@ Describe 'Update-AddressBookEntry' {
 
         Should -Invoke Invoke-WebRequest -ModuleName RicohAddressBook -Exactly -Times 1 -ParameterFilter {
             $Headers.SOAPAction -eq 'http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#putObjectProps' -and
-            $Body.OuterXml -eq (Get-Expected -Id 2 @{ longName = 'New Long Name' })
+            $Body.OuterXml -eq (Get-Expected -Id 2 @{ longName = 'New Key Display' })
         }
 
         Should -Invoke Invoke-WebRequest -ModuleName RicohAddressBook -Exactly -Times 1 -ParameterFilter {
@@ -1584,7 +1584,7 @@ Describe 'Add-AddressBookEntry' {
         @(
             [PSCustomObject]@{
                 Name              = 'By Folder'
-                LongName          = 'By Folder Path'
+                KeyDisplay        = 'By Folder Path'
                 DisplayPriority   = 4
                 Frequent          = $true
                 Title1            = 'CD'
@@ -1597,14 +1597,14 @@ Describe 'Add-AddressBookEntry' {
             }
             [PSCustomObject]@{
                 Name         = 'By Email'
-                LongName     = 'By Email Address'
+                KeyDisplay   = 'By Email Address'
                 Title2       = 9
                 Title3       = 4
                 EmailAddress = 'email@example.com'
             }
             [PSCustomObject]@{
                 Name              = 'By Folder & Email'
-                LongName          = 'By Folder Path and Email Address'
+                KeyDisplay        = 'By Folder Path and Email Address'
                 Frequent          = $true
                 FolderScanPath    = '\\second\folder\path'
                 FolderScanAccount = [pscredential]::new(
@@ -1617,13 +1617,13 @@ Describe 'Add-AddressBookEntry' {
             }
             [PSCustomObject]@{
                 Name           = 'Without ScanAccount'
-                LongName       = 'Without a ScanAccount'
+                KeyDisplay     = 'Without a ScanAccount'
                 Title1         = 'EF'
                 FolderScanPath = '\\folder\path'
             }
             [PSCustomObject]@{
                 Name          = 'With False IsDestination'
-                LongName      = 'With a False IsDestination'
+                KeyDisplay    = 'With a False IsDestination'
                 Title2        = 2
                 EmailAddress  = 'email@example.com'
                 IsDestination = $false
@@ -1631,7 +1631,7 @@ Describe 'Add-AddressBookEntry' {
             [PSCustomObject]@{
                 Name         = 'With Default Values'
                 Title3       = 3
-                LongName     = 'With Default IsSender/IsDestination'
+                KeyDisplay   = 'With Default IsSender/IsDestination'
                 EmailAddress = 'email@example.com'
             }
         ) | Add-AddressBookEntry @commonParameters
@@ -1947,7 +1947,7 @@ Describe 'Add-AddressBookEntry' {
     It 'Throws an error if Frequent, Title1, Title2, and Title3 are not provided' {
         $incompleteEntry = @{
             Name           = 'Name'
-            LongName       = 'LongName'
+            KeyDisplay     = 'KeyDisplay'
             FolderScanPath = '\\folder\path'
             Frequent       = $false
         }
@@ -1977,7 +1977,7 @@ Describe 'Add-AddressBookEntry' {
     ) 'Does not throw if Frequent = <Frequent>, Title1 = <Title1>, Title2 = <Title2>, Title3 = <Title3>' {
         $entry = @{
             Name           = 'Name'
-            LongName       = 'LongName'
+            KeyDisplay     = 'KeyDisplay'
             FolderScanPath = '\\folder\path'
         }
 
@@ -2115,7 +2115,7 @@ Describe 'SupportsShouldProcess' {
 
     It -ForEach @(
         @{ Function = 'Update'; Arguments = @{ Id = 1 } }
-        @{ Function = 'Add'; Arguments = @{ Name = 'A'; LongName = 'B'; EmailAddress = 'email@example.com'; Frequent = $true } }
+        @{ Function = 'Add'; Arguments = @{ Name = 'A'; KeyDisplay = 'B'; EmailAddress = 'email@example.com'; Frequent = $true } }
         @{ Function = 'Remove'; Arguments = @{ Id = @(1) } }
     ) '<Function>-AddressBookEntry does not call Invoke-WebRequest if -WhatIf is provided' {
         & "$Function-AddressBookEntry" @commonParameters @Arguments -WhatIf
