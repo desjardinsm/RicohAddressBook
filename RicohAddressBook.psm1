@@ -699,11 +699,13 @@ function Update-AddressBookEntry {
 
         [string]
         [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateLength(1, 20)]
         $Name,
 
         [string]
         [Alias('LongName')]
         [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateLength(1, 16)]
         $KeyDisplay,
 
         [byte]
@@ -737,6 +739,7 @@ function Update-AddressBookEntry {
 
         [string]
         [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateLength(1, 256)]
         $FolderScanPath,
 
         [pscredential]
@@ -745,6 +748,7 @@ function Update-AddressBookEntry {
 
         [string]
         [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateLength(1, 128)]
         $EmailAddress,
 
         [nullable[bool]]
@@ -1029,11 +1033,13 @@ function Add-AddressBookEntry {
 
         [string]
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [ValidateLength(1, 20)]
         $Name,
 
         [string]
         [Alias('LongName')]
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [ValidateLength(1, 16)]
         $KeyDisplay,
 
         [byte]
@@ -1068,6 +1074,7 @@ function Add-AddressBookEntry {
         [string]
         [Parameter(ParameterSetName = 'Folder', Mandatory, ValueFromPipelineByPropertyName)]
         [Parameter(ParameterSetName = 'FolderAndEmail', Mandatory, ValueFromPipelineByPropertyName)]
+        [ValidateLength(1, 256)]
         $FolderScanPath,
 
         [pscredential]
@@ -1078,6 +1085,7 @@ function Add-AddressBookEntry {
         [string]
         [Parameter(ParameterSetName = 'Email', Mandatory, ValueFromPipelineByPropertyName)]
         [Parameter(ParameterSetName = 'FolderAndEmail', Mandatory, ValueFromPipelineByPropertyName)]
+        [ValidateLength(1, 128)]
         $EmailAddress,
 
         [nullable[bool]]

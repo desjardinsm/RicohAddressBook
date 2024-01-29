@@ -1583,8 +1583,8 @@ Describe 'Add-AddressBookEntry' {
     It 'Adds each element of the pipeline separately' {
         @(
             [PSCustomObject]@{
-                Name              = 'By Folder'
-                KeyDisplay        = 'By Folder Path'
+                Name              = 'By Folder Path'
+                KeyDisplay        = 'Folder'
                 DisplayPriority   = 4
                 Frequent          = $true
                 Title1            = 'CD'
@@ -1596,15 +1596,15 @@ Describe 'Add-AddressBookEntry' {
                 )
             }
             [PSCustomObject]@{
-                Name         = 'By Email'
-                KeyDisplay   = 'By Email Address'
+                Name         = 'By Email Address'
+                KeyDisplay   = 'Email'
                 Title2       = 9
                 Title3       = 4
                 EmailAddress = 'email@example.com'
             }
             [PSCustomObject]@{
                 Name              = 'By Folder & Email'
-                KeyDisplay        = 'By Folder Path and Email Address'
+                KeyDisplay        = 'Folder/Email'
                 Frequent          = $true
                 FolderScanPath    = '\\second\folder\path'
                 FolderScanAccount = [pscredential]::new(
@@ -1617,21 +1617,21 @@ Describe 'Add-AddressBookEntry' {
             }
             [PSCustomObject]@{
                 Name           = 'Without ScanAccount'
-                KeyDisplay     = 'Without a ScanAccount'
+                KeyDisplay     = 'No ScanAccount'
                 Title1         = 'EF'
                 FolderScanPath = '\\folder\path'
             }
             [PSCustomObject]@{
-                Name          = 'With False IsDestination'
-                KeyDisplay    = 'With a False IsDestination'
+                Name          = 'Not Destination'
+                KeyDisplay    = 'Not Destination'
                 Title2        = 2
                 EmailAddress  = 'email@example.com'
                 IsDestination = $false
             }
             [PSCustomObject]@{
                 Name         = 'With Default Values'
+                KeyDisplay   = 'With Defaults'
                 Title3       = 3
-                KeyDisplay   = 'With Default IsSender/IsDestination'
                 EmailAddress = 'email@example.com'
             }
         ) | Add-AddressBookEntry @commonParameters
@@ -1657,11 +1657,11 @@ Describe 'Add-AddressBookEntry' {
                                 </item>
                                 <item>
                                     <propName>name</propName>
-                                    <propVal>By Folder</propVal>
+                                    <propVal>By Folder Path</propVal>
                                 </item>
                                 <item>
                                     <propName>longName</propName>
-                                    <propVal>By Folder Path</propVal>
+                                    <propVal>Folder</propVal>
                                 </item>
                                 <item>
                                     <propName>displayedOrder</propName>
@@ -1719,11 +1719,11 @@ Describe 'Add-AddressBookEntry' {
                                 </item>
                                 <item>
                                     <propName>name</propName>
-                                    <propVal>By Email</propVal>
+                                    <propVal>By Email Address</propVal>
                                 </item>
                                 <item>
                                     <propName>longName</propName>
-                                    <propVal>By Email Address</propVal>
+                                    <propVal>Email</propVal>
                                 </item>
                                 <item>
                                     <propName>displayedOrder</propName>
@@ -1761,7 +1761,7 @@ Describe 'Add-AddressBookEntry' {
                                 </item>
                                 <item>
                                     <propName>longName</propName>
-                                    <propVal>By Folder Path and Email Address</propVal>
+                                    <propVal>Folder/Email</propVal>
                                 </item>
                                 <item>
                                     <propName>displayedOrder</propName>
@@ -1827,7 +1827,7 @@ Describe 'Add-AddressBookEntry' {
                                 </item>
                                 <item>
                                     <propName>longName</propName>
-                                    <propVal>Without a ScanAccount</propVal>
+                                    <propVal>No ScanAccount</propVal>
                                 </item>
                                 <item>
                                     <propName>displayedOrder</propName>
@@ -1865,11 +1865,11 @@ Describe 'Add-AddressBookEntry' {
                                 </item>
                                 <item>
                                     <propName>name</propName>
-                                    <propVal>With False IsDestination</propVal>
+                                    <propVal>Not Destination</propVal>
                                 </item>
                                 <item>
                                     <propName>longName</propName>
-                                    <propVal>With a False IsDestination</propVal>
+                                    <propVal>Not Destination</propVal>
                                 </item>
                                 <item>
                                     <propName>displayedOrder</propName>
@@ -1907,7 +1907,7 @@ Describe 'Add-AddressBookEntry' {
                                 </item>
                                 <item>
                                     <propName>longName</propName>
-                                    <propVal>With Default IsSender/IsDestination</propVal>
+                                    <propVal>With Defaults</propVal>
                                 </item>
                                 <item>
                                     <propName>displayedOrder</propName>
