@@ -1138,7 +1138,7 @@ function Add-AddressBookEntry {
             $tagId = Get-TagIdValue
 
             if ([string]::IsNullOrEmpty($tagId)) {
-                throw 'At least of the following is required: Frequent, Title1, Title2, or Title3'
+                throw 'At least one of the following is required: Frequent, Title1, Title2, or Title3'
             }
 
             $entry = $template.CreateElement('item')
