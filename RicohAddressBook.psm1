@@ -928,7 +928,7 @@ function Update-AddressBookEntry {
     DisplayPriority, then by ID.
 
 .Parameter Frequent
-    A switch indicating whether the user is to be added to the frequently used
+    A boolean indicating whether the user is to be added to the frequently used
     list. At least one of either Frequent, Title1, Title2, or Title3 should be
     set.
 
