@@ -149,6 +149,10 @@ BeforeAll {
                                 <propVal>21</propVal>
                             </item>
                             <item>
+                                <propName>remoteFolder:select</propName>
+                                <propVal>private</propVal>
+                            </item>
+                            <item>
                                 <propName>remoteFolder:accountName</propName>
                                 <propVal>ScanAccount</propVal>
                             </item>
