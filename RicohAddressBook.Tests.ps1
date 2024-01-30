@@ -1993,6 +1993,31 @@ Describe 'Add-AddressBookEntry' {
 
         { Add-AddressBookEntry @commonParameters @entry } | Should -Not -Throw
     }
+
+    It 'Does not send request if there are no additions' {
+        $parameters = @{
+            Name           = 'John Doe'
+            KeyDisplay     = 'John D'
+            Frequent       = $false
+            FolderScanPath = '\\folder\path'
+        }
+
+        # This will error because there are no tags present (-Frequent is false
+        # and no -Title1, -Title2, or -Title3 are provided). The command itself
+        # will still complete because that is a non-terminating error, so the
+        # end {} block still runs.
+
+        # However, if the <propListList /> is empty (nothing was added, most
+        # likely because they errored), the request will fail with a server
+        # error stating COMMON_BAD_PARAMETER. When there are no new entries to
+        # add, then this function should skip the final call where it commits
+        # the new objects, which is what this test is trying to ensure.
+        Add-AddressBookEntry @commonParameters @parameters 2> $null
+
+        Should -Invoke Invoke-WebRequest -ModuleName RicohAddressBook -Exactly -Times 0 -ParameterFilter {
+            $Headers.SOAPAction -eq 'http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#putObjects'
+        }
+    }
 }
 
 Describe 'Remove-AddressBookEntry' {
