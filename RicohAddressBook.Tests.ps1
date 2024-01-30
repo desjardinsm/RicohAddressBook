@@ -1062,6 +1062,20 @@ Describe 'Get-AddressBookEntry' {
         }
     }
 
+    Context 'When called with -Name' {
+        It 'Filters out the results that do not match' {
+            $results = Get-AddressBookEntry @commonParameters -Name 'Matt*'
+
+            $results | Should -HaveCount 0
+        }
+
+        It 'Includes the results that match' {
+            $results = Get-AddressBookEntry @commonParameters -Name 'John*'
+
+            $results | Should -HaveCount 1
+        }
+    }
+
     It 'Returns an object of the correct type' {
         $result = Get-AddressBookEntry @commonParameters
 
