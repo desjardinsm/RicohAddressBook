@@ -1201,7 +1201,7 @@ function Add-AddressBookEntry {
             $names = Select-Xml @selection
 
             $allNames = $names -join ', '
-            if ($PSCmdlet.ShouldProcess(
+            if ($allNames.Length -gt 0 -and $PSCmdlet.ShouldProcess(
                     "Adding address book entries for $allNames",
                     "Add address book entry for ${allNames}?",
                     'Confirm address book addition.')) {
