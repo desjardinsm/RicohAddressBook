@@ -2179,3 +2179,105 @@ Describe 'PositionalBinding' {
         $attribute.PositionalBinding | Should -BeFalse -Because "$commandName should have [CmdletBinding(PositionalBinding = `$false)]"
     }
 }
+
+Describe 'Parameter validation' {
+    Context -ForEach @('Update', 'Add') '<_>-AddressBookEntry' {
+        BeforeAll {
+            $functionName = $_
+            $otherParameters = @{}
+
+            if ('Update' -eq $functionName) {
+                $otherParameters.Id = 1
+            } else {
+                $otherParameters.Name = '.'
+                $otherParameters.KeyDisplay = '.'
+                $otherParameters.Frequent = $true
+                $otherParameters.FolderScanPath = '.'
+                $otherParameters.EmailAddress = '.'
+            }
+        }
+
+        It -ForEach @(
+            @{ ParameterName = 'Name'; MaximumLength = 20 }
+            @{ ParameterName = 'KeyDisplay'; MaximumLength = 16 }
+            @{ ParameterName = 'FolderScanPath'; MaximumLength = 256 }
+            @{ ParameterName = 'EmailAddress'; MaximumLength = 128 }
+            @{ ParameterName = 'UserCode'; MaximumLength = 8; Character = '0' }
+        ) 'Throws a validation expection when <ParameterName> is longer than <MaximumLength> characters' {
+            if ($null -eq $Character) {
+                $Character = '.'
+            }
+
+            $parameters = $otherParameters.Clone()
+            $parameters.Remove($ParameterName)
+
+            {
+                $validParameters = @{
+                    $ParameterName = [string]::new($Character, $MaximumLength)
+                }
+
+                & "$functionName-AddressBookEntry" @commonParameters @parameters @validParameters -ErrorAction Stop
+            } | Should -Not -Throw
+
+            {
+                $invalidParameters = @{
+                    $ParameterName = [string]::new($Character, $MaximumLength + 1)
+                }
+
+                & "$functionName-AddressBookEntry" @commonParameters @parameters @invalidParameters -ErrorAction Stop
+            } | Should -Throw "Cannot validate argument on parameter '$ParameterName'. The character length of the $($MaximumLength + 1) argument is too long. Shorten the character length of the argument so it is fewer than or equal to `"$MaximumLength`" characters, and then try the command again."
+        }
+
+        It -ForEach @(
+            @{ ParameterName = 'DisplayPriority'; MaximumValue = 10 }
+            @{ ParameterName = 'Title2'; MaximumValue = 10 }
+            @{ ParameterName = 'Title3'; MaximumValue = 5 }
+        ) 'Throws a validation exception when <ParameterName> is greater than <MaximumValue>' {
+            {
+                $validParameters = @{
+                    $ParameterName = $MaximumValue
+                }
+
+                & "$functionName-AddressBookEntry" @commonParameters @otherParameters @validParameters
+            } | Should -Not -Throw
+
+            {
+                $invalidParameters = @{
+                    $ParameterName = $MaximumValue + 1
+                }
+
+                & "$functionName-AddressBookEntry" @commonParameters @otherParameters @invalidParameters
+            } | Should -Throw "Cannot validate argument on parameter '$ParameterName'. The $($MaximumValue + 1) argument is greater than the maximum allowed range of $MaximumValue. Supply an argument that is less than or equal to $MaximumValue and then try the command again."
+        }
+
+        It -ForEach @('DisplayPriority', 'Title2', 'Title3') 'Throws a validation exception when <_> is less than 1' {
+            {
+                $validParameters = @{
+                    $_ = 1
+                }
+
+                & "$functionName-AddressBookEntry" @commonParameters @otherParameters @validParameters
+            } | Should -Not -Throw
+
+            {
+                $invalidParameters = @{
+                    $_ = 0
+                }
+
+                & "$functionName-AddressBookEntry" @commonParameters @otherParameters @invalidParameters
+            } | Should -Throw "Cannot validate argument on parameter '$_'. The 0 argument is less than the minimum allowed range of 1. Supply an argument that is greater than or equal to 1 and then try the command again."
+        }
+
+        It 'Does not throw a validation exception when UserCode is number-like' {
+            {
+                & "$functionName-AddressBookEntry" @commonParameters @otherParameters -UserCode '01234567'
+            } | Should -Not -Throw
+        }
+
+        It -ForEach @('xyz', '0123ABCD', 'ABCD0123') 'Throws a validation exception when UserCode is <_>, not number-like' {
+            {
+                & "$functionName-AddressBookEntry" @commonParameters @otherParameters -UserCode $_
+            } | Should -Throw "Cannot validate argument on parameter 'UserCode'. The argument `"$_`" does not match the `"^\d+$`" pattern. Supply an argument that matches `"^\d+$`" and try the command again."
+        }
+    }
+}
