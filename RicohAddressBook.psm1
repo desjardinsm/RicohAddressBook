@@ -739,6 +739,10 @@ function Get-TagIdValue {
     If $EmailAddress is empty and this switch is set, email scanning will be
     removed from this address book entry.
 
+.Parameter PassThru
+    If -PassThru is true, return a Ricoh.AddressBook.Entry object for each
+    address book entry with the values that were updated.
+
 .Parameter SkipCertificateCheck
     Skips certificate validation checks. This includes all validation such as
     expiration, revocation, trusted root authority, etc.
@@ -746,6 +750,14 @@ function Get-TagIdValue {
     > [!WARNING] Using this parameter is not secure and is not recommended. This
     switch is only intended to be used against known hosts using a self-signed
     certificate for testing purposes. Use at your own risk.
+
+.Inputs
+    Custom objects used to update multiple entries at once.
+
+.Outputs
+    None, unless the -PassThru switch is provided. If -PassThru is provided,
+    then outputs a Ricoh.AddressBook.Entry object for each address book entry
+    with the values that were updated.
 
 .Example
     PS> Update-AddressBookEntry -Hostname https://10.10.10.10 -Credential admin -Id 1 -Name 'Matthew D'
@@ -864,6 +876,9 @@ function Update-AddressBookEntry {
         $ForceEmailAddress,
 
         [switch]
+        $PassThru,
+
+        [switch]
         $SkipCertificateCheck
     )
 
@@ -971,6 +986,12 @@ function Update-AddressBookEntry {
 
                 Invoke-SOAPRequest @request > $null
             }
+
+            if ($PassThru) {
+                $result = Format-PropertyList $content.propList
+                Add-Member -InputObject $result -MemberType NoteProperty -Name ID -Value $Id
+                $result
+            }
         } catch {
             Write-Error $_
         }
@@ -1064,6 +1085,10 @@ function Update-AddressBookEntry {
     If this value is set to false, this entry will not be visible on the scanner
     as a valid destination.
 
+.Parameter PassThru
+    If -PassThru is true, return a Ricoh.AddressBook.Entry object for each
+    address book entry that was submitted.
+
 .Parameter SkipCertificateCheck
     Skips certificate validation checks. This includes all validation such as
     expiration, revocation, trusted root authority, etc.
@@ -1071,6 +1096,14 @@ function Update-AddressBookEntry {
     > [!WARNING] Using this parameter is not secure and is not recommended. This
     switch is only intended to be used against known hosts using a self-signed
     certificate for testing purposes. Use at your own risk.
+
+.Inputs
+    Custom objects used to add multiple entries at once.
+
+.Outputs
+    None, unless the -PassThru switch is provided. If -PassThru is provided,
+    then outputs a Ricoh.AddressBook.Entry object for each address book entry
+    that was submitted.
 
 .Example
     PS> $entry = @{
@@ -1188,6 +1221,9 @@ function Add-AddressBookEntry {
         $IsDestination,
 
         [switch]
+        $PassThru,
+
+        [switch]
         $SkipCertificateCheck
     )
 
@@ -1299,6 +1335,19 @@ function Add-AddressBookEntry {
                 }
 
                 Invoke-SOAPRequest @request > $null
+            }
+
+            if ($PassThru) {
+                $selection = @{
+                    Xml       = $template
+                    Namespace = $namespaces
+                    XPath     = '/s:Envelope/s:Body/u:putObjects/propListList/item'
+                }
+                $entries = Select-Xml @selection
+
+                foreach ($entry in $entries) {
+                    Format-PropertyList $entry.Node
+                }
             }
         } catch {
             $PSCmdlet.ThrowTerminatingError($_)
