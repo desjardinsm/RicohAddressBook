@@ -329,6 +329,74 @@ function Test-Property {
     $Properties.ContainsKey($Name) -and $Properties[$Name] -eq 'true'
 }
 
+function Format-PropertyList {
+    [OutputType('Ricoh.AddressBook.Entry')]
+    param(
+        [System.Xml.XmlNode]
+        $PropertyList
+    )
+
+    $properties = @{}
+    foreach ($property in $PropertyList.ChildNodes) {
+        if (-not [string]::IsNullOrEmpty($property.propVal)) {
+            $properties[$property.propName] = $property.propVal
+        }
+    }
+
+    $output = [ordered]@{
+        PSTypeName         = 'Ricoh.AddressBook.Entry'
+
+        ID                 = [uint32]$properties['id']
+        RegistrationNumber = [uint32]$properties['index']
+        Name               = $properties['name']
+        KeyDisplay         = $properties['longName']
+        Priority           = [uint32]$properties['displayedOrder']
+    }
+
+    $output.Frequent = $false
+    switch ($properties['tagId'] -split ',') {
+        1 {
+            $output.Frequent = $true
+        }
+        { 2..11 -contains $_ } {
+            $output.Title1 = [TagId]$_
+        }
+        { 12..21 -contains $_ } {
+            $output.Title2 = $_ - 11
+        }
+        default {
+            $output.Title3 = $_ - 21
+        }
+    }
+
+    if (Test-Property $properties 'auth:') {
+        $output.UserCode = $properties['auth:name']
+    }
+
+    if ($properties['lastAccessDateTime'] -ne '1970-01-01T00:00:00Z') {
+        $output.LastUsed = [datetime]$properties['lastAccessDateTime']
+    }
+
+    if (Test-Property $properties 'remoteFolder:') {
+        $output.FolderScanType = $properties['remoteFolder:type']
+        $output.FolderScanPath = $properties['remoteFolder:path']
+        $output.FolderScanPort = [uint32]$properties['remoteFolder:port']
+
+        if ($properties.ContainsKey('remoteFolder:select') -and 'private' -eq $properties['remoteFolder:select']) {
+            $output.FolderScanAccount = $properties['remoteFolder:accountName']
+        }
+    }
+
+    if (Test-Property $properties 'mail:') {
+        $output.EmailAddress = $properties['mail:address']
+        $output.IsSender = $properties['isSender'] -eq 'true'
+    }
+
+    $output.IsDestination = $properties['isDestination'] -eq 'true'
+
+    [PSCustomObject]$output
+}
+
 <#
 .Synopsis
     Retrieves address book entries from a Ricoh multi-function printer
@@ -456,66 +524,11 @@ function Get-AddressBookEntry {
         } while ($Id.Count -gt 0)
 
         foreach ($entry in $entries) {
-            $properties = @{}
-            foreach ($property in $entry.Node.ChildNodes) {
-                if (-not [string]::IsNullOrEmpty($property.propVal)) {
-                    $properties[$property.propName] = $property.propVal
-                }
+            $result = Format-PropertyList $entry.Node
+
+            if ([string]::IsNullOrEmpty($Name) -or $result.Name -like $Name) {
+                $result
             }
-
-            if (-not [string]::IsNullOrEmpty($Name) -and $properties['name'] -notlike $Name) {
-                continue
-            }
-
-            $output = [ordered]@{
-                PSTypeName         = 'Ricoh.AddressBook.Entry'
-
-                ID                 = [uint32]$properties['id']
-                RegistrationNumber = [uint32]$properties['index']
-                Name               = $properties['name']
-                KeyDisplay         = $properties['longName']
-                Priority           = [uint32]$properties['displayedOrder']
-            }
-
-            $output.Frequent = $false
-            switch ($properties['tagId'] -split ',') {
-                1 {
-                    $output.Frequent = $true
-                }
-                { 2..11 -contains $_ } {
-                    $output.Title1 = [TagId]$_
-                }
-                { 12..21 -contains $_ } {
-                    $output.Title2 = $_ - 11
-                }
-                default {
-                    $output.Title3 = $_ - 21
-                }
-            }
-
-            if (Test-Property $properties 'auth:') {
-                $output.UserCode = $properties['auth:name']
-            }
-
-            if ($properties['lastAccessDateTime'] -ne '1970-01-01T00:00:00Z') {
-                $output.LastUsed = [datetime]$properties['lastAccessDateTime']
-            }
-
-            if (Test-Property $properties 'remoteFolder:') {
-                $output.FolderScanType = $properties['remoteFolder:type']
-                $output.FolderScanPath = $properties['remoteFolder:path']
-                $output.FolderScanPort = [uint32]$properties['remoteFolder:port']
-                $output.FolderScanAccount = $properties['remoteFolder:accountName']
-            }
-
-            if (Test-Property $properties 'mail:') {
-                $output.EmailAddress = $properties['mail:address']
-                $output.IsSender = $properties['isSender'] -eq 'true'
-            }
-
-            $output.IsDestination = $properties['isDestination'] -eq 'true'
-
-            [PSCustomObject]$output
         }
     } catch {
         $PSCmdlet.ThrowTerminatingError($_)
