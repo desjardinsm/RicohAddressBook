@@ -414,7 +414,7 @@ function Get-AddressBookEntry {
                 PSTypeName         = 'Ricoh.AddressBook.Entry'
 
                 ID                 = [uint32]$properties['id']
-                RegistrationNumber = '{0:d5}' -f [uint32]$properties['index']
+                RegistrationNumber = [uint32]$properties['index']
                 Name               = $properties['name']
                 KeyDisplay         = $properties['longName']
                 Priority           = [uint32]$properties['displayedOrder']

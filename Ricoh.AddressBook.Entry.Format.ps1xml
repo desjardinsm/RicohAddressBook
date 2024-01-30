@@ -41,6 +41,7 @@
                             </TableColumnItem>
                             <TableColumnItem>
                                 <PropertyName>RegistrationNumber</PropertyName>
+                                <FormatString>{0:d5}</FormatString>
                             </TableColumnItem>
                             <TableColumnItem>
                                 <PropertyName>Name</PropertyName>
