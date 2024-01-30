@@ -236,6 +236,63 @@ enum TagId {
     XYZ = 11
 }
 
+<#
+.Synopsis
+    Returns a Title1 TagId for a given letter
+
+.Description
+    Get-Title1Tag returns a TagId for use in the Title1 parameter of the
+    Update-AddressBookEntry or Add-AddressBookEntry functions.
+
+    TagId is an enum that groups letters together, matching the Title1 grouping
+    seen on the scanner itself:
+        - AB
+        - CD
+        - EF
+        - GH
+        - IJK
+        - LMN
+        - OPQ
+        - RST
+        - UVW
+        - XYZ
+
+    NOTE: This function is not strictly necessary, as just passing a string
+    (like "-Title1 AB") will cast this value to the correct enum value. This is
+    more useful when adding or updating entries in batches (for example, to
+    automatically generate a Title1 TagId from the first letter of each entry's
+    name); see the first example for a possible use case.
+
+.Parameter Letter
+    The letter to use to look up the correct TagId enum value.
+
+.Inputs
+    None. You cannot pipe input to Get-Title1Tag
+
+.Outputs
+    A TagId enum value representing the letter provided.
+
+.Example
+    PS> $entries = @(
+        @{
+            Name = 'Matthew D'
+            KeyDisplay = 'Matt D'
+            FolderScanPath = '\\folder\path'
+        }
+        @{
+            Name = 'John D'
+            KeyDisplay = 'John D'
+            FolderScanPath = '\\folder\path'
+        }
+    ) | ForEach-Object {
+        $_.Title1 = Get-Title1Tag $_.Name[0]
+
+        [PSCustomObject]$_
+    }
+
+    PS> $entries |
+        Add-AddressBookEntry -Hostname https://10.10.10.10 -Credential admin
+#>
 function Get-Title1Tag {
     [CmdletBinding()]
     [OutputType([TagId])]
