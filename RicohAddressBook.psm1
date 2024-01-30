@@ -344,28 +344,44 @@ function Format-PropertyList {
     }
 
     $output = [ordered]@{
-        PSTypeName         = 'Ricoh.AddressBook.Entry'
-
-        ID                 = [uint32]$properties['id']
-        RegistrationNumber = [uint32]$properties['index']
-        Name               = $properties['name']
-        KeyDisplay         = $properties['longName']
-        Priority           = [uint32]$properties['displayedOrder']
+        PSTypeName = 'Ricoh.AddressBook.Entry'
     }
 
-    $output.Frequent = $false
-    switch ($properties['tagId'] -split ',') {
-        1 {
-            $output.Frequent = $true
-        }
-        { 2..11 -contains $_ } {
-            $output.Title1 = [TagId]$_
-        }
-        { 12..21 -contains $_ } {
-            $output.Title2 = $_ - 11
-        }
-        default {
-            $output.Title3 = $_ - 21
+    if ($properties.ContainsKey('id')) {
+        $output.ID = [uint32]$properties['id']
+    }
+
+    if ($properties.ContainsKey('index')) {
+        $output.RegistrationNumber = [uint32]$properties['index']
+    }
+
+    if ($properties.ContainsKey('name')) {
+        $output.Name = $properties['name']
+    }
+
+    if ($properties.ContainsKey('longName')) {
+        $output.KeyDisplay = $properties['longName']
+    }
+
+    if ($properties.ContainsKey('displayedOrder')) {
+        $output.Priority = [uint32]$properties['displayedOrder']
+    }
+
+    if ($properties.ContainsKey('tagId')) {
+        $output.Frequent = $false
+        switch ($properties['tagId'] -split ',') {
+            1 {
+                $output.Frequent = $true
+            }
+            { 2..11 -contains $_ } {
+                $output.Title1 = [TagId]$_
+            }
+            { 12..21 -contains $_ } {
+                $output.Title2 = $_ - 11
+            }
+            default {
+                $output.Title3 = $_ - 21
+            }
         }
     }
 
@@ -373,7 +389,7 @@ function Format-PropertyList {
         $output.UserCode = $properties['auth:name']
     }
 
-    if ($properties['lastAccessDateTime'] -ne '1970-01-01T00:00:00Z') {
+    if ($properties.ContainsKey('lastAccessDateTime') -and $properties['lastAccessDateTime'] -ne '1970-01-01T00:00:00Z') {
         $output.LastUsed = [datetime]$properties['lastAccessDateTime']
     }
 
