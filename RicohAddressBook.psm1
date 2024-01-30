@@ -1047,9 +1047,9 @@ function Add-AddressBookEntry {
         [Parameter(ValueFromPipelineByPropertyName)]
         $DisplayPriority = 5,
 
-        [switch]
+        [bool]
         [Parameter(ValueFromPipelineByPropertyName)]
-        $Frequent,
+        $Frequent = $true,
 
         [TagId]
         [Parameter(ValueFromPipelineByPropertyName)]

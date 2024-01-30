@@ -563,7 +563,6 @@ Describe 'Disconnect-Session' {
                                 Name           = 'Name 1'
                                 KeyDisplay     = 'Key Display 1'
                                 FolderScanPath = '\\folder\path1'
-                                Frequent       = $true
                             }
                             [PSCustomObject]@{
                                 Name              = 'Name 2'
@@ -573,13 +572,11 @@ Describe 'Disconnect-Session' {
                                     'NewScanAccount',
                                     (ConvertTo-SecureString -String 'throws' -AsPlainText -Force)
                                 )
-                                Title2            = 1
                             }
                             [PSCustomObject]@{
                                 Name           = 'Name 3'
                                 KeyDisplay     = 'Key Display 3'
                                 FolderScanPath = '\\folder\path3'
-                                Title1         = 'LMN'
                             }
                         ) | Add-AddressBookEntry @commonParameters 2> $null
 
@@ -658,7 +655,7 @@ Describe 'Disconnect-Session' {
                                                 </item>
                                                 <item>
                                                     <propName>tagId</propName>
-                                                    <propVal>7</propVal>
+                                                    <propVal>1</propVal>
                                                 </item>
                                                 <item>
                                                     <propName>remoteFolder:</propName>
@@ -1598,6 +1595,7 @@ Describe 'Add-AddressBookEntry' {
             [PSCustomObject]@{
                 Name         = 'By Email Address'
                 KeyDisplay   = 'Email'
+                Frequent     = $false
                 Title2       = 9
                 Title3       = 4
                 EmailAddress = 'email@example.com'
@@ -1605,7 +1603,6 @@ Describe 'Add-AddressBookEntry' {
             [PSCustomObject]@{
                 Name              = 'By Folder & Email'
                 KeyDisplay        = 'Folder/Email'
-                Frequent          = $true
                 FolderScanPath    = '\\second\folder\path'
                 FolderScanAccount = [pscredential]::new(
                     'ScanAccount2',
@@ -1618,12 +1615,14 @@ Describe 'Add-AddressBookEntry' {
             [PSCustomObject]@{
                 Name           = 'Without ScanAccount'
                 KeyDisplay     = 'No ScanAccount'
+                Frequent       = $true
                 Title1         = 'EF'
                 FolderScanPath = '\\folder\path'
             }
             [PSCustomObject]@{
                 Name          = 'Not Destination'
                 KeyDisplay    = 'Not Destination'
+                Frequent      = $false
                 Title2        = 2
                 EmailAddress  = 'email@example.com'
                 IsDestination = $false
@@ -1835,7 +1834,7 @@ Describe 'Add-AddressBookEntry' {
                                 </item>
                                 <item>
                                     <propName>tagId</propName>
-                                    <propVal>4</propVal>
+                                    <propVal>1,4</propVal>
                                 </item>
                                 <item>
                                     <propName>remoteFolder:</propName>
@@ -1915,7 +1914,7 @@ Describe 'Add-AddressBookEntry' {
                                 </item>
                                 <item>
                                     <propName>tagId</propName>
-                                    <propVal>24</propVal>
+                                    <propVal>1,24</propVal>
                                 </item>
                                 <item>
                                     <propName>mail:</propName>
