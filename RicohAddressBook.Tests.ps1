@@ -1079,7 +1079,7 @@ Describe 'Get-AddressBookEntry' {
     It 'Returns an object of the correct type' {
         $result = Get-AddressBookEntry @commonParameters
 
-        $result.psobject.TypeNames[0] | Should -Be 'Ricoh.AddressBook.Entry'
+        $result.pstypenames[0] | Should -Be 'Ricoh.AddressBook.Entry'
     }
 
     It 'Returns an object with the parsed values' {
