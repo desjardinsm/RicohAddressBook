@@ -408,7 +408,9 @@ function Format-PropertyList {
         $output.IsSender = $properties['isSender'] -eq 'true'
     }
 
-    $output.IsDestination = $properties['isDestination'] -eq 'true'
+    if ($properties.ContainsKey('isDestination')) {
+        $output.IsDestination = $properties['isDestination'] -eq 'true'
+    }
 
     [PSCustomObject]$output
 }
