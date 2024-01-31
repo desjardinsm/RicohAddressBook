@@ -1,4 +1,5 @@
 BeforeAll {
+    Import-Module "${PSScriptRoot}/Tests/CustomAssertions"
     Import-Module -Force -Name .\RicohAddressBook.psd1
 
     $password = ConvertTo-SecureString -String 'MockPassword' -AsPlainText -Force
@@ -172,6 +173,11 @@ BeforeAll {
     } -ParameterFilter {
         $Headers.SOAPAction -eq 'http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#getObjectsProps'
     }
+}
+
+AfterAll {
+    Remove-Module CustomAssertions
+    Remove-Module Pester
 }
 
 Describe 'Invoke-WebRequest' {
