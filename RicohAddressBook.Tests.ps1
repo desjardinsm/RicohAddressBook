@@ -1104,22 +1104,27 @@ Describe 'Get-AddressBookEntry' {
     It 'Returns an object with the parsed values' {
         $result = Get-AddressBookEntry @commonParameters
 
-        $result.ID | Should -Be 1
-        $result.RegistrationNumber | Should -Be 1
-        $result.DisplayPriority | Should -Be 5
-        $result.Name | Should -Be 'John D'
-        $result.KeyDisplay | Should -Be 'John Doe'
-        $result.Frequent | Should -BeTrue
-        $result.Title1 | Should -Be 'IJK'
-        $result.Title2 | Should -Be 2
-        $result.Title3 | Should -Be 3
-        $result.LastUsed | Should -Be ([datetime]'2023-12-21T13:26:18Z')
-        $result.UserCode | Should -Be '54321'
-        $result.FolderScanType | Should -Be 'smb'
-        $result.FolderScanPath | Should -Be '\\folder\path'
-        $result.FolderScanPort | Should -Be 21
-        $result.FolderScanAccount | Should -Be 'ScanAccount'
-        $result.EmailAddress | Should -Be 'john.doe@example.com'
+        $result | Should -MatchObject @([PSCustomObject]@{
+                PSTypeName         = 'Ricoh.AddressBook.Entry'
+                ID                 = 1
+                RegistrationNumber = 1
+                DisplayPriority    = 5
+                Name               = 'John D'
+                KeyDisplay         = 'John Doe'
+                Frequent           = $true
+                Title1             = 'IJK'
+                Title2             = 2
+                Title3             = 3
+                LastUsed           = [datetime]'2023-12-21T13:26:18Z'
+                UserCode           = '54321'
+                FolderScanType     = 'smb'
+                FolderScanPath     = '\\folder\path'
+                FolderScanPort     = 21
+                FolderScanAccount  = 'ScanAccount'
+                EmailAddress       = 'john.doe@example.com'
+                IsSender           = $false
+                IsDestination      = $true
+            })
     }
 
     It 'Does not contain values that are missing' {
