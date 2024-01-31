@@ -791,7 +791,7 @@ function Update-AddressBookEntry {
         [Parameter(Mandatory)]
         $Credential,
 
-        [int]
+        [uint32]
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         $Id,
 
@@ -1417,7 +1417,7 @@ function Remove-AddressBookEntry {
         [Parameter(Mandatory)]
         $Credential,
 
-        [int[]]
+        [uint32[]]
         [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
         $Id,
 
