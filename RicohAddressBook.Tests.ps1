@@ -695,6 +695,19 @@ Describe 'Disconnect-Session' {
 }
 
 Describe 'Get-AddressBookEntry' {
+    It 'Has the correct parameters' {
+        $command = Get-Command Get-AddressBookEntry
+
+        $command | Should -HaveParameter Hostname -Mandatory -Type [uri]
+        $command | Should -HaveParameter Credential -Mandatory -Type [pscredential]
+        $command | Should -HaveParameter Id -Not -Mandatory
+        $command | Should -HaveParameter Id -Type [uint32[]]
+        $command | Should -HaveParameter Name -Not -Mandatory
+        $command | Should -HaveParameter Name -Type [string]
+        $command | Should -HaveParameter SkipCertificateCheck -Not -Mandatory
+        $command | Should -HaveParameter SkipCertificateCheck -Type [switch]
+    }
+
     Context 'Search-AddressBookEntry' {
         It 'Does not call searchObjects when -Id is given' {
             Get-AddressBookEntry @commonParameters -Id @()
@@ -1285,6 +1298,53 @@ Describe 'Get-AddressBookEntry' {
 }
 
 Describe 'Update-AddressBookEntry' {
+    It 'Has the correct parameters' {
+        $command = Get-Command Update-AddressBookEntry
+        $tagId = & (Get-Module RicohAddressBook) { [TagId] }
+
+        $command | Should -HaveParameter Hostname -Mandatory -Type [uri]
+        $command | Should -HaveParameter Credential -Mandatory -Type [pscredential]
+        $command | Should -HaveParameter Id -Mandatory -Type [uint32]
+        $command | Should -HaveParameter Name -Not -Mandatory
+        $command | Should -HaveParameter Name -Type [string]
+        $command | Should -HaveParameter KeyDisplay -Not -Mandatory
+        $command | Should -HaveParameter KeyDisplay -Type [string] -Alias LongName
+        $command | Should -HaveParameter DisplayPriority -Not -Mandatory
+        $command | Should -HaveParameter DisplayPriority -Type [byte]
+        $command | Should -HaveParameter Frequent -Not -Mandatory
+        $command | Should -HaveParameter Frequent -Type [switch]
+        $command | Should -HaveParameter Title1 -Not -Mandatory
+        $command | Should -HaveParameter Title1 -Type $tagId
+        $command | Should -HaveParameter Title2 -Not -Mandatory
+        $command | Should -HaveParameter Title2 -Type [byte]
+        $command | Should -HaveParameter Title3 -Not -Mandatory
+        $command | Should -HaveParameter Title3 -Type [byte]
+        $command | Should -HaveParameter UserCode -Not -Mandatory
+        $command | Should -HaveParameter UserCode -Type [string]
+        $command | Should -HaveParameter FolderScanPath -Not -Mandatory
+        $command | Should -HaveParameter FolderScanPath -Type [string]
+        $command | Should -HaveParameter FolderScanAccount -Not -Mandatory
+        $command | Should -HaveParameter FolderScanAccount -Type [pscredential]
+        $command | Should -HaveParameter EmailAddress -Not -Mandatory
+        $command | Should -HaveParameter EmailAddress -Type [string]
+        $command | Should -HaveParameter IsSender -Not -Mandatory
+        $command | Should -HaveParameter IsSender -Type [nullable[bool]]
+        $command | Should -HaveParameter IsDestination -Not -Mandatory
+        $command | Should -HaveParameter IsDestination -Type [nullable[bool]]
+        $command | Should -HaveParameter ForceUserCode -Not -Mandatory
+        $command | Should -HaveParameter ForceUserCode -Type [switch]
+        $command | Should -HaveParameter ForceFolderScanPath -Not -Mandatory
+        $command | Should -HaveParameter ForceFolderScanPath -Type [switch]
+        $command | Should -HaveParameter ForceFolderScanAccount -Not -Mandatory
+        $command | Should -HaveParameter ForceFolderScanAccount -Type [switch]
+        $command | Should -HaveParameter ForceEmailAddress -Not -Mandatory
+        $command | Should -HaveParameter ForceEmailAddress -Type [switch]
+        $command | Should -HaveParameter PassThru -Not -Mandatory
+        $command | Should -HaveParameter PassThru -Type [switch]
+        $command | Should -HaveParameter SkipCertificateCheck -Not -Mandatory
+        $command | Should -HaveParameter SkipCertificateCheck -Type [switch]
+    }
+
     It 'Updates each element of the pipeline separately' {
         @(
             [PSCustomObject]@{
@@ -1595,6 +1655,41 @@ Describe 'Update-AddressBookEntry' {
 }
 
 Describe 'Add-AddressBookEntry' {
+    It 'Has the correct parameters' {
+        $command = Get-Command Add-AddressBookEntry
+        $tagId = & (Get-Module RicohAddressBook) { [TagId] }
+
+        $command | Should -HaveParameter Hostname -Mandatory -Type [uri]
+        $command | Should -HaveParameter Credential -Mandatory -Type [pscredential]
+        $command | Should -HaveParameter Name -Mandatory -Type [string]
+        $command | Should -HaveParameter KeyDisplay -Mandatory -Type [string] -Alias LongName
+        $command | Should -HaveParameter DisplayPriority -Not -Mandatory
+        $command | Should -HaveParameter DisplayPriority -Type [byte] -DefaultValue 5
+        $command | Should -HaveParameter Frequent -Not -Mandatory
+        $command | Should -HaveParameter Frequent -Type [bool] -DefaultValue '$true'
+        $command | Should -HaveParameter Title1 -Not -Mandatory
+        $command | Should -HaveParameter Title1 -Type $tagId
+        $command | Should -HaveParameter Title2 -Not -Mandatory
+        $command | Should -HaveParameter Title2 -Type [byte]
+        $command | Should -HaveParameter Title3 -Not -Mandatory
+        $command | Should -HaveParameter Title3 -Type [byte]
+        $command | Should -HaveParameter UserCode -Not -Mandatory
+        $command | Should -HaveParameter UserCode -Type [string]
+        $command | Should -HaveParameter FolderScanPath -Mandatory -Type [string] -InParameterSet 'Folder'
+        $command | Should -HaveParameter FolderScanPath -Mandatory -Type [string] -InParameterSet 'FolderAndEmail'
+        $command | Should -HaveParameter FolderScanAccount -Type [pscredential] -InParameterSet 'Folder'
+        $command | Should -HaveParameter FolderScanAccount -Type [pscredential] -InParameterSet 'FolderAndEmail'
+        $command | Should -HaveParameter EmailAddress -Mandatory -Type [string] -InParameterSet 'Email'
+        $command | Should -HaveParameter EmailAddress -Mandatory -Type [string] -InParameterSet 'FolderAndEmail'
+        $command | Should -HaveParameter IsSender -Type [nullable[bool]] -InParameterSet 'Email'
+        $command | Should -HaveParameter IsSender -Type [nullable[bool]] -InParameterSet 'FolderAndEmail'
+        $command | Should -HaveParameter IsDestination -Type [nullable[bool]]
+        $command | Should -HaveParameter PassThru -Not -Mandatory
+        $command | Should -HaveParameter PassThru -Type [switch]
+        $command | Should -HaveParameter SkipCertificateCheck -Not -Mandatory
+        $command | Should -HaveParameter SkipCertificateCheck -Type [switch]
+    }
+
     It 'Adds each element of the pipeline separately' {
         @(
             [PSCustomObject]@{
@@ -2035,6 +2130,16 @@ Describe 'Add-AddressBookEntry' {
 }
 
 Describe 'Remove-AddressBookEntry' {
+    It 'Has the correct parameters' {
+        $command = Get-Command Remove-AddressBookEntry
+
+        $command | Should -HaveParameter Hostname -Mandatory -Type [uri]
+        $command | Should -HaveParameter Credential -Mandatory -Type [pscredential]
+        $command | Should -HaveParameter Id -Mandatory -Type [uint32[]]
+        $command | Should -HaveParameter SkipCertificateCheck -Not -Mandatory
+        $command | Should -HaveParameter SkipCertificateCheck -Type [switch]
+    }
+
     It 'Removes entries with the given IDs' {
         1..5 | Remove-AddressBookEntry @commonParameters
 
