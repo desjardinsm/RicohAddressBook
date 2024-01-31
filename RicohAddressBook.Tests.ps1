@@ -1559,6 +1559,69 @@ Describe 'Update-AddressBookEntry' {
         }
     }
 
+    It 'Outputs nothing if -PassThru is not provided' {
+        $result = Update-AddressBookEntry @commonParameters -Id 1
+
+        $result | Should -BeNullOrEmpty
+    }
+
+    It 'Outputs an object with the correct values if -PassThru is provided' {
+        $actual = @(
+            [PSCustomObject]@{
+                Id                = 1
+                Name              = 'New Name'
+                KeyDisplay        = 'New Key'
+                DisplayPriority   = 4
+                Frequent          = $true
+                Title1            = 'LMN'
+                Title2            = 2
+                Title3            = 3
+                UserCode          = '01234'
+                FolderScanPath    = '\\new\folder\path'
+                FolderScanAccount = [pscredential]::new(
+                    'NewScanAccount',
+                    (ConvertTo-SecureString -String 'NewMockPassword' -AsPlainText -Force)
+                )
+                EmailAddress      = 'new@example.com'
+                IsSender          = $true
+                IsDestination     = $true
+            }
+            [PSCustomObject]@{
+                Id                = 2
+                ForceUserCode     = $true
+                ForceScanPath     = $true
+                ForceScanAccount  = $true
+                ForceEmailAddress = $true
+            }
+        ) | Update-AddressBookEntry @commonParameters -PassThru
+
+        $actual | Should -MatchObject @(
+            [PSCustomObject]@{
+                PSTypeName        = 'Ricoh.AddressBook.Entry'
+                ID                = 1
+                Name              = 'New Name'
+                KeyDisplay        = 'New Key'
+                DisplayPriority   = 4
+                Frequent          = $true
+                Title1            = 'LMN'
+                Title2            = 2
+                Title3            = 3
+                UserCode          = '01234'
+                FolderScanType    = 'smb'
+                FolderScanPath    = '\\new\folder\path'
+                FolderScanPort    = 21
+                FolderScanAccount = 'NewScanAccount'
+                EmailAddress      = 'new@example.com'
+                IsSender          = $true
+                IsDestination     = $true
+            }
+            [PSCustomObject]@{
+                PSTypeName = 'Ricoh.AddressBook.Entry'
+                ID         = 2
+            }
+        )
+    }
+
     It -ForEach @(
         @{ Switch = 'ForceUserCode'; Result = @{ 'auth:' = 'false' } }
         @{ Switch = 'ForceFolderScanPath'; Result = @{ 'remoteFolder:' = 'false' } }
@@ -2107,6 +2170,66 @@ Describe 'Add-AddressBookEntry' {
         }
 
         { Add-AddressBookEntry @commonParameters @entry } | Should -Not -Throw
+    }
+
+    It 'Outputs nothing if -PassThru is not provided' {
+        $result = Add-AddressBookEntry @commonParameters -Name 'Name' -KeyDisplay 'KeyDisplay' -FolderScanPath '\\folder\path'
+
+        $result | Should -BeNullOrEmpty
+    }
+
+    It 'Outputs an object with the correct values if -PassThru is provided' {
+        $actual = @(
+            [PSCustomObject]@{
+                Name              = 'Name 1'
+                KeyDisplay        = 'Key 1'
+                DisplayPriority   = 6
+                Frequent          = $false
+                Title1            = 'IJK'
+                Title2            = 9
+                Title3            = 4
+                UserCode          = '98765'
+                FolderScanPath    = '\\folder\path'
+                FolderScanAccount = [pscredential]::new(
+                    'ScanAccount',
+                    (ConvertTo-SecureString -String 'MockPassword' -AsPlainText -Force)
+                )
+            }
+            [PSCustomObject]@{
+                Name         = 'Name 2'
+                KeyDisplay   = 'Key 2'
+                EmailAddress = 'mail@example.com'
+            }
+        ) | Add-AddressBookEntry @commonParameters -PassThru
+
+        $actual | Should -MatchObject @(
+            [PSCustomObject]@{
+                PSTypeName        = 'Ricoh.AddressBook.Entry'
+                Name              = 'Name 1'
+                KeyDisplay        = 'Key 1'
+                DisplayPriority   = 6
+                Frequent          = $false
+                Title1            = 'IJK'
+                Title2            = 9
+                Title3            = 4
+                UserCode          = '98765'
+                FolderScanType    = 'smb'
+                FolderScanPath    = '\\folder\path'
+                FolderScanPort    = 21
+                FolderScanAccount = 'ScanAccount'
+                IsDestination     = $true
+            }
+            [PSCustomObject]@{
+                PSTypeName      = 'Ricoh.AddressBook.Entry'
+                Name            = 'Name 2'
+                KeyDisplay      = 'Key 2'
+                DisplayPriority = 5
+                Frequent        = $true
+                EmailAddress    = 'mail@example.com'
+                IsSender        = $false
+                IsDestination   = $true
+            }
+        )
     }
 
     It 'Does not send request if there are no additions' {
