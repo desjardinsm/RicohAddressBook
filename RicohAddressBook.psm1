@@ -364,7 +364,7 @@ function Format-PropertyList {
     }
 
     if ($properties.ContainsKey('displayedOrder')) {
-        $output.Priority = [uint32]$properties['displayedOrder']
+        $output.DisplayPriority = [uint32]$properties['displayedOrder']
     }
 
     if ($properties.ContainsKey('tagId')) {

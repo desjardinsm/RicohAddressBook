@@ -1087,7 +1087,7 @@ Describe 'Get-AddressBookEntry' {
 
         $result.ID | Should -Be 1
         $result.RegistrationNumber | Should -Be 1
-        $result.Priority | Should -Be 5
+        $result.DisplayPriority | Should -Be 5
         $result.Name | Should -Be 'John D'
         $result.KeyDisplay | Should -Be 'John Doe'
         $result.Frequent | Should -BeTrue
