@@ -1,6 +1,6 @@
 BeforeAll {
-    Import-Module -Force -Name "${PSScriptRoot}/Tests/CustomAssertions"
-    Import-Module -Force -Name "${PSScriptRoot}/RicohAddressBook.psd1"
+    Import-Module -Force -Name (Join-Path $PSScriptRoot 'Tests/CustomAssertions')
+    Import-Module -Force -Name (Join-Path $PSScriptRoot 'RicohAddressBook.psd1')
 
     $password = ConvertTo-SecureString -String 'MockPassword' -AsPlainText -Force
     $credential = [pscredential]::new('admin', $password)
