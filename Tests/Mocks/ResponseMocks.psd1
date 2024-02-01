@@ -1,0 +1,156 @@
+@{
+    'Invoke-WebRequest' = @{
+        startSession    = @'
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope
+        xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"
+        s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+    <s:Body>
+        <tns:startSessionResponse
+                xmlns:tns="http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory">
+            <returnValue>OK</returnValue>
+            <stringOut>12345</stringOut>
+        </tns:startSessionResponse>
+    </s:Body>
+</s:Envelope>
+'@
+
+        searchObjects   = @'
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope
+        xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"
+        s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+    <s:Body>
+        <tns:searchObjectsResponse
+                xmlns:tns="http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory">
+            <returnValue>EOD</returnValue>
+            <resultSetId></resultSetId>
+            <numOfResults>2</numOfResults>
+            <rowList
+                    xmlns:soap-enc="http://schemas.xmlsoap.org/soap/encoding/"
+                    xmlns:itt="http://www.ricoh.co.jp/xmlns/schema/rdh/commontypes"
+                    soap-enc:arrayType="itt:property[][2]">
+                <item
+                        xmlns:soap-enc="http://schemas.xmlsoap.org/soap/encoding/"
+                        xmlns:itt="http://www.ricoh.co.jp/xmlns/schema/rdh/commontypes"
+                        soap-enc:arrayType="itt:property[1]">
+                    <item>
+                        <propName>id</propName>
+                        <propVal>1</propVal>
+                    </item>
+                </item>
+                <item
+                        xmlns:soap-enc="http://schemas.xmlsoap.org/soap/encoding/"
+                        xmlns:itt="http://www.ricoh.co.jp/xmlns/schema/rdh/commontypes"
+                        soap-enc:arrayType="itt:property[1]">
+                    <item>
+                        <propName>id</propName>
+                        <propVal>2</propVal>
+                    </item>
+                </item>
+            </rowList>
+        </tns:searchObjectsResponse>
+    </s:Body>
+</s:Envelope>
+'@
+
+        getObjectsProps = @'
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope
+        xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"
+        s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+    <s:Body>
+        <tns:getObjectsPropsResponse
+                xmlns:tns="http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory">
+            <returnValue
+                    xmlns:soap-enc="http://schemas.xmlsoap.org/soap/encoding/"
+                    xmlns:itt="http://www.ricoh.co.jp/xmlns/schema/rdh/commontypes"
+                    soap-enc:arrayType="itt:property[][1]">
+                <item
+                        xmlns:soap-enc="http://schemas.xmlsoap.org/soap/encoding/"
+                        xmlns:itt="http://www.ricoh.co.jp/xmlns/schema/rdh/commontypes"
+                        soap-enc:arrayType="itt:property[14]">
+                    <item>
+                        <propName>id</propName>
+                        <propVal>1</propVal>
+                    </item>
+                    <item>
+                        <propName>index</propName>
+                        <propVal>1</propVal>
+                    </item>
+                    <item>
+                        <propName>displayedOrder</propName>
+                        <propVal>5</propVal>
+                    </item>
+                    <item>
+                        <propName>name</propName>
+                        <propVal>John D</propVal>
+                    </item>
+                    <item>
+                        <propName>longName</propName>
+                        <propVal>John Doe</propVal>
+                    </item>
+                    <item>
+                        <propName>tagId</propName>
+                        <propVal>1,6,13,24</propVal>
+                    </item>
+                    <item>
+                        <propName>lastAccessDateTime</propName>
+                        <propVal>2023-12-21T13:26:18Z</propVal>
+                    </item>
+                    <item>
+                        <propName>isDestination</propName>
+                        <propVal>true</propVal>
+                    </item>
+                    <item>
+                        <propName>isSender</propName>
+                        <propVal>false</propVal>
+                    </item>
+                    <item>
+                        <propName>auth:</propName>
+                        <propVal>true</propVal>
+                    </item>
+                    <item>
+                        <propName>auth:name</propName>
+                        <propVal>54321</propVal>
+                    </item>
+                    <item>
+                        <propName>remoteFolder:</propName>
+                        <propVal>true</propVal>
+                    </item>
+                    <item>
+                        <propName>remoteFolder:type</propName>
+                        <propVal>smb</propVal>
+                    </item>
+                    <item>
+                        <propName>remoteFolder:path</propName>
+                        <propVal>\\folder\path</propVal>
+                    </item>
+                    <item>
+                        <propName>remoteFolder:port</propName>
+                        <propVal>21</propVal>
+                    </item>
+                    <item>
+                        <propName>remoteFolder:select</propName>
+                        <propVal>private</propVal>
+                    </item>
+                    <item>
+                        <propName>remoteFolder:accountName</propName>
+                        <propVal>ScanAccount</propVal>
+                    </item>
+                    <item>
+                        <propName>mail:</propName>
+                        <propVal>true</propVal>
+                    </item>
+                    <item>
+                        <propName>mail:address</propName>
+                        <propVal>john.doe@example.com</propVal>
+                    </item>
+                </item>
+            </returnValue>
+        </tns:getObjectsPropsResponse>
+    </s:Body>
+</s:Envelope>
+'@
+    }
+}
