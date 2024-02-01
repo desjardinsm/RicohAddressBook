@@ -1,5 +1,5 @@
 BeforeAll {
-    Import-Module -Force -Name (Join-Path $PSScriptRoot 'Tests/CustomAssertions')
+    Import-Module -Force -Name (Join-Path $PSScriptRoot 'Tests/TestSetup')
     Import-Module -Force -Name (Join-Path $PSScriptRoot 'RicohAddressBook')
 
     $password = ConvertTo-SecureString -String 'MockPassword' -AsPlainText -Force
@@ -176,7 +176,7 @@ BeforeAll {
 }
 
 AfterAll {
-    Remove-Module CustomAssertions
+    Remove-Module TestSetup
     Remove-Module Pester
 }
 
