@@ -262,7 +262,7 @@ Describe 'Disconnect-Session' {
                     @{ Function = 'Remove'; Arguments = @{Id = @(1) } }
                 ) '<Function>-AddressBookEntry calls Disconnect-Session' {
                     try {
-                        & "$Function-AddressBookEntry" @commonParameters @Arguments 2> $null
+                        & "$Function-AddressBookEntry" @commonParameters @Arguments -ErrorAction SilentlyContinue
                     } catch {}
 
                     Should -Invoke Invoke-WebRequest -ModuleName RicohAddressBook -Exactly -Times 1 -ParameterFilter {
@@ -311,7 +311,7 @@ Describe 'Disconnect-Session' {
                                 Id   = 3
                                 Name = 'New Name 2'
                             }
-                        ) | Update-AddressBookEntry @commonParameters 2> $null
+                        ) | Update-AddressBookEntry @commonParameters -ErrorAction SilentlyContinue
 
                         Should -Invoke Invoke-WebRequest -ModuleName RicohAddressBook -Exactly -Times 1 -ParameterFilter {
                             $Headers.SOAPAction -eq 'http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#terminateSession'
@@ -335,7 +335,7 @@ Describe 'Disconnect-Session' {
                                 Id   = 3
                                 Name = 'New Name 2'
                             }
-                        ) | Update-AddressBookEntry @commonParameters 2> $null
+                        ) | Update-AddressBookEntry @commonParameters -ErrorAction SilentlyContinue
 
                         Should -Invoke Invoke-WebRequest -ModuleName RicohAddressBook -Exactly -Times 2 -ParameterFilter {
                             $Headers.SOAPAction -eq 'http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#putObjectProps'
@@ -413,7 +413,7 @@ Describe 'Disconnect-Session' {
                                 KeyDisplay     = 'Key Display 3'
                                 FolderScanPath = '\\folder\path3'
                             }
-                        ) | Add-AddressBookEntry @commonParameters 2> $null
+                        ) | Add-AddressBookEntry @commonParameters -ErrorAction SilentlyContinue
 
                         Should -Invoke Invoke-WebRequest -ModuleName RicohAddressBook -Exactly -Times 1 -ParameterFilter {
                             $Headers.SOAPAction -eq 'http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#terminateSession'
@@ -441,7 +441,7 @@ Describe 'Disconnect-Session' {
                                 KeyDisplay     = 'Key Display 3'
                                 FolderScanPath = '\\folder\path3'
                             }
-                        ) | Add-AddressBookEntry @commonParameters 2> $null
+                        ) | Add-AddressBookEntry @commonParameters -ErrorAction SilentlyContinue
 
                         Should -Invoke Invoke-WebRequest -ModuleName RicohAddressBook -Exactly -Times 1 -ParameterFilter {
                             $Headers.SOAPAction -eq 'http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#putObjects' -and
@@ -1992,7 +1992,7 @@ Describe 'Add-AddressBookEntry' {
         }
 
         # Confirm that it is not a terminating error
-        { Add-AddressBookEntry @commonParameters @incompleteEntry 2> $null } |
+        { Add-AddressBookEntry @commonParameters @incompleteEntry -ErrorAction SilentlyContinue } |
             Should -Not -Throw
 
         # Then if it throws with -ErrorAction 'Stop', it must be a
@@ -2108,7 +2108,7 @@ Describe 'Add-AddressBookEntry' {
         # error stating COMMON_BAD_PARAMETER. When there are no new entries to
         # add, then this function should skip the final call where it commits
         # the new objects, which is what this test is trying to ensure.
-        Add-AddressBookEntry @commonParameters @parameters 2> $null
+        Add-AddressBookEntry @commonParameters @parameters -ErrorAction SilentlyContinue
 
         Should -Invoke Invoke-WebRequest -ModuleName RicohAddressBook -Exactly -Times 0 -ParameterFilter {
             $Headers.SOAPAction -eq 'http://www.ricoh.co.jp/xmlns/soap/rdh/udirectory#putObjects'
@@ -2308,7 +2308,7 @@ Describe 'Parameter validation' {
                     $ParameterName = [string]::new($Character, $MaximumLength)
                 }
 
-                & "$functionName-AddressBookEntry" @commonParameters @parameters @validParameters -ErrorAction Stop
+                & "$functionName-AddressBookEntry" @commonParameters @parameters @validParameters
             } | Should -Not -Throw
 
             {
@@ -2316,7 +2316,7 @@ Describe 'Parameter validation' {
                     $ParameterName = [string]::new($Character, $MaximumLength + 1)
                 }
 
-                & "$functionName-AddressBookEntry" @commonParameters @parameters @invalidParameters -ErrorAction Stop
+                & "$functionName-AddressBookEntry" @commonParameters @parameters @invalidParameters -ErrorAction SilentlyContinue
             } | Should -Throw "Cannot validate argument on parameter '$ParameterName'. The character length of the $($MaximumLength + 1) argument is too long. Shorten the character length of the argument so it is fewer than or equal to `"$MaximumLength`" characters, and then try the command again."
         }
 
@@ -2338,7 +2338,7 @@ Describe 'Parameter validation' {
                     $ParameterName = $MaximumValue + 1
                 }
 
-                & "$functionName-AddressBookEntry" @commonParameters @otherParameters @invalidParameters
+                & "$functionName-AddressBookEntry" @commonParameters @otherParameters @invalidParameters -ErrorAction SilentlyContinue
             } | Should -Throw "Cannot validate argument on parameter '$ParameterName'. The $($MaximumValue + 1) argument is greater than the maximum allowed range of $MaximumValue. Supply an argument that is less than or equal to $MaximumValue and then try the command again."
         }
 
@@ -2356,7 +2356,7 @@ Describe 'Parameter validation' {
                     $_ = 0
                 }
 
-                & "$functionName-AddressBookEntry" @commonParameters @otherParameters @invalidParameters
+                & "$functionName-AddressBookEntry" @commonParameters @otherParameters @invalidParameters -ErrorAction SilentlyContinue
             } | Should -Throw "Cannot validate argument on parameter '$_'. The 0 argument is less than the minimum allowed range of 1. Supply an argument that is greater than or equal to 1 and then try the command again."
         }
 
@@ -2368,7 +2368,7 @@ Describe 'Parameter validation' {
 
         It -ForEach @('xyz', '0123ABCD', 'ABCD0123') 'Throws a validation exception when UserCode is <_>, not number-like' {
             {
-                & "$functionName-AddressBookEntry" @commonParameters @otherParameters -UserCode $_
+                & "$functionName-AddressBookEntry" @commonParameters @otherParameters -UserCode $_ -ErrorAction SilentlyContinue
             } | Should -Throw "Cannot validate argument on parameter 'UserCode'. The argument `"$_`" does not match the `"^\d+$`" pattern. Supply an argument that matches `"^\d+$`" and try the command again."
         }
     }
