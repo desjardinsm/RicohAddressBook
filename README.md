@@ -1,5 +1,7 @@
 # RicohAddressBook
 
+[![Build status](https://ci.appveyor.com/api/projects/status/6wq08909v4c6cbjn?svg=true)](https://ci.appveyor.com/project/desjardinsm/ricohaddressbook)
+
 A PowerShell module to manage Ricoh printer address books.
 
 Based on the PowerShell module created by Alexander Krause.

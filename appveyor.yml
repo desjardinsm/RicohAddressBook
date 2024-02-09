@@ -15,8 +15,8 @@ install:
   - ps: Install-Module psake, Pester
 build: false
 test_script:
-  - ps: >-
-      Invoke-psake psakefile.ps1 test
+  - ps: |-
+      Invoke-psake ./psakefile.ps1 test
 
       if ($LASTEXITCODE -gt 0) {
         throw 'Tests failed'
