@@ -12,7 +12,7 @@
     GUID              = 'fd6a5e48-7fee-4618-9d02-4a721d6e39fa'
 
     # Author of this module
-    Author            = 'DesjardinsM'
+    Author            = 'Matthew Desjardins'
 
     # Company or vendor of this module
     CompanyName       = 'Unknown'
