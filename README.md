@@ -17,8 +17,11 @@ Based on the PowerShell module created by Alexander Krause.
 
 ## Installation
 
-Place the files in the Module directory into a directory named
-`RicohAddressBook` somewhere in the `$env:PSModulePath`.
+Download the files from the [latest release][latest_release] (or download them
+from the "Module" directory of the repository itself) and place them in a
+directory named `RicohAddressBook` somewhere in the `$env:PSModulePath`.
+
+[latest_release]: https://github.com/desjardinsm/TestRicohAddressBook/releases/latest
 
 For a user-installation, this would typically be something like
 `%USERPROFILE%\Documents\WindowsPowerShell\Modules`.
