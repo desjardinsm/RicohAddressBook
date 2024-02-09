@@ -1,6 +1,5 @@
 BeforeAll {
-    Import-Module -Force -Name (Join-Path $PSScriptRoot 'TestSetup')
-    Import-Module -Force -Name (Join-Path $PSScriptRoot '../Module/RicohAddressBook')
+    . (Join-Path $PSScriptRoot 'Setup.ps1')
 
     $password = ConvertTo-SecureString -String 'MockPassword' -AsPlainText -Force
     $credential = [pscredential]::new('admin', $password)
@@ -29,8 +28,7 @@ BeforeAll {
 }
 
 AfterAll {
-    Remove-Module TestSetup
-    Remove-Module Pester
+    Cleanup
 }
 
 Describe 'Invoke-WebRequest' {
