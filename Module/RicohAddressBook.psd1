@@ -81,10 +81,22 @@
     # DscResourcesToExport = @()
 
     # List of all modules packaged with this module
-    # ModuleList = @()
+    ModuleList        = @('./RicohAddressBook.psm1')
 
     # List of all files packaged with this module
-    # FileList = @()
+    FileList          = @(
+        './RicohAddressBook.psd1'
+        './RicohAddressBook.psm1'
+        './Ricoh.AddressBook.Entry.Format.ps1xml'
+
+        './Templates/deleteObjects.xml'
+        './Templates/getObjectsProps.xml'
+        './Templates/putObjectProps.xml'
+        './Templates/putObjects.xml'
+        './Templates/searchObjects.xml'
+        './Templates/startSession.xml'
+        './Templates/terminateSession.xml'
+    )
 
     # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
     PrivateData       = @{
