@@ -13,6 +13,21 @@ Based on the PowerShell module created by Alexander Krause.
 -   `Get-Title1Tag` (this is only useful for getting the proper Title1 for a
     letter, to be used in the Add- or Update- functions)
 
+## Installation
+
+Place the files in the Module directory into a directory named
+`RicohAddressBook` somewhere in the `$env:PSModulePath`.
+
+For a user-installation, this would typically be something like
+`%USERPROFILE%\Documents\WindowsPowerShell\Modules`.
+
+Alternatively, you can place the files in an accessible location and run the
+following command manually when you wish to use it:
+
+```powershell
+Import-Module "<path to module>\RicohAddressBook.psd1"
+```
+
 ## Credits
 
 This would not have been possible without the work done in the following projects:
