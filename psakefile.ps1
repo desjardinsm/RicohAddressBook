@@ -24,3 +24,21 @@ Task Test {
 
     Invoke-Pester -Configuration $configuration
 }
+
+Task TagRelease {
+    $module = Test-ModuleManifest -Path (Join-Path 'Module' 'RicohAddressBook.psd1')
+    $tagName = "v$($module.Version)"
+
+    if ($PreRelease) {
+        $lastRelease = git tag --list "$tagName-pre.*" |
+            Where-Object { $_ -match '\.(\d+)$' } |
+            ForEach-Object { [uint32] $Matches[1] } |
+            Measure-Object -Maximum |
+            Select-Object -ExpandProperty Maximum
+
+        $next = [string] ($lastRelease + 1)
+        $tagName += "-pre.$next"
+    }
+
+    git tag -a $tagName -m $tagName
+}
