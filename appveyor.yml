@@ -1,0 +1,43 @@
+version: "{build}"
+skip_non_tags: true
+init:
+  - ps: |-
+      if ($env:APPVEYOR_REPO_TAG) {
+        $env:IS_PRERELEASE = $env:APPVEYOR_REPO_TAG_NAME -like '*-pre.*'
+      }
+
+      $env:RELEASE_DESCRIPTION = if ($null -eq $env:APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED) {
+        "Release $env:APPVEYOR_REPO_TAG_NAME"
+      } else {
+        $env:APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED
+      }
+install:
+  - ps: Install-Module psake, Pester
+build: false
+test_script:
+  - ps: >-
+      Invoke-psake psakefile.ps1 test
+
+      if ($LASTEXITCODE -gt 0) {
+        throw 'Tests failed'
+      }
+artifacts:
+  - path: Module
+    name: $(APPVEYOR_PROJECT_NAME)
+deploy:
+  - provider: GitHub
+    tag: $(APPVEYOR_REPO_TAG_NAME)
+    description: $(APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED)
+    auth_token:
+      secure: +PxazkcvZpF9LLVySBX9zDKxps/khE1StNaoo8/brhcbOrtZAxL9fwWc2wmvCRia+cGSBx7z0HOqKy35wz9UMk40XWgu/4Q2zioye6Dtui40OvMDaQsPBH7wcAkIvsBG
+    artifact: $(APPVEYOR_PROJECT_NAME)
+    prerelease: $(IS_PRERELEASE)
+    on:
+      APPVEYOR_REPO_TAG: true
+on_finish:
+  # Upload test results on build finish (after_test will not run on a failed build)
+  - ps: |-
+      # Upload test results to AppVeyor
+      $client = [System.Net.WebClient]::new()
+      $results = Resolve-Path (Join-Path 'TestResults' 'testResults.xml')
+      $client.UploadFile("$env:APPVEYOR_URL/api/testresults/nunit3/$env:APPVEYOR_JOB_ID", $results)
