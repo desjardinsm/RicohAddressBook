@@ -39,7 +39,7 @@ This would not have been possible without the work done in the following project
 
 -   [Alexander Krause's PowerShell module][ps_module_archive] (which was hosted
     on the TechNet gallery)
--   [Ricoh.Net](https://github.com/gheeres/Ricoh.NET)
+-   [Ricoh.NET](https://github.com/gheeres/Ricoh.NET)
 -   [libmfd](https://github.com/adam-nielsen/libmfd)
 
 [ps_module_archive]: https://web.archive.org/web/20200318044655/https://gallery.technet.microsoft.com/scriptcenter/Ricoh-Multi-Function-27aeea71
