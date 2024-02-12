@@ -11,6 +11,9 @@ init:
       } else {
         $env:APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED
       }
+environment:
+  NuGetApiKey:
+    secure: 23+pfmN1D6MWK5DKZNxxX1R3VxBJ/Dn8/wVzJWqV7RvJcBoffGEx96hfa/fPOHyW
 install:
   - ps: Install-Module psake, Pester
 build: false
@@ -34,6 +37,14 @@ deploy:
     prerelease: $(IS_PRERELEASE)
     on:
       APPVEYOR_REPO_TAG: true
+after_deploy:
+  - ps: |-
+      if ($env:APPVEYOR_REPO_TAG -eq $true -and $env:IS_PRERELEASE -eq $false) {
+        Remove-Item -Recurse ./Publish/RicohAddressBook/ -ErrorAction Ignore
+        Copy-Item -Recurse ./Module/ ./Publish/RicohAddressBook/
+
+        Publish-Module -Path ./Publish/RicohAddressBook/ -NuGetApiKey $env:NuGetApiKey
+      }
 on_finish:
   # Upload test results on build finish (after_test will not run on a failed build)
   - ps: |-
