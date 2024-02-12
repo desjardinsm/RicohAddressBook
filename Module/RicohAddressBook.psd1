@@ -18,10 +18,10 @@
     CompanyName       = 'Unknown'
 
     # Copyright statement for this module
-    Copyright         = '(c) 2021 DesjardinsM. All rights reserved.'
+    Copyright         = '(c) 2021 Matthew Desjardins. All rights reserved.'
 
     # Description of the functionality provided by this module
-    # Description = ''
+    Description       = 'A module for managing address book entries for Ricoh multi-function printers and scanners.'
 
     # Minimum version of the Windows PowerShell engine required by this module
     # PowerShellVersion = ''
@@ -102,19 +102,23 @@
     PrivateData       = @{
         PSData = @{
             # Tags applied to this module. These help with module discovery in online galleries.
-            # Tags = @()
+            Tags         = @(
+                'ricoh'
+                'scanner'
+                'address-book'
+            )
 
             # A URL to the license for this module.
             # LicenseUri = ''
 
             # A URL to the main website for this project.
-            # ProjectUri = ''
+            ProjectUri   = 'https://github.com/desjardinsm/RicohAddressBook'
 
             # A URL to an icon representing this module.
             # IconUri = ''
 
             # ReleaseNotes of this module
-            # ReleaseNotes = ''
+            ReleaseNotes = 'Initial stable release (1.0.0)'
         } # End of PSData hashtable
     } # End of PrivateData hashtable
 
