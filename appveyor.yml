@@ -2,7 +2,7 @@ version: "{build}"
 skip_non_tags: true
 init:
   - ps: |-
-      if ($env:APPVEYOR_REPO_TAG) {
+      if ($env:APPVEYOR_REPO_TAG -eq $true) {
         $env:IS_PRERELEASE = $env:APPVEYOR_REPO_TAG_NAME -like '*-pre.*'
       }
 
