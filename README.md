@@ -17,6 +17,23 @@ Based on the PowerShell module created by Alexander Krause.
 
 ## Installation
 
+### PowerShell Gallery
+
+RicohAddressBook is available in the [PowerShell Gallery][ps_gallery]. The
+easiest way to install it is to simply run:
+
+[ps_gallery]: https://www.powershellgallery.com/packages/RicohAddressBook
+
+```powershell
+Install-Module -Name RicohAddressBook
+```
+
+See `Get-Help -Full Install-Module` for more information, such as for installing
+it either per-user or for all users (using the `-Scope` parameter), or to
+configure the PSGallery repository if it is not already setup.
+
+### Manual
+
 Download the files from the [latest release][latest_release] (or download them
 from the "Module" directory of the repository itself) and place them in a
 directory named `RicohAddressBook` somewhere in the `$env:PSModulePath`.
