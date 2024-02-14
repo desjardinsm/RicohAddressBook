@@ -1,16 +1,5 @@
 version: "{build}"
 skip_non_tags: true
-init:
-  - ps: |-
-      if ($env:APPVEYOR_REPO_TAG -eq $true) {
-        $env:IS_PRERELEASE = $env:APPVEYOR_REPO_TAG_NAME -like '*-pre.*'
-      }
-
-      $env:RELEASE_DESCRIPTION = if ($null -eq $env:APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED) {
-        "Release $env:APPVEYOR_REPO_TAG_NAME"
-      } else {
-        $env:APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED
-      }
 environment:
   NuGetApiKey:
     secure: 23+pfmN1D6MWK5DKZNxxX1R3VxBJ/Dn8/wVzJWqV7RvJcBoffGEx96hfa/fPOHyW
@@ -27,6 +16,8 @@ test_script:
 artifacts:
   - path: Module
     name: $(APPVEYOR_PROJECT_NAME)
+before_deploy:
+  - ps: Invoke-psake ./psakefile.ps1 InitializeDeployments
 deploy:
   - provider: GitHub
     tag: $(APPVEYOR_REPO_TAG_NAME)
@@ -38,17 +29,7 @@ deploy:
     on:
       APPVEYOR_REPO_TAG: true
 after_deploy:
-  - ps: |-
-      if ($env:APPVEYOR_REPO_TAG -eq $true -and $env:IS_PRERELEASE -eq $false) {
-        Remove-Item -Recurse ./Publish/RicohAddressBook/ -ErrorAction Ignore
-        Copy-Item -Recurse ./Module/ ./Publish/RicohAddressBook/
-
-        Publish-Module -Path ./Publish/RicohAddressBook/ -NuGetApiKey $env:NuGetApiKey
-      }
+  - ps: Invoke-psake ./psakefile.ps1 DeployToPowerShellGallery
 on_finish:
   # Upload test results on build finish (after_test will not run on a failed build)
-  - ps: |-
-      # Upload test results to AppVeyor
-      $client = [System.Net.WebClient]::new()
-      $results = Resolve-Path (Join-Path 'TestResults' 'testResults.xml')
-      $client.UploadFile("$env:APPVEYOR_URL/api/testresults/nunit3/$env:APPVEYOR_JOB_ID", $results)
+  - ps: Invoke-psake ./psakefile.ps1 UploadTestResults
