@@ -292,6 +292,34 @@ enum TagId {
 
     PS> $entries |
         Add-AddressBookEntry -Hostname https://10.10.10.10 -Credential admin
+
+.Example
+    PS> # Using delay-bound parameters
+
+    PS> @(
+            [PSCustomObject]@{
+                Name = 'Matthew D'
+                KeyDisplay = 'Matt D'
+                FolderScanPath = '\\folder\path'
+            }
+            [PSCustomObject]@{
+                Name = 'John D'
+                KeyDisplay = 'John D'
+                FolderScanPath = '\\folder\path'
+            }
+        ) |
+            Add-AddressBookEntry `
+                -Hostname https://10.10.10.10 `
+                -Credential admin `
+                -Title1 { Get-Title1Tag $_.KeyDisplay[0] }
+
+    These commands use a delay-bound parameter, which is an implicit feature of
+    PowerShell for parameters that can take pipeline input (whether by value or,
+    like in this case, by name) and have a type that is not [scriptblock] or
+    [object]. The scriptblock provided to the -Title1 parameter will be called
+    for each object that is piped in, with the pipeline variable "$_"
+    representing the current object. The scriptblock's return value will then be
+    bound to "Title1" for the current pipeline object.
 #>
 function Get-Title1Tag {
     [CmdletBinding()]
