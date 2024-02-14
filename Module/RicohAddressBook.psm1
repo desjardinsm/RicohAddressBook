@@ -1018,9 +1018,9 @@ function Update-AddressBookEntry {
             }
 
             if ($PassThru) {
-                $result = Format-PropertyList $content.propList
-                Add-Member -InputObject $result -MemberType NoteProperty -Name ID -Value $Id
-                $result
+                $propList = $content.propList.Clone()
+                Add-Property $propList 'id' $Id
+                Format-PropertyList $propList
             }
         } catch {
             Write-Error $_
