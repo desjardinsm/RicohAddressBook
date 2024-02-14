@@ -42,3 +42,35 @@ Task TagRelease {
 
     git tag -a $tagName -m $tagName
 }
+
+if ($env:CI -eq $true) {
+    Task InitializeDeployments {
+        if ($env:APPVEYOR -eq $true) {
+            if ($env:APPVEYOR_REPO_TAG -eq $true) {
+                $env:IS_PRERELEASE = $env:APPVEYOR_REPO_TAG_NAME -like '*-pre.*'
+            }
+
+            $env:RELEASE_DESCRIPTION = if ($null -eq $env:APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED) {
+                "Release $env:APPVEYOR_REPO_TAG_NAME"
+            } else {
+                $env:APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED
+            }
+        }
+    }
+
+    Task DeployToPowerShellGallery -precondition { $env:IS_PRERELEASE -eq $false } {
+        Remove-Item -Recurse './Publish/RicohAddressBook/' -ErrorAction Ignore
+        Copy-Item -Recurse './Module/' './Publish/RicohAddressBook/'
+
+        Publish-Module -Path './Publish/RicohAddressBook/' -NuGetApiKey $env:NuGetApiKey
+    }
+
+    Task UploadTestResults {
+        if ($env:APPVEYOR -eq $true) {
+            # Upload test results to AppVeyor
+            $client = [System.Net.WebClient]::new()
+            $results = Resolve-Path (Join-Path 'TestResults' 'testResults.xml')
+            $client.UploadFile("$env:APPVEYOR_URL/api/testresults/nunit3/$env:APPVEYOR_JOB_ID", $results)
+        }
+    }
+}
