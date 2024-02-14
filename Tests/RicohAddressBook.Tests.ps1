@@ -2337,7 +2337,7 @@ Describe 'Parameter validation' {
                 }
 
                 & "$functionName-AddressBookEntry" @commonParameters @otherParameters @invalidParameters -ErrorAction SilentlyContinue
-            } | Should -Throw "Cannot validate argument on parameter '$ParameterName'. The $($MaximumValue + 1) argument is greater than the maximum allowed range of $MaximumValue. Supply an argument that is less than or equal to $MaximumValue and then try the command again."
+            } | Should -Throw "Cannot validate argument on parameter '$ParameterName'. The argument `"$($MaximumValue + 1)`" does not belong to the set `"*,$MaximumValue`" specified by the ValidateSet attribute. Supply an argument that is in the set and then try the command again."
         }
 
         It -ForEach @('DisplayPriority', 'Title2', 'Title3') 'Throws a validation exception when <_> is less than 1' {
@@ -2355,7 +2355,7 @@ Describe 'Parameter validation' {
                 }
 
                 & "$functionName-AddressBookEntry" @commonParameters @otherParameters @invalidParameters -ErrorAction SilentlyContinue
-            } | Should -Throw "Cannot validate argument on parameter '$_'. The 0 argument is less than the minimum allowed range of 1. Supply an argument that is greater than or equal to 1 and then try the command again."
+            } | Should -Throw "Cannot validate argument on parameter '$_'. The argument `"0`" does not belong to the set `"1,*`" specified by the ValidateSet attribute. Supply an argument that is in the set and then try the command again."
         }
 
         It 'Does not throw a validation exception when UserCode is number-like' {

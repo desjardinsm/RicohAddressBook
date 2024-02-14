@@ -838,6 +838,7 @@ function Update-AddressBookEntry {
 
         [byte]
         [ValidateRange(1, 10)]
+        [ValidateSet(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)]
         [Parameter(ValueFromPipelineByPropertyName)]
         $DisplayPriority,
 
@@ -851,11 +852,13 @@ function Update-AddressBookEntry {
 
         [byte]
         [ValidateRange(1, 10)]
+        [ValidateSet(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)]
         [Parameter(ValueFromPipelineByPropertyName)]
         $Title2,
 
         [byte]
         [ValidateRange(1, 5)]
+        [ValidateSet(1, 2, 3, 4, 5)]
         [Parameter(ValueFromPipelineByPropertyName)]
         $Title3,
 
@@ -1193,6 +1196,7 @@ function Add-AddressBookEntry {
 
         [byte]
         [ValidateRange(1, 10)]
+        [ValidateSet(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)]
         [Parameter(ValueFromPipelineByPropertyName)]
         $DisplayPriority = 5,
 
@@ -1206,11 +1210,13 @@ function Add-AddressBookEntry {
 
         [byte]
         [ValidateRange(1, 10)]
+        [ValidateSet(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)]
         [Parameter(ValueFromPipelineByPropertyName)]
         $Title2,
 
         [byte]
         [ValidateRange(1, 5)]
+        [ValidateSet(1, 2, 3, 4, 5)]
         [Parameter(ValueFromPipelineByPropertyName)]
         $Title3,
 
